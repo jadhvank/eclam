@@ -1,0 +1,12 @@
+build/
+.build/
+.DS_Store
+*.xcodeproj
+*.swp
+xcuserdata/
+.swiftpm/
+DerivedData/
+.claude/worktrees/
+
+# 개인 홍보 초안 (비공개)
+/drafts/

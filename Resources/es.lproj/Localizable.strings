@@ -1,0 +1,355 @@
+/* Electronic Clam — Español. ADR-0011.
+   NEEDS HUMAN REVIEW — machine-assisted draft, not yet proofread by a native speaker. */
+
+/* Common */
+"common.ok" = "OK";
+"common.cancel" = "Cancelar";
+"common.yes" = "sí";
+"common.no" = "no";
+"common.on" = "activado";
+"common.off" = "desactivado";
+
+/* Presence (p. ej. pantalla externa) */
+"presence.present" = "presente";
+"presence.absent" = "ninguna";
+
+/* Menu bar */
+"menu.keepAwake" = "Mantener el Mac despierto";
+"menu.watchAgents" = "Vigilar agentes";
+"menu.settings" = "Ajustes…";
+"menu.quit" = "Salir";
+"menu.customize" = "Personalizar…";
+"menu.agentActiveSuffix" = " • activo";
+
+/* Accessibility */
+"a11y.asleep" = "Dormido";
+"a11y.awakeManual" = "Despierto (manual)";
+"a11y.awakeAuto" = "Despierto (automático)";
+"a11y.info" = "Ayuda";
+
+/* Menu header — registration */
+"header.requiresApproval" = "Aprobar en Ajustes del Sistema…";
+"header.notFound" = "Falta el ayudante — reinstalar";
+"header.registrationFailed" = "Registro fallido — inténtalo de nuevo";
+"header.unknown" = "Estado desconocido";
+
+/* Menu header — reasons */
+"header.guardThermalLabel" = "Protección activa — 🌡 %@";
+"header.guardThermalCritical" = "Protección activa — 🌡 crítico";
+"header.guardThermalSerious" = "Protección activa — 🌡 grave + tapa";
+"header.guardBattery" = "Protección activa — 🔋 %d%%";
+"header.guardBatteryLow" = "Protección activa — 🔋 baja";
+"header.guardTimer" = "Protección activa — ⏱ %d min";
+"header.guardTimerPlain" = "Protección activa — ⏱ temporizador";
+"header.guardWatchdog" = "Protección activa — el ayudante no responde";
+"header.awakeRemote" = "Despierto — sesión remota";
+"header.awakeAgentsCount" = "Despierto — %d agentes activos";
+"header.awakeAgents" = "Despierto — %@ activo";
+"header.awakeManual" = "Despierto — hasta que salga";
+"header.asleepIdle" = "Dormir al estar inactivo";
+
+
+/* Settings + tabs */
+"settings.title" = "Ajustes de Electronic Clam";
+"tab.general" = "General";
+"tab.agents" = "Agentes";
+"tab.remote" = "Remoto";
+"tab.safety" = "Seguridad";
+"tab.history" = "Historial";
+
+/* General pane */
+"general.version" = "Versión %@";
+"general.support" = "☕ Invítame a un café";
+"general.language" = "Idioma";
+"general.statusCard.on" = "Electronic Clam — Activado · sin dormir";
+"general.statusCard.off" = "Electronic Clam — Desactivado · duerme normal";
+"general.statusCard.helper" = "Asistente: %@";
+"general.menuBarTheme" = "Icono de la barra de menús";
+"theme.system" = "Sistema";
+"theme.light" = "Claro";
+"theme.dark" = "Oscuro";
+
+/* Agents pane */
+"agents.mode.strict" = "Estricto — contar solo agentes con actividad reciente";
+"agents.mode.lax" = "Flexible — mantener despierto mientras un proceso de agente vigilado esté en ejecución";
+"agents.section.mode" = "Modo de detección";
+"agents.section.watched" = "Agentes vigilados";
+"agents.section.hooks" = "Instalar hooks";
+"agents.section.hooksAdvanced" = "Hooks de agente (opcional)";
+"agents.hooks.caption" = "Electronic Clam detecta los agentes automáticamente observando sus registros de sesión: no se necesita ningún hook. Los hooks solo hacen que la detección sea instantánea y añaden un respaldo cuando el acceso a archivos está restringido.";
+"agents.watched.caption" = "Detectados automáticamente observando el registro de sesión de cada agente.";
+"agents.pollNote" = "La detección se actualiza cada 5 segundos aproximadamente (30 s con la pantalla bloqueada), así que un agente recién iniciado puede tardar unos segundos en aparecer. Los agentes con un hook instalado se registran al instante.";
+"agents.col.agent" = "Agente";
+"agents.col.status" = "Estado";
+"agents.col.pattern" = "Patrón";
+"agents.activeRow" = "● activo";
+"agents.addCustom" = "Añadir agente personalizado…";
+"agents.remove" = "Eliminar";
+"agents.installHook" = "Instalar hook de %@";
+"agents.uninstallHook" = "Desinstalar hook de %@";
+"agents.installed" = "Instalado";
+"agents.notInstalled" = "No instalado";
+"agents.hookMissing" = "Falta el binario del hook en el paquete de la app";
+"agents.uninstallAll" = "Desinstalar todos los hooks";
+"agents.uninstall" = "Desinstalar";
+"agents.add" = "Añadir";
+"agents.uninstallAll.title" = "¿Desinstalar todos los hooks de Electronic Clam?";
+"agents.uninstallAll.body" = "Elimina las entradas de hook de Electronic Clam de ~/.claude/settings.json, ~/.codex/config.toml y ~/.hermes/config.yaml. El resto de tus ajustes se conservan.";
+"agents.uninstallFail" = "No se pudieron desinstalar algunos hooks";
+"agents.couldNotInstall" = "No se pudo instalar el hook de %@";
+"agents.couldNotUninstall" = "No se pudo desinstalar el hook de %@";
+"agents.addCustom.title" = "Añadir agente personalizado";
+"agents.addCustom.body" = "Introduce un id único, una etiqueta y una ruta glob. Usa ~/ para tu carpeta de inicio.";
+"agents.ph.id" = "id (p. ej. my-agent)";
+"agents.ph.label" = "Etiqueta (p. ej. My Agent)";
+"agents.ph.glob" = "Glob (p. ej. ~/.my-agent/logs/*.log)";
+"agents.codexTrust" = "Tras instalar, ejecuta /hooks en la CLI de Codex para confiar en este hook.\nDeberás volver a confiar cuando Electronic Clam actualice el código del hook.";
+"agents.hermesTrust" = "Tras instalar, aprueba el aviso del hook la próxima vez que ejecutes Hermes\n(o configura hooks_auto_accept: true en ~/.hermes/config.yaml).";
+
+/* Remote pane (2-tier UI: master checkbox + radios) */
+"remote.master" = "Contar las sesiones remotas como actividad";
+"remote.optNeverIdle" = "Mantener despierto incluso inactivo (seguir conectado)";
+"remote.optIdleSleep" = "Permitir dormir tras una inactividad de:";
+"remote.help" = "Cuando te conectas a este Mac por SSH, VNC o Compartir Pantalla, Electronic Clam lo mantiene despierto para que la sesión no se interrumpa.";
+"remote.channels" = "Canales detectados";
+"remote.noneDetected" = "(ninguno detectado actualmente)";
+"remote.tip.master" = "Las sesiones remotas se detectan mediante aserciones de pmset, who(1), la CLI de Tailscale, Claude Code y Codex remote-control, y daemons de control remoto conocidos. Desactívalo para ignorar por completo las conexiones remotas.";
+"remote.tip.neverIdle" = "Estilo Compartir Pantalla: el Mac permanece despierto mientras la sesión esté conectada, aunque no ocurra nada.";
+"remote.tip.idleSleep" = "Un shell SSH inactivo deja de retener el Mac tras este tiempo, pero una compilación o agente remoto lo mantiene despierto igualmente, y Compartir Pantalla / VNC nunca caducan.";
+"remote.tip.channels" = "Las vías de acceso remoto detectadas actualmente (se muestran a modo de diagnóstico). Se actualiza cada pocos segundos mientras esta pestaña está abierta.";
+
+/* ADR-0017 — bloque de estado de guardas del menú */
+"status.battery" = "🔋 %d%% · límite %d%%%@";
+"status.thermal" = "🌡 %@ · límite %@%@";
+"status.timer" = "⏱ %dm · máx %dm";
+"status.remoteOff" = "🛰 remoto apagado";
+"status.remoteActiveNoExpiry" = "🛰 remoto activo · sin caducidad";
+"status.remoteIdleActive" = "🛰 inactivo %dm · duerme a %dm";
+"status.remoteActiveCap" = "🛰 remoto activo · duerme tras %dm inactivo";
+"status.remoteIdleNever" = "🛰 remoto · sin caducidad";
+"status.remoteIdleCap" = "🛰 remoto · duerme tras %dm inactivo";
+
+/* Safety pane */
+"safety.master" = "Liberar automáticamente cuando las condiciones sean inseguras";
+"safety.notify" = "Avisarme al liberar automáticamente";
+"safety.batteryThreshold" = "Umbral de batería";
+"safety.thermalCutoff" = "Dormir cuando se caliente así";
+"safety.thermalCutoff.caption" = "Las etapas más bajas duermen antes y de forma más segura; las más altas siguen despiertas más tiempo. Una etapa es la estimación de presión térmica de macOS a partir de varios sensores, no una temperatura fija — los °C reales se muestran abajo en 'Estado actual'.";
+"safety.maxDuration" = "Tiempo máximo despierto";
+"safety.currentState" = "Estado actual";
+"safety.lastRelease" = "Última liberación automática";
+"safety.none" = "(ninguno)";
+"safety.noneThisSession" = "(ninguno en esta sesión)";
+"safety.releaseActive" = "%@ (activo)";
+"safety.4step" = "(4 niveles)";
+"safety.5step" = "(5 niveles)";
+"safety.line.battery" = "Batería";
+"safety.line.power" = "Alimentación";
+"safety.line.lowPower" = "Bajo consumo";
+"safety.line.thermal" = "Térmico";
+"safety.line.fan" = "Ventilador";
+"safety.line.lid" = "Tapa";
+"safety.line.extDisplay" = "Pantalla externa";
+"safety.line.cooldown" = "Enfriamiento";
+
+/* Thermal values */
+"thermal.nominal" = "normal";
+"thermal.fair" = "moderado";
+"thermal.serious" = "grave";
+"thermal.critical" = "crítico";
+
+/* Opciones del menú de límite térmico — mismas etiquetas que el estado en vivo + pista de dirección en los extremos */
+"thermal.cutoff.nominal" = "Normal — antes, más seguro";
+"thermal.cutoff.fair" = "Moderado";
+"thermal.cutoff.serious" = "Grave";
+"thermal.cutoff.critical" = "Crítico — más tarde";
+
+/* Duration values */
+"duration.unlimited" = "Ilimitada";
+"duration.minutes" = "%d min";
+
+/* Power values */
+"power.ac" = "CA";
+"power.acCharging" = "CA (cargando)";
+"power.acNotCharging" = "CA (sin cargar)";
+"power.battery" = "Batería";
+
+/* Lid */
+"lid.closed" = "cerrada";
+"lid.open" = "abierta";
+
+/* Safety release reasons */
+"reason.batteryLow" = "Batería baja";
+"reason.thermalSerious" = "Térmico grave";
+"reason.thermalCritical" = "Térmico crítico";
+"reason.maxDuration" = "Tiempo máximo despierto seguido alcanzado";
+"reason.watchdog" = "Watchdog del ayudante";
+
+/* Notifications */
+"notify.release.title" = "Electronic Clam liberó la suspensión automáticamente";
+"notify.batteryLow" = "Batería baja";
+"notify.thermalSerious" = "Térmico grave";
+"notify.thermalCritical" = "Térmico crítico";
+"notify.maxDuration" = "Se alcanzó el tiempo máximo despierto seguido";
+"notify.watchdog" = "El watchdog del ayudante agotó el tiempo";
+
+/* History pane (ADR-0013) */
+"history.recent" = "Sesiones recientes";
+"history.col.when" = "Cuándo";
+"history.col.awake" = "Despierto";
+"history.col.lid" = "Tapa cerrada";
+"history.col.ended" = "Finalizó";
+"history.clear" = "Borrar historial";
+"history.footnote" = "Últimas 50 sesiones · almacenadas localmente en Application Support";
+"history.nowAwake" = "Despierto desde hace  %@";
+"history.clamshell" = "  └ Clamshell (tapa cerrada)  %@  (%d%%)";
+"history.holding" = "  └ Manteniéndolo: %@";
+"history.notAwake" = "Ahora mismo no está despierto";
+"history.now" = "ahora";
+"history.ongoing" = "● en curso";
+"history.startedBy" = "Iniciado por %@";
+"history.clear.title" = "¿Borrar el historial de actividad?";
+"history.clear.body" = "Elimina todas las sesiones pasadas registradas. La sesión actual (si está despierto) se conserva.";
+"history.clear.confirm" = "Borrar";
+"history.weekSummary" = "Esta semana: despierto %1$@ · agentes %2$@ · tapa cerrada %3$@%4$@";
+"history.weekTrips" = " · %1$d protecciones activas";
+"history.exportCsv" = "Exportar CSV…";
+"history.exportCsv.error" = "Error al exportar";
+
+/* History — current holder */
+"hold.manual" = "interruptor manual";
+"hold.remote" = "remoto (%@)";
+"hold.remoteBare" = "remoto";
+"hold.agent" = "agente (%@)";
+
+/* History — start cause */
+"cause.manual" = "interruptor manual";
+"cause.agent" = "agente";
+"cause.remote" = "remoto";
+"cause.unknown" = "desconocido";
+
+/* History — end reason */
+"end.manualOff" = "apagado manual";
+"end.forceSleep" = "suspensión forzada";
+"end.agentDone" = "agente finalizado";
+"end.remoteEnded" = "remoto finalizado";
+"end.networkLost" = "red perdida";
+"end.batteryLow" = "batería baja";
+"end.thermal" = "térmico";
+"end.thermalCritical" = "térmico crítico";
+"end.durationCap" = "límite de duración";
+"end.watchdog" = "watchdog";
+"end.appQuit" = "app cerrada";
+"end.unknown" = "finalizado";
+
+/* ADR-0018 — incorporación de aprobación en el primer arranque */
+"onboarding.title" = "Se necesita aprobación para mantener tu Mac despierto";
+"onboarding.message" = "Electronic Clam necesita que permitas su ayudante en segundo plano en Ajustes del Sistema → General → Ítems de inicio de sesión. Ábrelo ahora y activa Electronic Clam.";
+"onboarding.openSettings" = "Abrir Ajustes del Sistema";
+"onboarding.later" = "Más tarde";
+
+/* ADR-0018 — sección de permiso de la pestaña General */
+"permission.section" = "Permiso";
+"permission.status.enabled" = "Aprobado";
+"permission.status.requiresApproval" = "Se necesita aprobación";
+"permission.status.notRegistered" = "No registrado";
+"permission.status.notFound" = "Falta el ayudante — reinstalar";
+"permission.status.unknown" = "Estado desconocido";
+"permission.button.openSettings" = "Abrir Ajustes del Sistema";
+"permission.button.manage" = "Gestionar en Ajustes del Sistema";
+"permission.button.retry" = "Registrar de nuevo";
+"permission.button.reinstall" = "Ayuda de reinstalación";
+"permission.button.reinstallHelper" = "Reinstalar asistente";
+
+/* v0.5 P1 — handshake de versión del protocolo del helper (daemon antiguo restante tras una actualización) */
+"permission.versionMismatch.warning" = "El asistente en ejecución usa un protocolo más antiguo que esta app — probablemente quedó de una actualización.";
+"permission.versionMismatch.reinstall" = "Haz clic en \"Reinstalar asistente\" para actualizarlo.";
+
+/* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
+"agents.tip.hookOptional" = "Omite el hook si el paso de confianza resulta engorroso — la vigilancia de archivos sigue detectando el agente.";
+"agents.tip.lax" = "Mantiene el Mac despierto mientras el proceso de un agente vigilado siga vivo — incluso durante esperas largas, como aguardar la respuesta del modelo.";
+"agents.tip.pattern" = "La ruta de archivo que Electronic Clam vigila para saber que este agente está trabajando. ~/ es tu carpeta personal.";
+"agents.tip.strict" = "Cuenta un agente como activo solo mientras su registro de sesión cambia de verdad; un agente terminado o inactivo deja de mantener el Mac despierto.";
+"history.timeline" = "Últimas 24 horas";
+"menu.blankDisplays" = "Apagar pantalla — seguir trabajando";
+"safety.tip.battery" = "Con batería, deja dormir el Mac cuando la carga baje a este nivel. Se ignora con corriente.";
+"safety.battery.floorHelp" = "Suelo de seguridad: con la tapa cerrada y sin pantalla externa, la protección nunca baja del 30%, aunque el deslizador esté más bajo. En modo de bajo consumo el umbral sube otros 10 puntos. El deslizador puede endurecer la protección, pero no relajarla por debajo de estos suelos.";
+"safety.battery.floorHelp.effective" = "(efectivo %d%%)";
+"safety.tip.cooldown" = "El 'enfriamiento' es una pausa de 5 minutos después de que una protección deja dormir el Mac, para que no se reactive al instante. '—' significa que ninguna protección ha actuado en esta sesión.";
+"safety.tip.currentState" = "Una lectura en vivo de lo que ven las protecciones ahora mismo.";
+"safety.tip.lastRelease" = "El motivo más reciente por el que una protección dejó dormir el Mac en esta sesión. '(ninguno)' significa que nunca tuvieron que intervenir.";
+"safety.tip.master" = "El interruptor maestro de todas las protecciones. Encendido, Electronic Clam vuelve a dejar dormir el Mac en cuanto se cruza un límite — batería, temperatura o tiempo despierto.";
+"safety.tip.maxDuration" = "Deja dormir el Mac tras mantenerlo despierto este tiempo seguido. 'Ilimitada' no pone tope. No se aplica en modo Desktop (corriente + tapa abierta + pantalla externa).";
+"safety.tip.thermalCutoff" = "Deja dormir el Mac al alcanzar esta etapa de calor. Las etapas más bajas duermen antes y de forma más segura; la temperatura real se muestra abajo en 'Estado actual'.";
+
+/* ADR-0020 — nota en línea de trampa de actualización (panel General, se muestra cuando el helper no está disponible) */
+"general.helperUnavailable.note" = "Tras una actualización, macOS puede negarse a relanzar el antiguo asistente (limitación de firma ad-hoc). Haz clic en Reinstalar asistente; si sigue sin funcionar, reinicia tu Mac.";
+
+/* Hover tooltips — General pane (permission section) */
+"general.tip.permissionStatus" = "Indica si macOS permite ejecutar el asistente en segundo plano de Electronic Clam. El asistente es quien realiza el control real del reposo.";
+"general.tip.permissionButton" = "Gestiona o repara el permiso del asistente — abre Ajustes del Sistema o reintenta el registro, según el estado de arriba.";
+"general.tip.reinstallHelper" = "Anula el registro del asistente en segundo plano y lo vuelve a registrar. Úsalo cuando el asistente deje de responder tras una actualización o el estado del permiso parezca atascado. macOS puede pedirte que lo apruebes de nuevo.";
+"general.tip.exportDiagnostics" = "Guarda un paquete de diagnóstico (registros recientes, ajustes, estado del asistente) en tu escritorio — útil al informar de un error.";
+
+/* proposal §2 — exportar diagnóstico (General pane) */
+"general.exportDiagnostics" = "Exportar diagnóstico…";
+"general.exportDiagnostics.failed" = "Error al exportar";
+"general.exportDiagnostics.failed.body" = "No se pudo crear el paquete de diagnóstico. Comprueba que ~/Desktop tiene permisos de escritura e inténtalo de nuevo.";
+
+/* ADR-0025 — CLI TTL hold header */
+"header.awakeCliHold" = "Despierto — retención CLI · quedan %@";
+"header.awakeCliHoldForever" = "Despierto — retención CLI (sin caducidad)";
+
+/* proposal §1 — Detect Now 진단 버튼 */
+"agents.detectNow" = "Detectar ahora…";
+"agents.detectNow.title" = "Instantánea de detección";
+"agents.tip.detectNow" = "Ejecuta una pasada de detección y muestra exactamente qué archivo coincidió con cada agente (o por qué no). Misma salida que `eclam debug agents`.";
+
+/* proposal §5 — 첫 승인 후 1회 안내 */
+"onboarding.enabled.title" = "Electronic Clam está listo";
+"onboarding.enabled.body" = "Ejecuta un agente de código (Claude Code, Codex…) — el punto del menú se pone verde mientras trabaja y tu Mac sigue despierto. Haz clic en la concha para alternar.";
+
+/* ADR-0028 — Notificaciones de Telegram (pestaña + panel) */
+"tab.notifications" = "Notificaciones";
+"telegram.privacy" = "Desactivado por defecto. Al activarlo, los mensajes de estado van solo a la API de Telegram usando un token de bot que tú creas y posees — nunca se envía nada al desarrollador ni a ningún otro servidor. El token se guarda localmente con permisos de archivo solo para tu usuario.";
+"telegram.master" = "Enviar estado a mi bot de Telegram";
+"telegram.tip.master" = "El interruptor principal. Apagado significa que Electronic Clam no envía nada por la red. Los campos de configuración y el botón de prueba siguen usables para verificar la conexión primero.";
+"telegram.setup.help" = "Configuración: ① En Telegram, escribe a @BotFather → /newbot y copia el token. ② Envía cualquier mensaje a tu nuevo bot. ③ Pega el token abajo y pulsa Detectar.";
+"telegram.tokenLabel" = "Token del bot";
+"telegram.tip.token" = "El token que te dio @BotFather. Autentica *tu* bot — mantenlo privado. Se guarda solo en este Mac (archivo legible solo por tu usuario) y nunca se registra en logs.";
+"telegram.chatIdLabel" = "ID de chat";
+"telegram.detect" = "Detectar";
+"telegram.tip.detect" = "Busca el ID de chat automáticamente: primero envía cualquier mensaje a tu bot en Telegram y luego pulsa Detectar.";
+"telegram.eventsHeader" = "Enviar un mensaje cuando:";
+"telegram.evtSafety" = "Una protección permite dormir (batería · calor · temporizador)";
+"telegram.tip.evtSafety" = "El mensaje que más quieres cuando no estás: una protección acaba de permitir el sueño, así que el Mac podría dormirse pronto — batería baja, sobrecalentamiento o tiempo máximo despierto.";
+"telegram.evtEnd" = "El trabajo termina — los agentes quedan inactivos o la sesión remota termina";
+"telegram.tip.evtEnd" = "Se envía cuando el último agente activo queda inactivo o termina una sesión remota. Los episodios de menos de un minuto se omiten para evitar ruido.";
+"telegram.evtStart" = "El trabajo comienza — un agente o sesión remota empieza";
+"telegram.tip.evtStart" = "Se envía cuando un agente o sesión remota empieza a mantener el Mac despierto. Desactivado por defecto — puede ser frecuente. Limitado a un mensaje cada 5 minutos.";
+"telegram.sendTest" = "Enviar mensaje de prueba";
+"telegram.tip.sendTest" = "Envía un mensaje de prueba con la línea de estado actual. Funciona incluso con el interruptor principal apagado, para verificar la conexión primero.";
+"telegram.result.detecting" = "Buscando tu chat…";
+"telegram.result.detected" = "✓ ID de chat detectado";
+"telegram.result.sending" = "Enviando…";
+"telegram.result.sent" = "✓ Enviado — revisa tu Telegram";
+"telegram.error.notConfigured" = "Introduce primero un token de bot y un ID de chat.";
+"telegram.error.badToken" = "Eso no parece un token de bot (se espera 123456:ABC…).";
+"telegram.error.noUpdates" = "No se encontraron mensajes. Envía cualquier mensaje a tu bot en Telegram y vuelve a intentarlo.";
+"telegram.test" = "🐚 Electronic Clam — mensaje de prueba. Las notificaciones están conectadas.";
+"telegram.start.agent" = "🟢 Despierto — %@ está trabajando";
+"telegram.start.remote" = "🟢 Despierto — sesión remota (%@)";
+"telegram.start.generic" = "🟢 Despierto — manteniendo el Mac activo";
+"telegram.end.agentIdle" = "⚪️ %1$@ quedó inactivo — despierto durante %2$@";
+"telegram.end.battery" = "🛑 La protección de batería permitió dormir (%1$@) — tu Mac podría dormirse pronto. Despierto %2$@";
+"telegram.end.thermal" = "🛑 La protección térmica permitió dormir (%1$@) — tu Mac podría dormirse pronto. Despierto %2$@";
+"telegram.end.timer" = "⏱ Tiempo máximo despierto alcanzado (%1$@) — sueño permitido. Despierto %2$@";
+"telegram.end.watchdog" = "⚠️ Watchdog del helper activado — sueño restaurado";
+"telegram.end.remoteEnded" = "⚪️ Sesión remota terminada (%1$@) — despierto durante %2$@";
+"telegram.end.remoteLost" = "⚪️ Sesión remota perdida (sin red) — despierto durante %@";
+"telegram.end.generic" = "⚪️ Fin del periodo despierto — %@";
+
+/* ADR-0028 §7 — resumen periódico silencioso */
+"telegram.evtDigest" = "Estado periódico mientras trabaja (silencioso), cada";
+"telegram.tip.evtDigest" = "Un latido mientras algo mantiene el Mac despierto: un mensaje de estado silencioso (sin sonido ni banner) a este intervalo; si el latido deja de llegar, el Mac o la red han caído. Se detiene en cuanto termina el trabajo.";
+"telegram.digest" = "📊 Sigue despierto — %@";

@@ -1,0 +1,355 @@
+/* Electronic Clam — 简体中文. ADR-0011.
+   NEEDS HUMAN REVIEW — machine-assisted draft, not yet proofread by a native speaker. */
+
+/* Common */
+"common.ok" = "好";
+"common.cancel" = "取消";
+"common.yes" = "是";
+"common.no" = "否";
+"common.on" = "开";
+"common.off" = "关";
+
+/* Presence (外接显示器等) */
+"presence.present" = "有";
+"presence.absent" = "无";
+
+/* Menu bar */
+"menu.keepAwake" = "保持 Mac 唤醒";
+"menu.watchAgents" = "监视代理";
+"menu.settings" = "设置…";
+"menu.quit" = "退出";
+"menu.customize" = "自定义…";
+"menu.agentActiveSuffix" = " • 活动中";
+
+/* Accessibility */
+"a11y.asleep" = "睡眠";
+"a11y.awakeManual" = "唤醒（手动）";
+"a11y.awakeAuto" = "唤醒（自动）";
+"a11y.info" = "帮助";
+
+/* Menu header — registration */
+"header.requiresApproval" = "在系统设置中批准…";
+"header.notFound" = "缺少 Helper — 请重新安装";
+"header.registrationFailed" = "注册失败 — 请重试";
+"header.unknown" = "未知状态";
+
+/* Menu header — reasons */
+"header.guardThermalLabel" = "守护已介入 — 🌡 %@";
+"header.guardThermalCritical" = "守护已介入 — 🌡 严重";
+"header.guardThermalSerious" = "守护已介入 — 🌡 偏高 + 合盖";
+"header.guardBattery" = "守护已介入 — 🔋 %d%%";
+"header.guardBatteryLow" = "守护已介入 — 🔋 电量低";
+"header.guardTimer" = "守护已介入 — ⏱ %d分钟";
+"header.guardTimerPlain" = "守护已介入 — ⏱ 计时器";
+"header.guardWatchdog" = "守护已介入 — Helper 超时";
+"header.awakeRemote" = "唤醒 — 远程会话";
+"header.awakeAgentsCount" = "唤醒 — %d 个代理活动中";
+"header.awakeAgents" = "唤醒 — %@ 活动中";
+"header.awakeManual" = "唤醒 — 直到我退出";
+"header.asleepIdle" = "空闲时睡眠";
+
+
+/* Settings + tabs */
+"settings.title" = "Electronic Clam 设置";
+"tab.general" = "通用";
+"tab.agents" = "代理";
+"tab.remote" = "远程";
+"tab.safety" = "安全";
+"tab.history" = "历史";
+
+/* General pane */
+"general.version" = "版本 %@";
+"general.support" = "☕ 请我喝杯咖啡";
+"general.language" = "语言";
+"general.statusCard.on" = "Electronic Clam — 已开启 · 保持唤醒";
+"general.statusCard.off" = "Electronic Clam — 已关闭 · 正常休眠";
+"general.statusCard.helper" = "辅助权限:%@";
+"general.menuBarTheme" = "菜单栏图标";
+"theme.system" = "跟随系统";
+"theme.light" = "浅色";
+"theme.dark" = "深色";
+
+/* Agents pane */
+"agents.mode.strict" = "严格 — 仅计入近期有活动的代理";
+"agents.mode.lax" = "宽松 — 只要监视的代理进程在运行就保持唤醒";
+"agents.section.mode" = "检测模式";
+"agents.section.watched" = "监视的代理";
+"agents.section.hooks" = "安装挂钩";
+"agents.section.hooksAdvanced" = "代理挂钩（可选）";
+"agents.hooks.caption" = "Electronic Clam 通过监视每个代理的会话日志自动检测 — 无需挂钩。挂钩只会让检测即时生效，并在文件访问受限时提供后备方案。";
+"agents.watched.caption" = "通过监视每个代理的会话日志自动检测。";
+"agents.pollNote" = "检测约每 5 秒刷新一次(锁屏时为 30 秒),因此刚启动的代理可能需要几秒才会显示。已安装挂钩的代理会即时注册。";
+"agents.col.agent" = "代理";
+"agents.col.status" = "状态";
+"agents.col.pattern" = "模式";
+"agents.activeRow" = "● 活动中";
+"agents.addCustom" = "添加自定义代理…";
+"agents.remove" = "移除";
+"agents.installHook" = "安装 %@ 挂钩";
+"agents.uninstallHook" = "卸载 %@ 挂钩";
+"agents.installed" = "已安装";
+"agents.notInstalled" = "未安装";
+"agents.hookMissing" = "应用包中缺少挂钩二进制文件";
+"agents.uninstallAll" = "卸载所有挂钩";
+"agents.uninstall" = "卸载";
+"agents.add" = "添加";
+"agents.uninstallAll.title" = "卸载所有 Electronic Clam 挂钩？";
+"agents.uninstallAll.body" = "将从 ~/.claude/settings.json、~/.codex/config.toml 和 ~/.hermes/config.yaml 中移除 Electronic Clam 挂钩条目。您的其他设置将保留。";
+"agents.uninstallFail" = "部分挂钩无法卸载";
+"agents.couldNotInstall" = "无法安装 %@ 挂钩";
+"agents.couldNotUninstall" = "无法卸载 %@ 挂钩";
+"agents.addCustom.title" = "添加自定义代理";
+"agents.addCustom.body" = "请输入唯一 id、标签和 glob 路径。主目录请使用 ~/。";
+"agents.ph.id" = "id（例如 my-agent）";
+"agents.ph.label" = "标签（例如 My Agent）";
+"agents.ph.glob" = "Glob（例如 ~/.my-agent/logs/*.log）";
+"agents.codexTrust" = "安装后，在 Codex CLI 中运行 /hooks 以信任此挂钩。\n当 Electronic Clam 更新挂钩代码时需重新信任。";
+"agents.hermesTrust" = "安装后，下次运行 Hermes 时批准挂钩提示\n（或在 ~/.hermes/config.yaml 中设置 hooks_auto_accept: true）。";
+
+/* Remote pane (2-tier UI: master checkbox + radios) */
+"remote.master" = "将远程会话视为活动";
+"remote.optNeverIdle" = "空闲时也保持唤醒（维持连接）";
+"remote.optIdleSleep" = "空闲达到以下时长后允许睡眠:";
+"remote.help" = "当您通过 SSH、VNC 或屏幕共享连接到此 Mac 时，Electronic Clam 会保持其唤醒以免会话中断。";
+"remote.channels" = "检测到的通道";
+"remote.noneDetected" = "（当前未检测到）";
+"remote.tip.master" = "远程会话通过 pmset 断言、who(1)、Tailscale CLI、Claude Code 与 Codex remote-control 及已知远程控制守护进程检测。关闭后将完全忽略远程连接。";
+"remote.tip.neverIdle" = "屏幕共享模式: 只要会话保持连接，即使没有任何操作也保持 Mac 唤醒。";
+"remote.tip.idleSleep" = "空闲的 SSH 终端在超过此时长后不再阻止睡眠，但远程构建或代理运行时会保持唤醒，屏幕共享 / VNC 永不过期。";
+"remote.tip.channels" = "当前检测到的远程接入路径（用于诊断显示）。此标签页打开期间每隔数秒刷新。";
+
+/* ADR-0017 — 菜单守护状态 */
+"status.battery" = "🔋 %d%% · 阈值 %d%%%@";
+"status.thermal" = "🌡 %@ · 上限 %@%@";
+"status.timer" = "⏱ %dm · 上限 %dm";
+"status.remoteOff" = "🛰 远程关闭";
+"status.remoteActiveNoExpiry" = "🛰 远程活动 · 不过期";
+"status.remoteIdleActive" = "🛰 空闲 %dm · %dm 后睡眠";
+"status.remoteActiveCap" = "🛰 远程活动 · 空闲 %dm 后睡眠";
+"status.remoteIdleNever" = "🛰 远程 · 不过期";
+"status.remoteIdleCap" = "🛰 远程 · 空闲 %dm 后睡眠";
+
+/* Safety pane */
+"safety.master" = "条件变得不安全时自动解除";
+"safety.notify" = "自动解除时通知我";
+"safety.batteryThreshold" = "电量阈值";
+"safety.thermalCutoff" = "热到这个程度就让它睡";
+"safety.thermalCutoff.caption" = "等级越低越早、越安全地休眠;越高则保持唤醒越久。等级是 macOS 综合多个传感器估算的发热压力,并非固定温度 — 实际温度(°C)显示在下方“当前状态”。";
+"safety.maxDuration" = "最长唤醒时间";
+"safety.currentState" = "当前状态";
+"safety.lastRelease" = "上次自动解除";
+"safety.none" = "（无）";
+"safety.noneThisSession" = "（本次会话无）";
+"safety.releaseActive" = "%@（生效中）";
+"safety.4step" = "（4 级）";
+"safety.5step" = "（5 级）";
+"safety.line.battery" = "电量";
+"safety.line.power" = "电源";
+"safety.line.lowPower" = "低电量模式";
+"safety.line.thermal" = "温度";
+"safety.line.fan" = "风扇";
+"safety.line.lid" = "上盖";
+"safety.line.extDisplay" = "外接显示器";
+"safety.line.cooldown" = "冷却";
+
+/* Thermal values */
+"thermal.nominal" = "正常";
+"thermal.fair" = "尚可";
+"thermal.serious" = "偏高";
+"thermal.critical" = "严重";
+
+/* 温度上限下拉项 — 与当前状态相同的等级词 + 两端方向提示 */
+"thermal.cutoff.nominal" = "正常 — 最早、最安全";
+"thermal.cutoff.fair" = "尚可";
+"thermal.cutoff.serious" = "偏高";
+"thermal.cutoff.critical" = "严重 — 最晚";
+
+/* Duration values */
+"duration.unlimited" = "无限制";
+"duration.minutes" = "%d 分钟";
+
+/* Power values */
+"power.ac" = "交流电";
+"power.acCharging" = "交流电（充电中）";
+"power.acNotCharging" = "交流电（未充电）";
+"power.battery" = "电池";
+
+/* Lid */
+"lid.closed" = "合盖";
+"lid.open" = "开盖";
+
+/* Safety release reasons */
+"reason.batteryLow" = "电量低";
+"reason.thermalSerious" = "温度偏高";
+"reason.thermalCritical" = "温度严重";
+"reason.maxDuration" = "已达最长连续唤醒";
+"reason.watchdog" = "Helper 看门狗";
+
+/* Notifications */
+"notify.release.title" = "Electronic Clam 已自动解除睡眠";
+"notify.batteryLow" = "电量低";
+"notify.thermalSerious" = "温度偏高";
+"notify.thermalCritical" = "温度严重";
+"notify.maxDuration" = "已达最长连续唤醒";
+"notify.watchdog" = "Helper 看门狗超时";
+
+/* History pane (ADR-0013) */
+"history.recent" = "最近的会话";
+"history.col.when" = "时间";
+"history.col.awake" = "唤醒时长";
+"history.col.lid" = "合盖时长";
+"history.col.ended" = "结束原因";
+"history.clear" = "清除历史";
+"history.footnote" = "最近 50 个会话 · 本地存储于 Application Support";
+"history.nowAwake" = "已唤醒  %@";
+"history.clamshell" = "  └ Clamshell（合盖）  %@  (%d%%)";
+"history.holding" = "  └ 维持原因: %@";
+"history.notAwake" = "当前未唤醒";
+"history.now" = "现在";
+"history.ongoing" = "● 进行中";
+"history.startedBy" = "开始原因: %@";
+"history.clear.title" = "清除唤醒历史？";
+"history.clear.body" = "移除所有已记录的过去会话。当前会话（若处于唤醒状态）将保留。";
+"history.clear.confirm" = "清除";
+"history.weekSummary" = "本周: 唤醒 %1$@ · 代理 %2$@ · 合盖 %3$@%4$@";
+"history.weekTrips" = " · 守护触发 %1$d 次";
+"history.exportCsv" = "导出 CSV…";
+"history.exportCsv.error" = "导出失败";
+
+/* History — current holder */
+"hold.manual" = "手动开关";
+"hold.remote" = "远程 (%@)";
+"hold.remoteBare" = "远程";
+"hold.agent" = "代理 (%@)";
+
+/* History — start cause */
+"cause.manual" = "手动开关";
+"cause.agent" = "代理";
+"cause.remote" = "远程";
+"cause.unknown" = "未知";
+
+/* History — end reason */
+"end.manualOff" = "手动关闭";
+"end.forceSleep" = "强制睡眠";
+"end.agentDone" = "代理结束";
+"end.remoteEnded" = "远程结束";
+"end.networkLost" = "网络断开";
+"end.batteryLow" = "电量低";
+"end.thermal" = "温度";
+"end.thermalCritical" = "温度严重";
+"end.durationCap" = "时间上限";
+"end.watchdog" = "看门狗";
+"end.appQuit" = "应用退出";
+"end.unknown" = "已结束";
+
+/* ADR-0018 — 首次启动授权引导 */
+"onboarding.title" = "需要授权才能让 Mac 保持唤醒";
+"onboarding.message" = "请在「系统设置 → 通用 → 登录项」中允许 Electronic Clam 的后台帮助程序。立即打开并开启 Electronic Clam。";
+"onboarding.openSettings" = "打开系统设置";
+"onboarding.later" = "稍后";
+
+/* ADR-0018 — 通用标签页的权限部分 */
+"permission.section" = "权限";
+"permission.status.enabled" = "已授权";
+"permission.status.requiresApproval" = "需要授权";
+"permission.status.notRegistered" = "未注册";
+"permission.status.notFound" = "缺少帮助程序 — 请重新安装";
+"permission.status.unknown" = "未知状态";
+"permission.button.openSettings" = "打开系统设置";
+"permission.button.manage" = "在系统设置中管理";
+"permission.button.retry" = "重新注册";
+"permission.button.reinstall" = "重新安装说明";
+"permission.button.reinstallHelper" = "重新安装助手";
+
+/* v0.5 P1 — helper 协议版本握手（升级后遗留的旧 daemon） */
+"permission.versionMismatch.warning" = "正在运行的 helper 使用的协议比此应用更旧 — 可能是升级后遗留的旧版本。";
+"permission.versionMismatch.reinstall" = "请点击「重新安装助手」进行更新。";
+
+/* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
+"agents.tip.hookOptional" = "如果信任设置太麻烦,可以跳过 hook — 仅靠文件监视也能检测到代理。";
+"agents.tip.lax" = "只要受监视代理的进程仍在运行,就让 Mac 保持唤醒 — 即使是等待模型回复等较长的空闲期间也不例外。";
+"agents.tip.pattern" = "用于判断该代理是否在工作的受监视文件路径。~/ 表示主目录。";
+"agents.tip.strict" = "仅当代理的会话日志确实在更新时才视为活跃。已完成或闲置的代理不再让 Mac 保持唤醒。";
+"history.timeline" = "最近 24 小时";
+"menu.blankDisplays" = "仅熄屏 — 继续工作";
+"safety.tip.battery" = "使用电池时,电量降到此水平就让 Mac 休眠。接通电源时忽略。";
+"safety.battery.floorHelp" = "安全下限:合上盖子且没有外接显示器时,即使滑块设得更低,也不会低于 30%。低电量模式下阈值再提高 10 个百分点。滑块只能让防护更严格,不能低于这些下限。";
+"safety.battery.floorHelp.effective" = "(实际生效 %d%%)";
+"safety.tip.cooldown" = "“冷却”是防护让 Mac 休眠后的 5 分钟暂停,避免立即重新生效。“—”表示本次会话中防护从未触发。";
+"safety.tip.currentState" = "实时显示防护当前看到的数值。";
+"safety.tip.lastRelease" = "本次会话中防护最近一次让 Mac 休眠的原因。“(无)”表示防护从未介入。";
+"safety.tip.master" = "下方所有防护的总开关。开启时,电池、温度或连续唤醒时长任一超限,Electronic Clam 就会让 Mac 重新休眠。";
+"safety.tip.maxDuration" = "从开始保持唤醒起,连续唤醒达到此时长后让 Mac 休眠。“无限制”不设上限。在 Desktop 模式下(接通电源 + 开盖 + 外接显示器)不适用。";
+"safety.tip.thermalCutoff" = "达到此发热等级时让 Mac 休眠。等级越低越早、越安全地休眠;实际温度显示在下方“当前状态”。";
+
+/* ADR-0020 — 升级陷阱内联提示（General pane，helper 不可用时显示）*/
+"general.helperUnavailable.note" = "升级后，macOS 可能拒绝重新启动旧的 helper（ad-hoc 签名限制）。请点击「重新安装助手」；如果仍然无效，请重启 Mac。";
+
+/* Hover tooltips — General pane (permission section) */
+"general.tip.permissionStatus" = "macOS 是否允许 Electronic Clam 的后台助手运行。实际的睡眠控制由助手执行。";
+"general.tip.permissionButton" = "管理或修复助手权限 — 根据上方状态打开系统设置或重试注册。";
+"general.tip.reinstallHelper" = "注销并重新注册后台助手。当升级后助手无响应或权限状态异常时使用。macOS 可能会要求您重新批准。";
+"general.tip.exportDiagnostics" = "将包含最近日志、设置和助手状态的诊断包保存到桌面 — 提交错误报告时很有用。";
+
+/* proposal §2 — 导出诊断（General pane）*/
+"general.exportDiagnostics" = "导出诊断包…";
+"general.exportDiagnostics.failed" = "导出失败";
+"general.exportDiagnostics.failed.body" = "无法创建诊断包。请确认 ~/Desktop 有写入权限后重试。";
+
+/* ADR-0025 — CLI TTL hold header */
+"header.awakeCliHold" = "保持唤醒 — CLI 锁定 · 剩余 %@";
+"header.awakeCliHoldForever" = "保持唤醒 — CLI 锁定(无限期)";
+
+/* proposal §1 — Detect Now 진단 버튼 */
+"agents.detectNow" = "立即检测…";
+"agents.detectNow.title" = "检测快照";
+"agents.tip.detectNow" = "执行一次检测,并展示每个代理匹配到了哪个文件(或为何没有匹配)。与 `eclam debug agents` 输出相同。";
+
+/* proposal §5 — 첫 승인 후 1회 안내 */
+"onboarding.enabled.title" = "Electronic Clam 已就绪";
+"onboarding.enabled.body" = "运行一个编码代理(Claude Code、Codex…)— 工作时菜单圆点会变绿,Mac 保持唤醒。随时点击贝壳即可切换。";
+
+/* ADR-0028 — Telegram 通知 (标签页 + 面板) */
+"tab.notifications" = "通知";
+"telegram.privacy" = "默认关闭。启用后,状态消息仅通过你自己创建并拥有的机器人令牌发送到 Telegram 的 API — 不会向开发者或任何其他服务器发送任何数据。令牌仅保存在这台 Mac 上,使用仅限用户读取的文件权限。";
+"telegram.master" = "向我的 Telegram 机器人发送状态";
+"telegram.tip.master" = "总开关。关闭时 Electronic Clam 不会通过网络发送任何内容。下方的设置字段和测试按钮在关闭时仍可使用,方便先确认连接。";
+"telegram.setup.help" = "设置: ① 在 Telegram 中向 @BotFather 发送 /newbot 创建机器人并复制令牌。② 给新机器人发送任意一条消息。③ 在下方粘贴令牌并点击检测。";
+"telegram.tokenLabel" = "机器人令牌";
+"telegram.tip.token" = "@BotFather 发给你的令牌。它用于认证你的机器人 — 请保密。仅保存在这台 Mac 上(仅限用户读取的文件),不会写入日志。";
+"telegram.chatIdLabel" = "聊天 ID";
+"telegram.detect" = "检测";
+"telegram.tip.detect" = "自动查找聊天 ID:先在 Telegram 中给机器人发送任意消息,然后点击检测。";
+"telegram.eventsHeader" = "在以下情况发送消息:";
+"telegram.evtSafety" = "安全防护允许睡眠时 (电池 · 过热 · 计时器)";
+"telegram.tip.evtSafety" = "离开时最需要的消息:防护刚刚解除了睡眠抑制,Mac 可能很快入睡 — 电池不足、过热或达到最长唤醒时间。";
+"telegram.evtEnd" = "工作结束时 — 代理进入空闲或远程会话结束";
+"telegram.tip.evtEnd" = "当最后一个工作中的代理进入空闲或远程会话结束时发送。少于一分钟的短暂片段会被跳过以避免噪音。";
+"telegram.evtStart" = "工作开始时 — 代理或远程会话开始";
+"telegram.tip.evtStart" = "当代理或远程会话开始保持 Mac 唤醒时发送。可能较频繁,默认关闭。限制为每 5 分钟一条。";
+"telegram.sendTest" = "发送测试消息";
+"telegram.tip.sendTest" = "发送一条包含当前状态行的测试消息。即使总开关关闭也可使用,方便先确认连接。";
+"telegram.result.detecting" = "正在查找聊天…";
+"telegram.result.detected" = "✓ 已检测到聊天 ID";
+"telegram.result.sending" = "发送中…";
+"telegram.result.sent" = "✓ 已发送 — 请查看 Telegram";
+"telegram.error.notConfigured" = "请先输入机器人令牌和聊天 ID。";
+"telegram.error.badToken" = "这看起来不像机器人令牌 (应为 123456:ABC…)。";
+"telegram.error.noUpdates" = "未找到消息。请先在 Telegram 中给机器人发送任意消息,然后重试。";
+"telegram.test" = "🐚 Electronic Clam — 测试消息。通知已连接成功。";
+"telegram.start.agent" = "🟢 唤醒 — %@ 正在工作";
+"telegram.start.remote" = "🟢 唤醒 — 远程会话 (%@)";
+"telegram.start.generic" = "🟢 唤醒 — 保持 Mac 唤醒";
+"telegram.end.agentIdle" = "⚪️ %1$@ 已空闲 — 唤醒持续 %2$@ 后结束";
+"telegram.end.battery" = "🛑 电池防护已允许睡眠 (%1$@) — Mac 可能很快入睡。已唤醒 %2$@";
+"telegram.end.thermal" = "🛑 过热防护已允许睡眠 (%1$@) — Mac 可能很快入睡。已唤醒 %2$@";
+"telegram.end.timer" = "⏱ 已达最长唤醒时间 (%1$@) — 允许睡眠。已唤醒 %2$@";
+"telegram.end.watchdog" = "⚠️ 助手看门狗已触发 — 已恢复睡眠";
+"telegram.end.remoteEnded" = "⚪️ 远程会话结束 (%1$@) — 唤醒持续 %2$@ 后结束";
+"telegram.end.remoteLost" = "⚪️ 远程会话中断 (网络丢失) — 唤醒持续 %@ 后结束";
+"telegram.end.generic" = "⚪️ 唤醒结束 — %@";
+
+/* ADR-0028 §7 — 定期静默摘要 */
+"telegram.evtDigest" = "工作期间定期状态 (静默),间隔";
+"telegram.tip.evtDigest" = "Mac 保持唤醒期间的心跳:按此间隔发送静默状态消息(无声音、无横幅)。如果心跳中断,说明 Mac 或网络出了问题。工作结束立即停止。";
+"telegram.digest" = "📊 仍在唤醒中 — %@";

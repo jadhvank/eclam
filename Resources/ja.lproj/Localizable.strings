@@ -1,0 +1,355 @@
+/* Electronic Clam — 日本語. ADR-0011.
+   NEEDS HUMAN REVIEW — machine-assisted draft, not yet proofread by a native speaker. */
+
+/* Common */
+"common.ok" = "OK";
+"common.cancel" = "キャンセル";
+"common.yes" = "はい";
+"common.no" = "いいえ";
+"common.on" = "オン";
+"common.off" = "オフ";
+
+/* Presence (外部ディスプレイなど) */
+"presence.present" = "あり";
+"presence.absent" = "なし";
+
+/* Menu bar */
+"menu.keepAwake" = "Macをスリープさせない";
+"menu.watchAgents" = "エージェントを監視";
+"menu.settings" = "設定…";
+"menu.quit" = "終了";
+"menu.customize" = "カスタマイズ…";
+"menu.agentActiveSuffix" = " • 動作中";
+
+/* Accessibility */
+"a11y.asleep" = "スリープ";
+"a11y.awakeManual" = "起動中（手動）";
+"a11y.awakeAuto" = "起動中（自動）";
+"a11y.info" = "ヘルプ";
+
+/* Menu header — registration */
+"header.requiresApproval" = "システム設定で承認…";
+"header.notFound" = "ヘルパーがありません — 再インストール";
+"header.registrationFailed" = "登録に失敗 — 再試行";
+"header.unknown" = "不明な状態";
+
+/* Menu header — reasons */
+"header.guardThermalLabel" = "ガード作動 — 🌡 %@";
+"header.guardThermalCritical" = "ガード作動 — 🌡 危険";
+"header.guardThermalSerious" = "ガード作動 — 🌡 高温 + 蓋";
+"header.guardBattery" = "ガード作動 — 🔋 %d%%";
+"header.guardBatteryLow" = "ガード作動 — 🔋 残量低下";
+"header.guardTimer" = "ガード作動 — ⏱ %d分";
+"header.guardTimerPlain" = "ガード作動 — ⏱ タイマー";
+"header.guardWatchdog" = "ガード作動 — ヘルパー応答なし";
+"header.awakeRemote" = "起動中 — リモートセッション";
+"header.awakeAgentsCount" = "起動中 — エージェント%d個が動作中";
+"header.awakeAgents" = "起動中 — %@ が動作中";
+"header.awakeManual" = "起動中 — 終了するまで";
+"header.asleepIdle" = "アイドル時にスリープ";
+
+
+/* Settings + tabs */
+"settings.title" = "Electronic Clam 設定";
+"tab.general" = "一般";
+"tab.agents" = "エージェント";
+"tab.remote" = "リモート";
+"tab.safety" = "安全";
+"tab.history" = "履歴";
+
+/* General pane */
+"general.version" = "バージョン %@";
+"general.support" = "☕ コーヒーを一杯おごる";
+"general.language" = "言語";
+"general.statusCard.on" = "Electronic Clam — オン · スリープしません";
+"general.statusCard.off" = "Electronic Clam — オフ · 通常どおりスリープ";
+"general.statusCard.helper" = "ヘルパー権限: %@";
+"general.menuBarTheme" = "メニューバーアイコン";
+"theme.system" = "システム";
+"theme.light" = "ライト";
+"theme.dark" = "ダーク";
+
+/* Agents pane */
+"agents.mode.strict" = "厳格 — 最近活動したエージェントのみ対象";
+"agents.mode.lax" = "緩和 — 監視中のエージェントプロセスが起動していれば維持";
+"agents.section.mode" = "検出モード";
+"agents.section.watched" = "監視中のエージェント";
+"agents.section.hooks" = "フックのインストール";
+"agents.section.hooksAdvanced" = "エージェントフック（任意）";
+"agents.hooks.caption" = "Electronic Clam は各エージェントのセッションログを監視して自動的に検出します — フックは不要です。フックは検出を即時にし、ファイルアクセスが制限された環境でフォールバックを追加するだけです。";
+"agents.watched.caption" = "各エージェントのセッションログを監視して自動的に検出します。";
+"agents.pollNote" = "検出は約5秒ごとに更新されます(画面ロック中は30秒)。そのため起動直後のエージェントは表示まで数秒かかることがあります。フックを導入したエージェントは即座に反映されます。";
+"agents.col.agent" = "エージェント";
+"agents.col.status" = "状態";
+"agents.col.pattern" = "パターン";
+"agents.activeRow" = "● 動作中";
+"agents.addCustom" = "カスタムエージェントを追加…";
+"agents.remove" = "削除";
+"agents.installHook" = "%@ フックをインストール";
+"agents.uninstallHook" = "%@ フックをアンインストール";
+"agents.installed" = "インストール済み";
+"agents.notInstalled" = "未インストール";
+"agents.hookMissing" = "アプリバンドルにフックバイナリがありません";
+"agents.uninstallAll" = "すべてのフックをアンインストール";
+"agents.uninstall" = "アンインストール";
+"agents.add" = "追加";
+"agents.uninstallAll.title" = "すべての Electronic Clam フックをアンインストールしますか？";
+"agents.uninstallAll.body" = "~/.claude/settings.json、~/.codex/config.toml、~/.hermes/config.yaml から Electronic Clam のフックエントリを削除します。他の設定は保持されます。";
+"agents.uninstallFail" = "一部のフックをアンインストールできませんでした";
+"agents.couldNotInstall" = "%@ フックをインストールできませんでした";
+"agents.couldNotUninstall" = "%@ フックをアンインストールできませんでした";
+"agents.addCustom.title" = "カスタムエージェントを追加";
+"agents.addCustom.body" = "一意の id、ラベル、glob パスを入力してください。ホームディレクトリには ~/ を使用します。";
+"agents.ph.id" = "id（例: my-agent）";
+"agents.ph.label" = "ラベル（例: My Agent）";
+"agents.ph.glob" = "Glob（例: ~/.my-agent/logs/*.log）";
+"agents.codexTrust" = "インストール後、Codex CLI で /hooks を実行してこのフックを信頼してください。\nElectronic Clam がフックコードを更新したら再度信頼が必要です。";
+"agents.hermesTrust" = "インストール後、次回 Hermes を実行する際にフックのプロンプトを承認してください\n（または ~/.hermes/config.yaml に hooks_auto_accept: true を設定）。";
+
+/* Remote pane (2-tier UI: master checkbox + radios) */
+"remote.master" = "リモートセッションをアクティビティとして扱う";
+"remote.optNeverIdle" = "アイドルでも起こしておく（接続を維持）";
+"remote.optIdleSleep" = "アイドルが次の時間続いたらスリープを許可:";
+"remote.help" = "この Mac に SSH、VNC、画面共有で接続すると、Electronic Clam がセッションが切れないようにスリープを防ぎます。";
+"remote.channels" = "検出されたチャンネル";
+"remote.noneDetected" = "（現在検出されていません）";
+"remote.tip.master" = "リモートセッションは pmset アサーション、who(1)、Tailscale CLI、Claude Code・Codex remote-control、既知のリモート制御デーモンで検出します。オフにするとリモート接続を完全に無視します。";
+"remote.tip.neverIdle" = "画面共有スタイル: 何も起きていなくても、セッションが接続されている間は Mac を起こしておきます。";
+"remote.tip.idleSleep" = "アイドルの SSH シェルはこの時間が過ぎると Mac を解放しますが、リモートのビルドやエージェントが動いていれば起きたままで、画面共有・VNC は期限切れになりません。";
+"remote.tip.channels" = "現在検出されているリモート接続経路です（診断用の表示）。このタブを開いている間、数秒ごとに更新されます。";
+
+/* ADR-0017 — メニューのガード状態 */
+"status.battery" = "🔋 %d%% · ガード %d%%%@";
+"status.thermal" = "🌡 %@ · 上限 %@%@";
+"status.timer" = "⏱ %dm · 上限 %dm";
+"status.remoteOff" = "🛰 リモート オフ";
+"status.remoteActiveNoExpiry" = "🛰 リモート稼働中 · 期限なし";
+"status.remoteIdleActive" = "🛰 アイドル %dm · %dm でスリープ";
+"status.remoteActiveCap" = "🛰 リモート稼働中 · アイドル %dm 後にスリープ";
+"status.remoteIdleNever" = "🛰 リモート · 期限なし";
+"status.remoteIdleCap" = "🛰 リモート · アイドル %dm 後にスリープ";
+
+/* Safety pane */
+"safety.master" = "条件が危険になったら自動解除";
+"safety.notify" = "自動解除時に通知";
+"safety.batteryThreshold" = "バッテリーしきい値";
+"safety.thermalCutoff" = "これくらい熱くなったらスリープ";
+"safety.thermalCutoff.caption" = "段階が低いほど早く・安全にスリープし、高いほど長く起きています。段階は macOS が複数のセンサーから推定する発熱圧力で、固定の温度ではありません — 実際の温度(°C)は下の「現在の状態」に表示されます。";
+"safety.maxDuration" = "最大の起きていられる時間";
+"safety.currentState" = "現在の状態";
+"safety.lastRelease" = "最後の自動解除";
+"safety.none" = "（なし）";
+"safety.noneThisSession" = "（このセッションではなし）";
+"safety.releaseActive" = "%@（有効）";
+"safety.4step" = "（4段階）";
+"safety.5step" = "（5段階）";
+"safety.line.battery" = "バッテリー";
+"safety.line.power" = "電源";
+"safety.line.lowPower" = "低電力";
+"safety.line.thermal" = "温度";
+"safety.line.fan" = "ファン";
+"safety.line.lid" = "蓋";
+"safety.line.extDisplay" = "外部ディスプレイ";
+"safety.line.cooldown" = "クールダウン";
+
+/* Thermal values */
+"thermal.nominal" = "正常";
+"thermal.fair" = "やや高い";
+"thermal.serious" = "高い";
+"thermal.critical" = "危険";
+
+/* 温度カットオフのドロップダウン項目 — 現在の状態と同じ段階語+両端に方向ヒント */
+"thermal.cutoff.nominal" = "正常 — 最も早く・最も安全";
+"thermal.cutoff.fair" = "やや高い";
+"thermal.cutoff.serious" = "高い";
+"thermal.cutoff.critical" = "危険 — 最も遅く";
+
+/* Duration values */
+"duration.unlimited" = "無制限";
+"duration.minutes" = "%d分";
+
+/* Power values */
+"power.ac" = "AC";
+"power.acCharging" = "AC（充電中）";
+"power.acNotCharging" = "AC（充電なし）";
+"power.battery" = "バッテリー";
+
+/* Lid */
+"lid.closed" = "閉";
+"lid.open" = "開";
+
+/* Safety release reasons */
+"reason.batteryLow" = "バッテリー残量低下";
+"reason.thermalSerious" = "温度が高い";
+"reason.thermalCritical" = "温度が危険";
+"reason.maxDuration" = "最大連続起床時間に到達";
+"reason.watchdog" = "ヘルパーウォッチドッグ";
+
+/* Notifications */
+"notify.release.title" = "Electronic Clam がスリープを自動解除しました";
+"notify.batteryLow" = "バッテリー残量低下";
+"notify.thermalSerious" = "温度が高い";
+"notify.thermalCritical" = "温度が危険";
+"notify.maxDuration" = "最大連続起床時間に到達";
+"notify.watchdog" = "ヘルパーウォッチドッグがタイムアウト";
+
+/* History pane (ADR-0013) */
+"history.recent" = "最近のセッション";
+"history.col.when" = "時刻";
+"history.col.awake" = "起動時間";
+"history.col.lid" = "蓋を閉じた時間";
+"history.col.ended" = "終了理由";
+"history.clear" = "履歴を消去";
+"history.footnote" = "最近50セッション · Application Support にローカル保存";
+"history.nowAwake" = "起動中  %@";
+"history.clamshell" = "  └ Clamshell（蓋を閉じた状態）  %@  (%d%%)";
+"history.holding" = "  └ 維持要因: %@";
+"history.notAwake" = "現在は起動していません";
+"history.now" = "現在";
+"history.ongoing" = "● 進行中";
+"history.startedBy" = "開始要因: %@";
+"history.clear.title" = "起動履歴を消去しますか？";
+"history.clear.body" = "記録された過去のセッションをすべて削除します。現在のセッション（起動中の場合）は保持されます。";
+"history.clear.confirm" = "消去";
+"history.weekSummary" = "今週: 起動 %1$@ · エージェント %2$@ · 蓋閉じ %3$@%4$@";
+"history.weekTrips" = " · ガード %1$d回";
+"history.exportCsv" = "CSV 書き出し…";
+"history.exportCsv.error" = "書き出し失敗";
+
+/* History — current holder */
+"hold.manual" = "手動トグル";
+"hold.remote" = "リモート (%@)";
+"hold.remoteBare" = "リモート";
+"hold.agent" = "エージェント (%@)";
+
+/* History — start cause */
+"cause.manual" = "手動トグル";
+"cause.agent" = "エージェント";
+"cause.remote" = "リモート";
+"cause.unknown" = "不明";
+
+/* History — end reason */
+"end.manualOff" = "手動オフ";
+"end.forceSleep" = "強制スリープ";
+"end.agentDone" = "エージェント終了";
+"end.remoteEnded" = "リモート終了";
+"end.networkLost" = "ネットワーク切断";
+"end.batteryLow" = "バッテリー低下";
+"end.thermal" = "温度";
+"end.thermalCritical" = "温度危険";
+"end.durationCap" = "時間制限";
+"end.watchdog" = "ウォッチドッグ";
+"end.appQuit" = "アプリ終了";
+"end.unknown" = "終了";
+
+/* ADR-0018 — 初回起動時の承認オンボーディング */
+"onboarding.title" = "Mac をスリープさせないには承認が必要です";
+"onboarding.message" = "システム設定 → 一般 → ログイン項目で Electronic Clam のバックグラウンドヘルパーを許可してください。今すぐ開いて Electronic Clam をオンにしてください。";
+"onboarding.openSettings" = "システム設定を開く";
+"onboarding.later" = "後で";
+
+/* ADR-0018 — 一般タブの権限セクション */
+"permission.section" = "権限";
+"permission.status.enabled" = "承認済み";
+"permission.status.requiresApproval" = "承認が必要";
+"permission.status.notRegistered" = "未登録";
+"permission.status.notFound" = "ヘルパーがありません — 再インストール";
+"permission.status.unknown" = "不明な状態";
+"permission.button.openSettings" = "システム設定を開く";
+"permission.button.manage" = "システム設定で管理";
+"permission.button.retry" = "再登録";
+"permission.button.reinstall" = "再インストール手順";
+"permission.button.reinstallHelper" = "ヘルパーを再インストール";
+
+/* v0.5 P1 — ヘルパープロトコルのバージョンハンドシェイク（アップグレード後に旧 daemon が残存） */
+"permission.versionMismatch.warning" = "実行中のヘルパーは、このアプリより古いプロトコルを使用しています — アップグレード後に旧バージョンが残っている可能性があります。";
+"permission.versionMismatch.reinstall" = "「ヘルパーを再インストール」をクリックして更新してください。";
+
+/* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
+"agents.tip.hookOptional" = "信頼設定が面倒ならフックは省略できます — ファイル監視だけでもエージェントを検知します。";
+"agents.tip.lax" = "監視対象エージェントのプロセスが生きている間、Mac をスリープさせません — モデルの応答待ちなど長いアイドル中も維持されます。";
+"agents.tip.pattern" = "このエージェントが作業中かどうかを判断するために監視するファイルパスです。~/ はホームフォルダです。";
+"agents.tip.strict" = "エージェントのセッションログが実際に更新されている間だけアクティブと見なします。完了・停止したエージェントは Mac を起こし続けません。";
+"history.timeline" = "過去24時間";
+"menu.blankDisplays" = "画面だけオフ — 作業は継続";
+"safety.tip.battery" = "バッテリー駆動中、残量がこのレベルまで下がったら Mac をスリープさせます。電源接続中は無視されます。";
+"safety.battery.floorHelp" = "安全フロア: フタを閉じて外部ディスプレイがない場合、スライダーをより低く設定していても 30% を下回りません。低電力モードではしきい値がさらに 10 ポイント上がります。スライダーでガードを厳しくはできますが、このフロアより緩くはできません。";
+"safety.battery.floorHelp.effective" = "(実効 %d%%)";
+"safety.tip.cooldown" = "「クールダウン」はガードが Mac をスリープさせた後の5分間の休止で、すぐに再作動しないためのものです。「—」はこのセッションでガードが作動していないことを意味します。";
+"safety.tip.currentState" = "ガードが現在見ている値をリアルタイムで表示します。";
+"safety.tip.lastRelease" = "このセッションでガードが Mac をスリープさせた直近の理由です。「(なし)」はガードが介入していないことを意味します。";
+"safety.tip.master" = "以下すべてのガードのマスタースイッチです。オンの間、バッテリー・温度・連続起床時間のいずれかが限界を超えると Mac を再びスリープさせます。";
+"safety.tip.maxDuration" = "起こし始めてから連続でこの時間起きていたら Mac をスリープさせます。「無制限」は制限しません。Desktop モード(AC + 蓋オープン + 外部ディスプレイ)では適用されません。";
+"safety.tip.thermalCutoff" = "この発熱段階に達したら Mac をスリープさせます。低い段階ほど早く・安全にスリープし、実際の温度は下の「現在の状態」に表示されます。";
+
+/* ADR-0020 — アップグレード後のヘルパー不在インラインノート（General pane、helper unavailable 時に表示）*/
+"general.helperUnavailable.note" = "アップグレード後、macOS が旧ヘルパーの再起動を拒否することがあります（ad-hoc 署名の制限）。「ヘルパーを再インストール」をクリックし、それでも解決しない場合は Mac を再起動してください。";
+
+/* Hover tooltips — General pane (permission section) */
+"general.tip.permissionStatus" = "macOS が Electronic Clam のバックグラウンドヘルパーの実行を許可しているかどうかです。実際のスリープ制御はヘルパーが行います。";
+"general.tip.permissionButton" = "ヘルパーの権限を管理・修復します — 上の状態に応じて、システム設定を開くか登録を再試行します。";
+"general.tip.reinstallHelper" = "バックグラウンドヘルパーの登録を解除して再登録します。アップグレード後にヘルパーが応答しないときや、権限の状態がおかしいときに使ってください。macOS が再承認を求めることがあります。";
+"general.tip.exportDiagnostics" = "最近のログ・設定・ヘルパーの状態をまとめた診断バンドルをデスクトップに保存します — バグ報告に便利です。";
+
+/* proposal §2 — 診断バンドル書き出し（General pane）*/
+"general.exportDiagnostics" = "診断バンドルを書き出す…";
+"general.exportDiagnostics.failed" = "書き出し失敗";
+"general.exportDiagnostics.failed.body" = "診断バンドルを作成できませんでした。~/Desktop への書き込み権限を確認してもう一度お試しください。";
+
+/* ADR-0025 — CLI TTL hold header */
+"header.awakeCliHold" = "起床中 — CLI ホールド · 残り %@";
+"header.awakeCliHoldForever" = "起床中 — CLI ホールド(無期限)";
+
+/* proposal §1 — Detect Now 진단 버튼 */
+"agents.detectNow" = "今すぐ検知…";
+"agents.detectNow.title" = "検知スナップショット";
+"agents.tip.detectNow" = "検知を1回実行し、各エージェントがどのファイルにマッチしたか(またはなぜしなかったか)をそのまま表示します。`eclam debug agents` と同じ出力です。";
+
+/* proposal §5 — 첫 승인 후 1회 안내 */
+"onboarding.enabled.title" = "Electronic Clam の準備ができました";
+"onboarding.enabled.body" = "コーディングエージェント(Claude Code、Codex…)を動かしてみてください — 動作中はメニューのドットが緑になり、Mac は起きたままです。シェルをクリックすればいつでも切り替えられます。";
+
+/* ADR-0028 — Telegram 通知 (タブ + パネル) */
+"tab.notifications" = "通知";
+"telegram.privacy" = "デフォルトはオフです。有効にすると、ステータスメッセージはあなた自身が作成・所有するボットトークンを使って Telegram の API のみに送信されます — 開発者や他のサーバーには一切データを送りません。トークンはこの Mac にのみ、ユーザー専用のファイル権限で保存されます。";
+"telegram.master" = "自分の Telegram ボットにステータスを送る";
+"telegram.tip.master" = "マスタースイッチです。オフの間、Electronic Clam はネットワークに何も送信しません。下の設定フィールドとテストボタンはオフでも使えるので、先に接続を確認できます。";
+"telegram.setup.help" = "設定: ① Telegram で @BotFather に /newbot を送り、ボットを作成してトークンをコピー。② 新しいボットに何かメッセージを送る。③ 下にトークンを貼り付けて自動検出をクリック。";
+"telegram.tokenLabel" = "ボットトークン";
+"telegram.tip.token" = "@BotFather が発行したトークンです。あなたのボットを認証する秘密の値なので公開しないでください。この Mac にのみ保存され(ユーザー専用ファイル)、ログには残りません。";
+"telegram.chatIdLabel" = "チャット ID";
+"telegram.detect" = "自動検出";
+"telegram.tip.detect" = "チャット ID を自動で調べます。先に Telegram でボットに何かメッセージを送ってからクリックしてください。";
+"telegram.eventsHeader" = "メッセージを送るタイミング:";
+"telegram.evtSafety" = "安全ガードがスリープを許可したとき (バッテリー · 発熱 · タイマー)";
+"telegram.tip.evtSafety" = "外出中に最も欲しいメッセージ: ガードがスリープ抑制を解除し、Mac がまもなくスリープする可能性があります — バッテリー低下、過熱、最大起床時間の超過。";
+"telegram.evtEnd" = "作業が終わったとき — エージェントのアイドル化・リモートセッション終了";
+"telegram.tip.evtEnd" = "最後に作業していたエージェントがアイドルになるか、リモートセッションが終了すると送信されます。1分未満の短いエピソードはノイズ防止のためスキップします。";
+"telegram.evtStart" = "作業が始まったとき — エージェント・リモートセッション開始";
+"telegram.tip.evtStart" = "エージェントやリモートセッションが Mac を起こし続け始めると送信されます。頻発しうるためデフォルトはオフ。5分に1回に制限されます。";
+"telegram.sendTest" = "テストメッセージを送信";
+"telegram.tip.sendTest" = "現在のステータス行を含むテストメッセージを1通送ります。マスタースイッチがオフでも動作するので、先に接続を確認できます。";
+"telegram.result.detecting" = "チャットを探しています…";
+"telegram.result.detected" = "✓ チャット ID を検出";
+"telegram.result.sending" = "送信中…";
+"telegram.result.sent" = "✓ 送信済み — Telegram を確認してください";
+"telegram.error.notConfigured" = "先にボットトークンとチャット ID を入力してください。";
+"telegram.error.badToken" = "ボットトークンの形式ではないようです (例: 123456:ABC…)。";
+"telegram.error.noUpdates" = "メッセージが見つかりません。Telegram でボットに何かメッセージを送ってから再試行してください。";
+"telegram.test" = "🐚 Electronic Clam — テストメッセージ。通知の接続が完了しました。";
+"telegram.start.agent" = "🟢 起床 — %@ が作業中";
+"telegram.start.remote" = "🟢 起床 — リモートセッション (%@)";
+"telegram.start.generic" = "🟢 起床 — Mac を起こしています";
+"telegram.end.agentIdle" = "⚪️ %1$@ がアイドルに — %2$@ の起床が終了";
+"telegram.end.battery" = "🛑 バッテリーガードがスリープを許可 (%1$@) — Mac はまもなくスリープする可能性があります。起床時間 %2$@";
+"telegram.end.thermal" = "🛑 発熱ガードがスリープを許可 (%1$@) — Mac はまもなくスリープする可能性があります。起床時間 %2$@";
+"telegram.end.timer" = "⏱ 最大起床時間に到達 (%1$@) — スリープ許可。起床時間 %2$@";
+"telegram.end.watchdog" = "⚠️ ヘルパーのウォッチドッグが作動 — スリープを復元";
+"telegram.end.remoteEnded" = "⚪️ リモートセッション終了 (%1$@) — %2$@ の起床が終了";
+"telegram.end.remoteLost" = "⚪️ リモートセッション切断 (ネットワーク喪失) — %@ の起床が終了";
+"telegram.end.generic" = "⚪️ 起床終了 — %@";
+
+/* ADR-0028 §7 — 定期サイレントダイジェスト */
+"telegram.evtDigest" = "作業中の定期ステータス (サイレント)、間隔";
+"telegram.tip.evtDigest" = "Mac が起きている間のハートビート: この間隔でサイレントなステータスメッセージ(音・バナーなし)を送ります。届いていたハートビートが途切れたら、Mac かネットワークが落ちた合図です。作業が終わると即座に止まります。";
+"telegram.digest" = "📊 まだ起きています — %@";

@@ -1,0 +1,357 @@
+/* Electronic Clam — English (source of truth). ADR-0011. */
+
+/* Common */
+"common.ok" = "OK";
+"common.cancel" = "Cancel";
+"common.yes" = "yes";
+"common.no" = "no";
+"common.on" = "on";
+"common.off" = "off";
+
+/* Presence (e.g. external display) */
+"presence.present" = "present";
+"presence.absent" = "none";
+
+/* Menu bar */
+"menu.keepAwake" = "Keep Mac Awake";
+"menu.watchAgents" = "Watch Agents";
+"menu.settings" = "Settings…";
+"menu.quit" = "Quit";
+"menu.customize" = "Customize…";
+"menu.agentActiveSuffix" = " • active";
+
+/* Accessibility (menu bar glyph) */
+"a11y.asleep" = "Asleep";
+"a11y.awakeManual" = "Awake (manual)";
+"a11y.awakeAuto" = "Awake (auto)";
+"a11y.info" = "Help";
+
+/* Menu header — registration states */
+"header.requiresApproval" = "Approve in System Settings…";
+"header.notFound" = "Helper missing — reinstall";
+"header.registrationFailed" = "Registration failed — try again";
+"header.unknown" = "Unknown state";
+
+/* Menu header — awake/guard reasons (%@ = label, %d = number).
+   ADR-0026: guard releases say "Guard active", not "Asleep" — the Mac may
+   well be awake under the user; the header reports what the app is doing. */
+"header.guardThermalLabel" = "Guard active — 🌡 %@";
+"header.guardThermalCritical" = "Guard active — 🌡 critical";
+"header.guardThermalSerious" = "Guard active — 🌡 serious + lid";
+"header.guardBattery" = "Guard active — 🔋 %d%%";
+"header.guardBatteryLow" = "Guard active — 🔋 low";
+"header.guardTimer" = "Guard active — ⏱ %dm";
+"header.guardTimerPlain" = "Guard active — ⏱ timer";
+"header.guardWatchdog" = "Guard active — helper timeout";
+"header.awakeRemote" = "Awake — remote session";
+"header.awakeAgentsCount" = "Awake — %d agents active";
+"header.awakeAgents" = "Awake — %@ active";
+"header.awakeManual" = "Awake — until I quit";
+"header.asleepIdle" = "Asleep when idle";
+
+
+/* Settings window + tabs */
+"settings.title" = "Electronic Clam Settings";
+"tab.general" = "General";
+"tab.agents" = "Agents";
+"tab.remote" = "Remote";
+"tab.safety" = "Safety";
+"tab.history" = "History";
+
+/* General pane */
+"general.version" = "Version %@";
+"general.support" = "☕ Buy me a coffee";
+"general.language" = "Language";
+"general.statusCard.on" = "Electronic Clam — On · staying awake";
+"general.statusCard.off" = "Electronic Clam — Off · sleeps normally";
+"general.statusCard.helper" = "Helper: %@";
+"general.menuBarTheme" = "Menu Bar Icon";
+"theme.system" = "System";
+"theme.light" = "Light";
+"theme.dark" = "Dark";
+
+/* Agents pane */
+"agents.mode.strict" = "Strict — only count agents with recent activity";
+"agents.mode.lax" = "Lax — keep awake while any watched agent process is running";
+"agents.section.mode" = "Detection mode";
+"agents.section.watched" = "Watched agents";
+"agents.section.hooks" = "Install hooks";
+"agents.section.hooksAdvanced" = "Agent hooks (optional)";
+"agents.hooks.caption" = "Electronic Clam detects agents automatically by watching their session logs — no hook needed. Hooks only make detection instant and add a fallback when file access is restricted.";
+"agents.watched.caption" = "Detected automatically by watching each agent's session log.";
+"agents.pollNote" = "Detection refreshes about every 5 seconds (30 s while the screen is locked), so a just-started agent can take a few seconds to show. Agents with a hook installed register instantly.";
+"agents.col.agent" = "Agent";
+"agents.col.status" = "Status";
+"agents.col.pattern" = "Pattern";
+"agents.activeRow" = "● active";
+"agents.addCustom" = "Add Custom Agent…";
+"agents.remove" = "Remove";
+"agents.installHook" = "Install %@ hook";
+"agents.uninstallHook" = "Uninstall %@ hook";
+"agents.installed" = "Installed";
+"agents.notInstalled" = "Not installed";
+"agents.hookMissing" = "Hook binary missing from app bundle";
+"agents.uninstallAll" = "Uninstall all hooks";
+"agents.uninstall" = "Uninstall";
+"agents.add" = "Add";
+"agents.uninstallAll.title" = "Uninstall all Electronic Clam hooks?";
+"agents.uninstallAll.body" = "Removes Electronic Clam hook entries from ~/.claude/settings.json, ~/.codex/config.toml, and ~/.hermes/config.yaml. Your other settings are preserved.";
+"agents.uninstallFail" = "Some hooks could not be uninstalled";
+"agents.couldNotInstall" = "Could not install %@ hook";
+"agents.couldNotUninstall" = "Could not uninstall %@ hook";
+"agents.addCustom.title" = "Add custom agent";
+"agents.addCustom.body" = "Enter a unique id, label, and a glob path. Use ~/ for your home directory.";
+"agents.ph.id" = "id (e.g. my-agent)";
+"agents.ph.label" = "Label (e.g. My Agent)";
+"agents.ph.glob" = "Glob (e.g. ~/.my-agent/logs/*.log)";
+"agents.codexTrust" = "After install, run /hooks in Codex CLI to trust this hook.\nRe-trust needed when Electronic Clam updates the hook code.";
+"agents.hermesTrust" = "After install, approve the hook prompt the next time you run Hermes\n(or set hooks_auto_accept: true in ~/.hermes/config.yaml).";
+
+/* Remote pane (2-tier UI: master checkbox + radios) */
+"remote.master" = "Count remote sessions as activity";
+"remote.optNeverIdle" = "Keep awake even when idle (stay connected)";
+"remote.optIdleSleep" = "Allow sleep when idle for";
+"remote.help" = "When you SSH, VNC, or Screen Share into this Mac, Electronic Clam keeps it awake so the session doesn't drop.";
+"remote.channels" = "Detected channels";
+"remote.noneDetected" = "(none currently detected)";
+"remote.tip.master" = "Remote sessions are detected via pmset assertions, who(1), the Tailscale CLI, Claude Code and Codex remote-control, and known remote-control daemons. Turn this off to ignore remote connections entirely.";
+"remote.tip.neverIdle" = "Screen-Sharing style: the Mac stays awake for as long as the session is connected, even if nothing is happening.";
+"remote.tip.idleSleep" = "An idle SSH shell releases the Mac after this timeout — but a remote build or agent keeps it awake regardless, and Screen Sharing / VNC never time out.";
+"remote.tip.channels" = "The remote-access paths currently detected (shown for diagnostics). Refreshes every few seconds while this pane is open.";
+
+/* ADR-0017 — menu guard status block */
+"status.battery" = "🔋 %d%% · guard %d%%%@";
+"status.thermal" = "🌡 %@ · limit %@%@";
+"status.timer" = "⏱ %dm · cap %dm";
+"status.remoteOff" = "🛰 remote off";
+"status.remoteActiveNoExpiry" = "🛰 remote active · no expiry";
+"status.remoteIdleActive" = "🛰 idle %dm · sleep at %dm";
+"status.remoteActiveCap" = "🛰 remote active · sleep after %dm idle";
+"status.remoteIdleNever" = "🛰 remote · no expiry";
+"status.remoteIdleCap" = "🛰 remote · sleep after %dm idle";
+
+/* Safety pane */
+"safety.master" = "Auto-release when conditions become unsafe";
+"safety.notify" = "Notify me on auto-release";
+"safety.batteryThreshold" = "Battery threshold";
+"safety.thermalCutoff" = "Sleep once it gets this hot";
+"safety.thermalCutoff.caption" = "Lower stages sleep sooner and safer; higher stages stay awake longer. A stage is macOS's heat-pressure estimate from many sensors, not a fixed temperature — the actual °C is shown under 'Current state' below.";
+"safety.maxDuration" = "Maximum awake time";
+"safety.currentState" = "Current state";
+"safety.lastRelease" = "Last auto-release";
+"safety.none" = "(none)";
+"safety.noneThisSession" = "(none in this session)";
+"safety.releaseActive" = "%@ (active)";
+"safety.4step" = "(4-step)";
+"safety.5step" = "(5-step)";
+"safety.line.battery" = "Battery";
+"safety.line.power" = "Power";
+"safety.line.lowPower" = "Low Power";
+"safety.line.thermal" = "Thermal";
+"safety.line.fan" = "Fan";
+"safety.line.lid" = "Lid";
+"safety.line.extDisplay" = "Ext display";
+"safety.line.cooldown" = "Cooldown";
+
+/* Thermal cutoff values (display only; persisted value stays English) */
+"thermal.nominal" = "nominal";
+"thermal.fair" = "fair";
+"thermal.serious" = "serious";
+"thermal.critical" = "critical";
+
+/* Thermal cutoff dropdown items — same stage words as the live readout, plus a
+   direction hint on the extremes (separate keys so the live labels stay plain) */
+"thermal.cutoff.nominal" = "Nominal — soonest, safest";
+"thermal.cutoff.fair" = "Fair";
+"thermal.cutoff.serious" = "Serious";
+"thermal.cutoff.critical" = "Critical — latest";
+
+/* Duration values */
+"duration.unlimited" = "Unlimited";
+"duration.minutes" = "%d min";
+
+/* Power line values */
+"power.ac" = "AC";
+"power.acCharging" = "AC (charging)";
+"power.acNotCharging" = "AC (not charging)";
+"power.battery" = "Battery";
+
+/* Lid state */
+"lid.closed" = "closed";
+"lid.open" = "open";
+
+/* Safety release reasons (Safety pane) */
+"reason.batteryLow" = "Battery low";
+"reason.thermalSerious" = "Thermal serious";
+"reason.thermalCritical" = "Thermal critical";
+"reason.maxDuration" = "Max continuous awake reached";
+"reason.watchdog" = "Helper watchdog";
+
+/* Auto-release notifications */
+"notify.release.title" = "Electronic Clam auto-released sleep";
+"notify.batteryLow" = "Battery low";
+"notify.thermalSerious" = "Thermal serious";
+"notify.thermalCritical" = "Thermal critical";
+"notify.maxDuration" = "Max continuous awake reached";
+"notify.watchdog" = "Helper watchdog timed out";
+
+/* History pane (ADR-0013) */
+"history.recent" = "Recent sessions";
+"history.col.when" = "When";
+"history.col.awake" = "Awake";
+"history.col.lid" = "Lid closed";
+"history.col.ended" = "Ended";
+"history.clear" = "Clear history";
+"history.footnote" = "Last 50 sessions · stored locally in Application Support";
+"history.nowAwake" = "Now awake  %@";
+"history.clamshell" = "  └ Clamshell (lid closed)  %@  (%d%%)";
+"history.holding" = "  └ Holding: %@";
+"history.notAwake" = "Not awake right now";
+"history.now" = "now";
+"history.ongoing" = "● ongoing";
+"history.startedBy" = "Started by %@";
+"history.clear.title" = "Clear awake history?";
+"history.clear.body" = "Removes all recorded past sessions. The current session (if awake) is kept.";
+"history.clear.confirm" = "Clear";
+"history.weekSummary" = "This week: awake %1$@ · agents %2$@ · clamshell %3$@%4$@";
+"history.weekTrips" = " · %1$d guard trips";
+"history.exportCsv" = "Export CSV…";
+"history.exportCsv.error" = "Export failed";
+
+/* History — current holder */
+"hold.manual" = "manual toggle";
+"hold.remote" = "remote (%@)";
+"hold.remoteBare" = "remote";
+"hold.agent" = "agent (%@)";
+
+/* History — start cause */
+"cause.manual" = "manual toggle";
+"cause.agent" = "agent";
+"cause.remote" = "remote";
+"cause.unknown" = "unknown";
+
+/* History — end reason */
+"end.manualOff" = "manual off";
+"end.forceSleep" = "force sleep";
+"end.agentDone" = "agent done";
+"end.remoteEnded" = "remote ended";
+"end.networkLost" = "network lost";
+"end.batteryLow" = "battery low";
+"end.thermal" = "thermal";
+"end.thermalCritical" = "thermal critical";
+"end.durationCap" = "duration cap";
+"end.watchdog" = "watchdog";
+"end.appQuit" = "app quit";
+"end.unknown" = "ended";
+
+/* ADR-0018 — first-run approval onboarding */
+"onboarding.title" = "Approval needed to keep your Mac awake";
+"onboarding.message" = "Electronic Clam needs you to allow its background helper in System Settings → General → Login Items. Open it now and switch Electronic Clam on.";
+"onboarding.openSettings" = "Open System Settings";
+"onboarding.later" = "Later";
+
+/* ADR-0018 — General-tab permission section */
+"permission.section" = "Permission";
+"permission.status.enabled" = "Approved";
+"permission.status.requiresApproval" = "Approval needed";
+"permission.status.notRegistered" = "Not registered";
+"permission.status.notFound" = "Helper missing — reinstall";
+"permission.status.unknown" = "Unknown state";
+"permission.button.openSettings" = "Open System Settings";
+"permission.button.manage" = "Manage in System Settings";
+"permission.button.retry" = "Register again";
+"permission.button.reinstall" = "Reinstall help";
+"permission.button.reinstallHelper" = "Reinstall Helper";
+
+/* v0.5 P1 — helper protocol version handshake (old daemon left over after an upgrade) */
+"permission.versionMismatch.warning" = "The helper that is running speaks an older protocol than this app — likely left over from an upgrade.";
+"permission.versionMismatch.reinstall" = "Click \"Reinstall Helper\" to update it.";
+
+/* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
+"agents.tip.hookOptional" = "Skip the hook if the trust step is a hassle — file-watching still detects the agent.";
+"agents.tip.lax" = "Keeps the Mac awake while a watched agent's process is alive — even during long idle waits, like waiting on a model reply.";
+"agents.tip.pattern" = "The file path Electronic Clam watches to tell this agent is working. ~/ is your home folder.";
+"agents.tip.strict" = "Counts an agent as active only while its session log is actively changing, so a finished or idle agent stops holding the Mac awake.";
+"history.timeline" = "Last 24 hours";
+"menu.blankDisplays" = "Blank screen — keep working";
+"safety.tip.battery" = "On battery power, let the Mac sleep when the charge falls to this level. Ignored while on AC power.";
+"safety.battery.floorHelp" = "Safety floor: with the lid closed and no external display, the guard never goes below 30% — even if the slider is set lower. In Low Power Mode the threshold rises another 10 points. The slider can tighten the guard, but not loosen it past these floors.";
+"safety.battery.floorHelp.effective" = "(effective %d%%)";
+"safety.tip.cooldown" = "'Cooldown' is a 5-minute pause after a guard lets the Mac sleep, so it doesn't re-engage instantly. '—' means no guard has fired this session.";
+"safety.tip.currentState" = "A live readout of what the guards see right now.";
+"safety.tip.lastRelease" = "The most recent reason a guard let the Mac sleep this session. '(none)' means the guards never had to step in.";
+"safety.tip.master" = "The master switch for every guard below. When on, Electronic Clam lets the Mac sleep again once any limit — battery, temperature, or awake-time — is crossed.";
+"safety.tip.maxDuration" = "Let the Mac sleep after it's been kept awake this long in one continuous stretch. 'Unlimited' never caps it. Not applied in Desktop mode (AC + lid open + external display).";
+"safety.tip.thermalCutoff" = "Let the Mac sleep once it reaches this heat stage. Lower stages sleep sooner and safer; the live temperature is under 'Current state' below.";
+
+/* ADR-0020 — upgrade trap inline note (General pane, shown when helper is unavailable) */
+"general.helperUnavailable.note" = "After an upgrade, macOS may refuse to relaunch the old helper (ad-hoc signing limitation). Click Reinstall Helper; if it still fails, restart your Mac.";
+
+/* Hover tooltips — General pane (permission section) */
+"general.tip.permissionStatus" = "Whether macOS allows Electronic Clam's background helper to run. The helper is the part that actually controls sleep.";
+"general.tip.permissionButton" = "Manages or repairs the helper permission — opens System Settings or retries registration, depending on the state above.";
+"general.tip.reinstallHelper" = "Unregisters and re-registers the background helper. Use this when the helper stops responding after an upgrade or the permission state looks stuck. macOS may ask you to approve the helper again.";
+"general.tip.exportDiagnostics" = "Saves a diagnostics bundle (recent logs, settings, helper status) to your Desktop — useful when filing a bug report.";
+
+/* proposal §2 — diagnostics export (General pane) */
+"general.exportDiagnostics" = "Export Diagnostics…";
+"general.exportDiagnostics.failed" = "Export failed";
+"general.exportDiagnostics.failed.body" = "Could not create the diagnostics bundle. Check that ~/Desktop is writable and try again.";
+
+/* ADR-0025 — CLI TTL hold header */
+"header.awakeCliHold" = "Awake — CLI hold · %@ left";
+"header.awakeCliHoldForever" = "Awake — CLI hold (no expiry)";
+
+/* proposal §1 — Detect Now 진단 버튼 */
+"agents.detectNow" = "Detect Now…";
+"agents.detectNow.title" = "Detection snapshot";
+"agents.tip.detectNow" = "Runs one detection pass and shows exactly which file each agent matched (or why it didn't). Same output as `eclam debug agents`.";
+
+/* proposal §5 — 첫 승인 후 1회 안내 */
+"onboarding.enabled.title" = "Electronic Clam is ready";
+"onboarding.enabled.body" = "Run a coding agent (Claude Code, Codex…) — the menu dot turns green while it works, and your Mac stays awake. Click the shell anytime to toggle.";
+
+/* ADR-0028 — Telegram notifications (tab + pane) */
+"tab.notifications" = "Notifications";
+"telegram.privacy" = "Off by default. When enabled, status messages go only to Telegram's API using a bot token you create and own — nothing is ever sent to the developer or any other server. The token is stored locally with user-only file permissions.";
+"telegram.master" = "Send status to my Telegram bot";
+"telegram.tip.master" = "The master switch. Off means Electronic Clam sends nothing over the network at all. Setup fields and the test button below stay usable so you can wire things up first.";
+"telegram.setup.help" = "Setup: ① In Telegram, message @BotFather → /newbot and copy the token. ② Send any message to your new bot. ③ Paste the token below and click Detect.";
+"telegram.tokenLabel" = "Bot token";
+"telegram.tip.token" = "The token @BotFather gave you. It authenticates *your* bot — keep it private. Stored on this Mac only (user-readable file), never logged.";
+"telegram.chatIdLabel" = "Chat ID";
+"telegram.detect" = "Detect";
+"telegram.tip.detect" = "Looks up the chat ID automatically: send any message to your bot in Telegram first, then click Detect.";
+"telegram.eventsHeader" = "Send a message when:";
+"telegram.evtSafety" = "A safety guard releases sleep (battery · heat · timer)";
+"telegram.tip.evtSafety" = "The message you most want when away: a guard just released sleep, so the Mac may go to sleep soon — battery low, overheating, or the max-awake timer.";
+"telegram.evtEnd" = "Work ends — agents go idle or the remote session ends";
+"telegram.tip.evtEnd" = "Fires when the last working agent goes idle or a remote session ends. Episodes shorter than a minute are skipped to avoid noise.";
+"telegram.evtStart" = "Work starts — an agent or remote session begins";
+"telegram.tip.evtStart" = "Fires when an agent or remote session starts holding the Mac awake. Off by default — it can get chatty. Throttled to one message per 5 minutes.";
+"telegram.sendTest" = "Send Test Message";
+"telegram.tip.sendTest" = "Sends one test message with the current status line. Works even while the master switch is off, so you can verify the wiring first.";
+"telegram.result.detecting" = "Looking for your chat…";
+"telegram.result.detected" = "✓ Chat ID detected";
+"telegram.result.sending" = "Sending…";
+"telegram.result.sent" = "✓ Sent — check your Telegram";
+"telegram.error.notConfigured" = "Enter a bot token and chat ID first.";
+"telegram.error.badToken" = "That doesn't look like a bot token (expected 123456:ABC…).";
+"telegram.error.noUpdates" = "No messages found. Send any message to your bot in Telegram, then try again.";
+"telegram.test" = "🐚 Electronic Clam — test message. Notifications are wired up.";
+"telegram.start.agent" = "🟢 Awake — %@ is working";
+"telegram.start.remote" = "🟢 Awake — remote session (%@)";
+"telegram.start.generic" = "🟢 Awake — keeping the Mac up";
+"telegram.end.agentIdle" = "⚪️ %1$@ went idle — awake ended after %2$@";
+"telegram.end.battery" = "🛑 Battery guard released sleep (%1$@) — your Mac may sleep soon. Awake %2$@";
+"telegram.end.thermal" = "🛑 Thermal guard released sleep (%1$@) — your Mac may sleep soon. Awake %2$@";
+"telegram.end.timer" = "⏱ Max awake duration reached (%1$@) — sleep allowed. Awake %2$@";
+"telegram.end.watchdog" = "⚠️ Helper watchdog tripped — sleep restored";
+"telegram.end.remoteEnded" = "⚪️ Remote session ended (%1$@) — awake ended after %2$@";
+"telegram.end.remoteLost" = "⚪️ Remote session dropped (network lost) — awake ended after %@";
+"telegram.end.generic" = "⚪️ Awake ended after %@";
+
+/* ADR-0028 §7 — periodic silent digest */
+"telegram.evtDigest" = "Periodic status while working (silent), every";
+"telegram.tip.evtDigest" = "A heartbeat while something is keeping the Mac awake: a silent status message (no sound, no banner) at this interval, so a missing heartbeat tells you the Mac or network died. Stops the moment work ends.";
+"telegram.digest" = "📊 Still awake — %@";

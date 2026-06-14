@@ -1,0 +1,354 @@
+/* Electronic Clam — 한국어. ADR-0011. */
+
+/* Common */
+"common.ok" = "확인";
+"common.cancel" = "취소";
+"common.yes" = "예";
+"common.no" = "아니요";
+"common.on" = "켬";
+"common.off" = "끔";
+
+/* Presence (외부 디스플레이 등) */
+"presence.present" = "있음";
+"presence.absent" = "없음";
+
+/* Menu bar */
+"menu.keepAwake" = "Mac 깨어있게 유지";
+"menu.watchAgents" = "에이전트 감시";
+"menu.settings" = "설정…";
+"menu.quit" = "종료";
+"menu.customize" = "사용자화…";
+"menu.agentActiveSuffix" = " • 활동 중";
+
+/* Accessibility */
+"a11y.asleep" = "잠자는 중";
+"a11y.awakeManual" = "깨어있음 (수동)";
+"a11y.awakeAuto" = "깨어있음 (자동)";
+"a11y.info" = "도움말";
+
+/* Menu header — registration */
+"header.requiresApproval" = "시스템 설정에서 승인…";
+"header.notFound" = "헬퍼 없음 — 재설치";
+"header.registrationFailed" = "등록 실패 — 다시 시도";
+"header.unknown" = "알 수 없는 상태";
+
+/* Menu header — reasons */
+"header.guardThermalLabel" = "절전 보호 — 🌡 %@";
+"header.guardThermalCritical" = "절전 보호 — 🌡 위험";
+"header.guardThermalSerious" = "절전 보호 — 🌡 심각 + 덮개";
+"header.guardBattery" = "절전 보호 — 🔋 %d%%";
+"header.guardBatteryLow" = "절전 보호 — 🔋 부족";
+"header.guardTimer" = "절전 보호 — ⏱ %d분";
+"header.guardTimerPlain" = "절전 보호 — ⏱ 타이머";
+"header.guardWatchdog" = "절전 보호 — 헬퍼 응답 없음";
+"header.awakeRemote" = "깨어있음 — 원격 세션";
+"header.awakeAgentsCount" = "깨어있음 — 에이전트 %d개 활동";
+"header.awakeAgents" = "깨어있음 — %@ 활동 중";
+"header.awakeManual" = "깨어있음 — 종료할 때까지";
+"header.asleepIdle" = "유휴 시 잠자기";
+
+
+/* Settings + tabs */
+"settings.title" = "Electronic Clam 설정";
+"tab.general" = "일반";
+"tab.agents" = "에이전트";
+"tab.remote" = "원격";
+"tab.safety" = "안전";
+"tab.history" = "기록";
+
+/* General pane */
+"general.version" = "버전 %@";
+"general.support" = "☕ 커피 한 잔 후원하기";
+"general.language" = "언어";
+"general.statusCard.on" = "Electronic Clam — 켜짐 · 잠들지 않음";
+"general.statusCard.off" = "Electronic Clam — 꺼짐 · 평소처럼 잠듦";
+"general.statusCard.helper" = "헬퍼 권한: %@";
+"general.menuBarTheme" = "메뉴 막대 아이콘";
+"theme.system" = "시스템";
+"theme.light" = "밝게";
+"theme.dark" = "어둡게";
+
+/* Agents pane */
+"agents.mode.strict" = "엄격 — 최근 활동이 있는 에이전트만 인정";
+"agents.mode.lax" = "느슨 — 감시 중인 에이전트 프로세스가 살아있으면 깨워둠";
+"agents.section.mode" = "감지 모드";
+"agents.section.watched" = "감시 중인 에이전트";
+"agents.section.hooks" = "훅 설치";
+"agents.section.hooksAdvanced" = "에이전트 훅 (선택)";
+"agents.hooks.caption" = "Electronic Clam은 각 에이전트의 세션 로그를 감시해 자동으로 감지합니다 — 훅은 필요 없습니다. 훅은 감지를 즉시로 만들고, 파일 접근이 제한된 환경에서 폴백을 더할 뿐입니다.";
+"agents.watched.caption" = "각 에이전트의 세션 로그를 감시해 자동으로 감지합니다.";
+"agents.pollNote" = "탐지는 약 5초마다 갱신됩니다(화면 잠금 시 30초). 그래서 막 시작한 에이전트는 표시되기까지 몇 초 걸릴 수 있습니다. 훅이 설치된 에이전트는 즉시 반영됩니다.";
+"agents.col.agent" = "에이전트";
+"agents.col.status" = "상태";
+"agents.col.pattern" = "패턴";
+"agents.activeRow" = "● 활동 중";
+"agents.addCustom" = "사용자 에이전트 추가…";
+"agents.remove" = "제거";
+"agents.installHook" = "%@ 훅 설치";
+"agents.uninstallHook" = "%@ 훅 제거";
+"agents.installed" = "설치됨";
+"agents.notInstalled" = "설치 안 됨";
+"agents.hookMissing" = "앱 번들에 훅 바이너리 없음";
+"agents.uninstallAll" = "모든 훅 제거";
+"agents.uninstall" = "제거";
+"agents.add" = "추가";
+"agents.uninstallAll.title" = "모든 Electronic Clam 훅을 제거할까요?";
+"agents.uninstallAll.body" = "~/.claude/settings.json, ~/.codex/config.toml, ~/.hermes/config.yaml 에서 Electronic Clam 훅 항목을 제거합니다. 다른 설정은 유지됩니다.";
+"agents.uninstallFail" = "일부 훅을 제거하지 못했습니다";
+"agents.couldNotInstall" = "%@ 훅을 설치할 수 없습니다";
+"agents.couldNotUninstall" = "%@ 훅을 제거할 수 없습니다";
+"agents.addCustom.title" = "사용자 에이전트 추가";
+"agents.addCustom.body" = "고유 id, 레이블, glob 경로를 입력하세요. 홈 디렉터리는 ~/ 를 사용합니다.";
+"agents.ph.id" = "id (예: my-agent)";
+"agents.ph.label" = "레이블 (예: My Agent)";
+"agents.ph.glob" = "Glob (예: ~/.my-agent/logs/*.log)";
+"agents.codexTrust" = "설치 후 Codex CLI에서 /hooks 를 실행해 이 훅을 신뢰하세요.\nElectronic Clam이 훅 코드를 업데이트하면 다시 신뢰해야 합니다.";
+"agents.hermesTrust" = "설치 후 다음에 Hermes를 실행할 때 훅 프롬프트를 승인하세요\n(또는 ~/.hermes/config.yaml 에 hooks_auto_accept: true 설정).";
+
+/* Remote pane (2-tier UI: master checkbox + radios) */
+"remote.master" = "원격 세션을 활동으로 간주";
+"remote.optNeverIdle" = "유휴여도 깨워둠 (계속 연결 유지)";
+"remote.optIdleSleep" = "유휴 상태가 다음 시간 지속되면 잠자기 허용:";
+"remote.help" = "이 Mac에 SSH, VNC, 화면 공유로 접속하면 세션이 끊기지 않도록 Electronic Clam이 깨워둡니다.";
+"remote.channels" = "감지된 채널";
+"remote.noneDetected" = "(현재 감지된 항목 없음)";
+"remote.tip.master" = "원격 세션은 pmset assertion, who(1), Tailscale CLI, Claude Code·Codex remote-control, 알려진 원격 제어 데몬으로 감지합니다. 끄면 원격 접속을 완전히 무시합니다.";
+"remote.tip.neverIdle" = "화면 공유 방식: 아무 일이 없어도 세션이 연결돼 있는 동안 Mac을 깨워둡니다.";
+"remote.tip.idleSleep" = "유휴 SSH 셸은 이 시간이 지나면 Mac을 놓아주지만, 원격 빌드나 에이전트가 돌고 있으면 계속 깨어 있고 화면 공유·VNC는 만료되지 않습니다.";
+"remote.tip.channels" = "현재 감지된 원격 접속 경로입니다 (진단용 표시). 이 탭이 열려 있는 동안 몇 초마다 갱신됩니다.";
+
+/* ADR-0017 — 메뉴 가드 상태 블록 */
+"status.battery" = "🔋 %d%% · 가드 %d%%%@";
+"status.thermal" = "🌡 %@ · 기준 %@%@";
+"status.timer" = "⏱ %d분 · 상한 %d분";
+"status.remoteOff" = "🛰 원격 끔";
+"status.remoteActiveNoExpiry" = "🛰 원격 활성 · 만료 없음";
+"status.remoteIdleActive" = "🛰 유휴 %d분 · %d분에 잠";
+"status.remoteActiveCap" = "🛰 원격 활성 · 유휴 %d분 후 잠";
+"status.remoteIdleNever" = "🛰 원격 · 만료 없음";
+"status.remoteIdleCap" = "🛰 원격 · 유휴 %d분 후 잠";
+
+/* Safety pane */
+"safety.master" = "조건이 위험해지면 자동 해제";
+"safety.notify" = "자동 해제 시 알림";
+"safety.batteryThreshold" = "배터리 임계값";
+"safety.thermalCutoff" = "이만큼 뜨거워지면 잠재우기";
+"safety.thermalCutoff.caption" = "낮은 단계일수록 더 빨리·안전하게 잠들고, 높을수록 더 오래 깨어있습니다. 단계는 macOS가 여러 센서로 추정하는 발열 압력이며 고정 온도가 아닙니다 — 실제 온도(°C)는 아래 ‘현재 상태’에 표시됩니다.";
+"safety.maxDuration" = "최대 깨어있는 시간";
+"safety.currentState" = "현재 상태";
+"safety.lastRelease" = "마지막 자동 해제";
+"safety.none" = "(없음)";
+"safety.noneThisSession" = "(이번 세션에 없음)";
+"safety.releaseActive" = "%@ (활성)";
+"safety.4step" = "(4단계)";
+"safety.5step" = "(5단계)";
+"safety.line.battery" = "배터리";
+"safety.line.power" = "전원";
+"safety.line.lowPower" = "저전력";
+"safety.line.thermal" = "온도";
+"safety.line.fan" = "팬";
+"safety.line.lid" = "덮개";
+"safety.line.extDisplay" = "외부 디스플레이";
+"safety.line.cooldown" = "쿨다운";
+
+/* Thermal values */
+"thermal.nominal" = "정상";
+"thermal.fair" = "양호";
+"thermal.serious" = "심각";
+"thermal.critical" = "위험";
+
+/* 온도 차단 드롭다운 항목 — 현재 상태 줄과 같은 단어 + 양 극단에 방향 힌트 */
+"thermal.cutoff.nominal" = "정상 — 가장 일찍, 가장 안전";
+"thermal.cutoff.fair" = "양호";
+"thermal.cutoff.serious" = "심각";
+"thermal.cutoff.critical" = "위험 — 가장 늦게";
+
+/* Duration values */
+"duration.unlimited" = "무제한";
+"duration.minutes" = "%d분";
+
+/* Power values */
+"power.ac" = "AC";
+"power.acCharging" = "AC (충전 중)";
+"power.acNotCharging" = "AC (충전 안 함)";
+"power.battery" = "배터리";
+
+/* Lid */
+"lid.closed" = "닫힘";
+"lid.open" = "열림";
+
+/* Safety release reasons */
+"reason.batteryLow" = "배터리 부족";
+"reason.thermalSerious" = "온도 심각";
+"reason.thermalCritical" = "온도 위험";
+"reason.maxDuration" = "최대 연속 깨움 도달";
+"reason.watchdog" = "헬퍼 워치독";
+
+/* Notifications */
+"notify.release.title" = "Electronic Clam이 절전을 자동 해제했습니다";
+"notify.batteryLow" = "배터리 부족";
+"notify.thermalSerious" = "온도 심각";
+"notify.thermalCritical" = "온도 위험";
+"notify.maxDuration" = "최대 연속 깨움 도달";
+"notify.watchdog" = "헬퍼 워치독 시간 초과";
+
+/* History pane (ADR-0013) */
+"history.recent" = "최근 세션";
+"history.col.when" = "시점";
+"history.col.awake" = "깨어있던 시간";
+"history.col.lid" = "덮개 닫힘";
+"history.col.ended" = "종료 사유";
+"history.clear" = "기록 지우기";
+"history.footnote" = "최근 50개 세션 · Application Support에 로컬 저장";
+"history.nowAwake" = "깨어있는 중  %@";
+"history.clamshell" = "  └ Clamshell (덮개 닫힘)  %@  (%d%%)";
+"history.holding" = "  └ 유지 원인: %@";
+"history.notAwake" = "지금은 깨어있지 않음";
+"history.now" = "지금";
+"history.ongoing" = "● 진행 중";
+"history.startedBy" = "시작 원인: %@";
+"history.clear.title" = "깨어있던 기록을 지울까요?";
+"history.clear.body" = "기록된 과거 세션을 모두 제거합니다. 현재 세션(깨어있는 경우)은 유지됩니다.";
+"history.clear.confirm" = "지우기";
+"history.weekSummary" = "이번 주: 깨어있던 시간 %1$@ · 에이전트 %2$@ · 덮개 닫힘 %3$@%4$@";
+"history.weekTrips" = " · 가드 %1$d회";
+"history.exportCsv" = "CSV 내보내기…";
+"history.exportCsv.error" = "내보내기 실패";
+
+/* History — current holder */
+"hold.manual" = "수동 토글";
+"hold.remote" = "원격 (%@)";
+"hold.remoteBare" = "원격";
+"hold.agent" = "에이전트 (%@)";
+
+/* History — start cause */
+"cause.manual" = "수동 토글";
+"cause.agent" = "에이전트";
+"cause.remote" = "원격";
+"cause.unknown" = "알 수 없음";
+
+/* History — end reason */
+"end.manualOff" = "수동 끔";
+"end.forceSleep" = "강제 절전";
+"end.agentDone" = "에이전트 종료";
+"end.remoteEnded" = "원격 종료";
+"end.networkLost" = "네트워크 끊김";
+"end.batteryLow" = "배터리 부족";
+"end.thermal" = "온도";
+"end.thermalCritical" = "온도 위험";
+"end.durationCap" = "시간 제한";
+"end.watchdog" = "워치독";
+"end.appQuit" = "앱 종료";
+"end.unknown" = "종료됨";
+
+/* ADR-0018 — 첫 실행 승인 온보딩 */
+"onboarding.title" = "Mac을 깨어있게 하려면 승인이 필요합니다";
+"onboarding.message" = "시스템 설정 → 일반 → 로그인 항목에서 Electronic Clam 백그라운드 도우미를 허용해야 합니다. 지금 열어 Electronic Clam을 켜 주세요.";
+"onboarding.openSettings" = "시스템 설정 열기";
+"onboarding.later" = "나중에";
+
+/* ADR-0018 — General 탭 권한 섹션 */
+"permission.section" = "권한";
+"permission.status.enabled" = "승인됨";
+"permission.status.requiresApproval" = "승인 필요";
+"permission.status.notRegistered" = "등록 안 됨";
+"permission.status.notFound" = "도우미 없음 — 재설치 필요";
+"permission.status.unknown" = "알 수 없는 상태";
+"permission.button.openSettings" = "시스템 설정 열기";
+"permission.button.manage" = "시스템 설정에서 관리";
+"permission.button.retry" = "다시 등록";
+"permission.button.reinstall" = "재설치 안내";
+"permission.button.reinstallHelper" = "도우미 재설치";
+
+/* v0.5 P1 — helper 프로토콜 버전 핸드셰이크 (업그레이드 후 잔존한 구버전 daemon) */
+"permission.versionMismatch.warning" = "실행 중인 helper가 이 앱보다 오래된 프로토콜을 사용합니다 — 업그레이드 후 이전 버전이 남아 있는 것일 수 있습니다.";
+"permission.versionMismatch.reinstall" = "\"도우미 재설치\"를 눌러 업데이트하세요.";
+
+/* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
+"agents.tip.hookOptional" = "신뢰 설정이 번거로우면 훅은 건너뛰어도 됩니다 — 파일 감시만으로도 에이전트를 감지합니다.";
+"agents.tip.lax" = "감시 대상 에이전트의 프로세스가 살아있는 동안 Mac을 깨워둡니다 — 모델 응답을 기다리는 긴 대기 중에도 유지됩니다.";
+"agents.tip.pattern" = "이 에이전트가 작업 중인지 판단하기 위해 감시하는 파일 경로입니다. ~/ 는 홈 폴더입니다.";
+"agents.tip.strict" = "에이전트의 세션 로그가 실제로 갱신되는 동안만 활성으로 칩니다. 작업이 끝났거나 멈춘 에이전트는 더 이상 Mac을 깨워두지 않습니다.";
+"history.timeline" = "최근 24시간";
+"menu.blankDisplays" = "화면만 끄기 — 작업은 계속";
+"safety.tip.battery" = "배터리 사용 중 잔량이 이 수준까지 떨어지면 Mac을 재웁니다. 전원 연결 중에는 무시됩니다.";
+"safety.battery.floorHelp" = "안전 바닥: 덮개를 닫고 외부 디스플레이가 없을 때는 슬라이더를 더 낮게 두어도 30% 아래로는 내려가지 않습니다. 저전력 모드에서는 임계값이 10%p 더 올라갑니다. 슬라이더로 가드를 더 엄격하게 할 수는 있지만, 이 바닥보다 느슨하게 할 수는 없습니다.";
+"safety.battery.floorHelp.effective" = "(실효 %d%%)";
+"safety.tip.cooldown" = "'쿨다운'은 가드가 Mac을 재운 뒤 5분간 재작동을 막는 휴지기입니다. '—'는 이번 세션에 가드가 작동한 적 없음을 뜻합니다.";
+"safety.tip.currentState" = "가드가 지금 보고 있는 값을 실시간으로 보여줍니다.";
+"safety.tip.lastRelease" = "이번 세션에서 가드가 Mac을 재운 가장 최근 사유입니다. '(없음)'은 가드가 개입한 적 없다는 뜻입니다.";
+"safety.tip.master" = "아래 모든 가드의 마스터 스위치입니다. 켜져 있으면 배터리·온도·연속 깨움 시간 중 하나라도 한계를 넘는 순간 Mac을 다시 재웁니다.";
+"safety.tip.maxDuration" = "한 번 깨우기 시작한 뒤 이 시간만큼 연속으로 깨어 있으면 Mac을 재웁니다. '무제한'은 제한하지 않습니다. Desktop 모드(AC + 덮개 열림 + 외부 디스플레이)에서는 적용되지 않습니다.";
+"safety.tip.thermalCutoff" = "이 발열 단계에 닿으면 Mac을 재웁니다. 낮은 단계일수록 더 빨리·안전하게 잠들며, 실제 온도는 아래 ‘현재 상태’에 표시됩니다.";
+
+/* ADR-0020 — 업그레이드 트랩 인라인 안내 (General pane, helper unavailable 시 표시) */
+"general.helperUnavailable.note" = "업그레이드 후 macOS가 이전 helper의 재실행을 거부할 수 있습니다(ad-hoc 서명 한계). Reinstall Helper를 누르고, 그래도 안 되면 Mac을 재부팅하세요.";
+
+/* Hover tooltips — General pane (permission section) */
+"general.tip.permissionStatus" = "macOS가 Electronic Clam의 백그라운드 도우미 실행을 허용했는지 여부입니다. 실제 잠자기 제어는 도우미가 수행합니다.";
+"general.tip.permissionButton" = "도우미 권한을 관리·복구합니다 — 위 상태에 따라 시스템 설정을 열거나 등록을 다시 시도합니다.";
+"general.tip.reinstallHelper" = "백그라운드 도우미를 등록 해제 후 다시 등록합니다. 업그레이드 후 도우미가 응답하지 않거나 권한 상태가 꼬였을 때 사용하세요. macOS가 다시 승인을 요청할 수 있습니다.";
+"general.tip.exportDiagnostics" = "최근 로그·설정·도우미 상태를 담은 진단 번들을 데스크탑에 저장합니다 — 버그 신고할 때 유용합니다.";
+
+/* proposal §2 — 진단 내보내기 (General pane) */
+"general.exportDiagnostics" = "진단 번들 내보내기…";
+"general.exportDiagnostics.failed" = "내보내기 실패";
+"general.exportDiagnostics.failed.body" = "진단 번들을 만들 수 없습니다. ~/Desktop 에 쓰기 권한이 있는지 확인하고 다시 시도하세요.";
+
+/* ADR-0025 — CLI TTL hold header */
+"header.awakeCliHold" = "깨어있음 — CLI 유지 · %@ 남음";
+"header.awakeCliHoldForever" = "깨어있음 — CLI 유지 (만료 없음)";
+
+/* proposal §1 — Detect Now 진단 버튼 */
+"agents.detectNow" = "지금 감지…";
+"agents.detectNow.title" = "감지 스냅샷";
+"agents.tip.detectNow" = "감지를 1회 실행해 각 에이전트가 어떤 파일에 매칭됐는지(또는 왜 안 됐는지)를 그대로 보여줍니다. `eclam debug agents`와 같은 출력입니다.";
+
+/* proposal §5 — 첫 승인 후 1회 안내 */
+"onboarding.enabled.title" = "Electronic Clam 준비 완료";
+"onboarding.enabled.body" = "코딩 에이전트(Claude Code, Codex…)를 돌려보세요 — 작업 중엔 메뉴의 점이 초록색이 되고 Mac이 깨어있습니다. 조개를 클릭하면 언제든 토글됩니다.";
+
+/* ADR-0028 — 텔레그램 알림 (탭 + 패널) */
+"tab.notifications" = "알림";
+"telegram.privacy" = "기본값은 꺼짐입니다. 켜면 상태 메시지가 사용자가 직접 만들고 소유한 봇 토큰으로 Telegram API에만 전송됩니다 — 개발자나 다른 어떤 서버로도 데이터가 가지 않습니다. 토큰은 이 Mac에만, 사용자 전용 파일 권한으로 저장됩니다.";
+"telegram.master" = "내 텔레그램 봇으로 상태 보내기";
+"telegram.tip.master" = "마스터 스위치입니다. 끄면 Electronic Clam은 네트워크로 아무것도 보내지 않습니다. 아래 설정 필드와 테스트 버튼은 꺼진 상태에서도 동작해 먼저 연결을 확인할 수 있습니다.";
+"telegram.setup.help" = "설정: ① 텔레그램에서 @BotFather에게 /newbot을 보내 봇을 만들고 토큰을 복사하세요. ② 새 봇에게 아무 메시지나 보내세요. ③ 아래에 토큰을 붙여넣고 자동 감지를 누르세요.";
+"telegram.tokenLabel" = "봇 토큰";
+"telegram.tip.token" = "@BotFather가 발급한 토큰입니다. 당신의 봇을 인증하는 비밀값이니 외부에 노출하지 마세요. 이 Mac에만 저장되며(사용자 전용 파일), 로그에 남지 않습니다.";
+"telegram.chatIdLabel" = "채팅 ID";
+"telegram.detect" = "자동 감지";
+"telegram.tip.detect" = "채팅 ID를 자동으로 찾습니다. 먼저 텔레그램에서 봇에게 아무 메시지나 보낸 뒤 누르세요.";
+"telegram.eventsHeader" = "메시지를 보낼 때:";
+"telegram.evtSafety" = "안전 가드가 잠을 허용했을 때 (배터리 · 발열 · 타이머)";
+"telegram.tip.evtSafety" = "자리를 비웠을 때 가장 필요한 메시지: 가드가 방금 잠금을 풀어 Mac이 곧 잠들 수 있습니다 — 배터리 부족, 과열, 최대 깨어있기 시간 초과.";
+"telegram.evtEnd" = "작업이 끝났을 때 — 에이전트 유휴 진입·원격 세션 종료";
+"telegram.tip.evtEnd" = "마지막으로 작업 중이던 에이전트가 유휴 상태가 되거나 원격 세션이 끝나면 발송됩니다. 1분 미만의 짧은 에피소드는 소음 방지를 위해 건너뜁니다.";
+"telegram.evtStart" = "작업이 시작됐을 때 — 에이전트·원격 세션 시작";
+"telegram.tip.evtStart" = "에이전트나 원격 세션이 Mac을 깨어있게 잡기 시작하면 발송됩니다. 잦을 수 있어 기본 꺼짐. 5분당 1회로 제한됩니다.";
+"telegram.sendTest" = "테스트 메시지 보내기";
+"telegram.tip.sendTest" = "현재 상태 한 줄을 포함한 테스트 메시지를 1통 보냅니다. 마스터 스위치가 꺼져 있어도 동작해 연결을 먼저 확인할 수 있습니다.";
+"telegram.result.detecting" = "채팅을 찾는 중…";
+"telegram.result.detected" = "✓ 채팅 ID 감지됨";
+"telegram.result.sending" = "보내는 중…";
+"telegram.result.sent" = "✓ 전송됨 — 텔레그램을 확인하세요";
+"telegram.error.notConfigured" = "봇 토큰과 채팅 ID를 먼저 입력하세요.";
+"telegram.error.badToken" = "봇 토큰 형식이 아닌 것 같습니다 (예: 123456:ABC…).";
+"telegram.error.noUpdates" = "메시지를 찾지 못했습니다. 텔레그램에서 봇에게 아무 메시지나 보낸 뒤 다시 시도하세요.";
+"telegram.test" = "🐚 Electronic Clam — 테스트 메시지. 알림 연결이 완료됐습니다.";
+"telegram.start.agent" = "🟢 깨어있음 — %@ 작업 중";
+"telegram.start.remote" = "🟢 깨어있음 — 원격 세션 (%@)";
+"telegram.start.generic" = "🟢 깨어있음 — Mac을 깨워 둡니다";
+"telegram.end.agentIdle" = "⚪️ %1$@ 유휴 진입 — %2$@ 동안 깨어있다 종료";
+"telegram.end.battery" = "🛑 배터리 가드가 잠을 허용 (%1$@) — Mac이 곧 잠들 수 있습니다. 깨어있던 시간 %2$@";
+"telegram.end.thermal" = "🛑 발열 가드가 잠을 허용 (%1$@) — Mac이 곧 잠들 수 있습니다. 깨어있던 시간 %2$@";
+"telegram.end.timer" = "⏱ 최대 깨어있기 시간 도달 (%1$@) — 잠 허용. 깨어있던 시간 %2$@";
+"telegram.end.watchdog" = "⚠️ 헬퍼 워치독 발동 — 잠 복원됨";
+"telegram.end.remoteEnded" = "⚪️ 원격 세션 종료 (%1$@) — %2$@ 동안 깨어있다 종료";
+"telegram.end.remoteLost" = "⚪️ 원격 세션 끊김 (네트워크 유실) — %@ 동안 깨어있다 종료";
+"telegram.end.generic" = "⚪️ 깨어있기 종료 — %@";
+
+/* ADR-0028 §7 — 주기 무음 다이제스트 */
+"telegram.evtDigest" = "작업 중 주기 상태 (무음), 간격";
+"telegram.tip.evtDigest" = "Mac이 깨어있는 동안의 하트비트: 이 간격으로 무음 상태 메시지(소리·배너 없음)를 보냅니다. 오던 하트비트가 끊기면 Mac이나 네트워크가 죽었다는 신호입니다. 작업이 끝나면 즉시 멈춥니다.";
+"telegram.digest" = "📊 아직 깨어있음 — %@";
