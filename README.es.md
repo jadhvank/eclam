@@ -10,7 +10,7 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.5.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.0-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · **Español**
@@ -80,6 +80,8 @@ Conecta tu propio bot de Telegram y recibirás un aviso cuando un agente se dete
 - **CLI + sesiones con nombre** — manéjalo directamente desde la terminal (ver [Usage](#usage)).
 - **Hooks de agente opcionales** — al instalarlos se inyecta un hook de señal de actividad en la configuración de Claude / Codex / Hermes; al desinstalarlos se restauran.
 - **Restauración del sueño garantizada al salir** — tres capas: restauración síncrona al salir, un manejador de SIGTERM y un watchdog de 20 segundos por si la app se cuelga.
+- **Abrir al iniciar sesión (opcional)** — inicia Electronic Clam automáticamente cuando inicias sesión; desactivado por defecto.
+- **Notificaciones de actualización** — consulta GitHub en busca de nuevas versiones y te indica la descarga; solo avisa, nunca instala nada por su cuenta.
 
 ## Instalación
 

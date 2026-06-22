@@ -10,7 +10,7 @@ It detects *work*, not just a running process.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.5.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.0-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -80,6 +80,8 @@ Connect your own Telegram bot and you'll get a ping when an agent stops or your 
 - **CLI + named sessions** — drive it straight from the terminal (see [Usage](#usage)).
 - **Optional agent hooks** — installing injects an activity-signal hook into Claude / Codex / Hermes configs; uninstalling restores them.
 - **Guaranteed sleep restore on exit** — three layers: synchronous restore on quit, a SIGTERM handler, and a 20-second watchdog if the app crashes.
+- **Open at login (optional)** — start Electronic Clam automatically when you log in; off by default.
+- **Update notifications** — checks GitHub for new releases and points you to the download; it only notifies, never installs on its own.
 
 ## Install
 

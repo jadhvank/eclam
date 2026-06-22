@@ -1,13 +1,13 @@
 cask "eclam" do
-  version "0.5.0"
-  sha256 :no_check # placeholder; scripts/release.sh rewrites this to the real digest at release
+  version "0.6.0"
+  sha256 "5832b11937278d673e670ec6b562067e5f999be03b61175982e5486c52cd0145"
 
   url "https://github.com/jadhvank/eclam/releases/download/v#{version}/ElectronicClam-#{version}.zip"
   name "ElectronicClam"
   desc "Menu bar app: keep macOS awake while agents work; safe sleep when conditions degrade"
   homepage "https://github.com/jadhvank/eclam"
 
-  depends_on macos: ">= :ventura"
+  depends_on macos: :ventura
   # build.sh is arm64-only (no universal binary yet — docs/TODO.md). Without
   # this gate an Intel brew install succeeds and the app crashes at launch.
   depends_on arch: :arm64

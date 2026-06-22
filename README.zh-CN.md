@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.5.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.0-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · **中文** · [日本語](README.ja.md) · [Español](README.es.md)
@@ -80,6 +80,8 @@
 - **CLI + 命名会话** —— 直接从终端操作(见 [Usage](#usage))。
 - **可选的代理 hook** —— 安装后会在 Claude / Codex / Hermes 的配置中注入一个活动信号 hook,卸载时还原。
 - **退出时保证恢复睡眠** —— 三重保障:退出时同步恢复、一个 SIGTERM 处理器,以及 App 崩溃时的 20 秒看门狗。
+- **登录时启动(可选)** —— 登录时自动启动 Electronic Clam;默认关闭。
+- **更新通知** —— 检查 GitHub 上的新版本,并指引你前往下载;只通知,绝不自行安装。
 
 ## 安装
 

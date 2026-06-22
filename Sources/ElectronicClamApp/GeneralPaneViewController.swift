@@ -18,6 +18,18 @@ final class GeneralPaneViewController: NSViewController {
     private let themePopup = NSPopUpButton(frame: .zero, pullsDown: false)
     /// Theme popup row order — index maps to this array, not `allCases`.
     private let themeOrder: [StateStore.MenuBarTheme] = [.system, .light, .dark]
+    /// ADR-0032 — "Open at Login" toggle. State is the live `SMAppService.mainApp`
+    /// status (not a StateStore mirror); `renderLoginItemRow()` reflects it on show
+    /// and on app reactivation so a System Settings change tracks without relaunch.
+    private let loginItemCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+    /// Inline guidance shown only when the OS reports `.requiresApproval` — the
+    /// user disabled the entry in System Settings, so `register()` won't force it.
+    private let loginItemNote = NSTextField(wrappingLabelWithString: "")
+    /// ADR-0035 — notify-only update controls. The link button runs a manual
+    /// check; the checkbox is an opt-out for the daily background check
+    /// (`renderUpdatesRow()` syncs it from `UpdateChecker.autoCheckEnabled`).
+    private let checkUpdatesButton = NSButton(title: "", target: nil, action: nil)
+    private let autoCheckUpdatesCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
     /// Called after the language is changed so the app can re-render live.
     private let onLanguageChanged: () -> Void
     /// ADR-0018 — permission status row. The label + link-style button are
@@ -87,6 +99,48 @@ final class GeneralPaneViewController: NSViewController {
 
         let languageRow = Self.formRow(NSL("general.language", "Language"), control: languagePopup)
         let themeRow = Self.formRow(NSL("general.menuBarTheme", "Menu Bar Icon"), control: themePopup)
+
+        // ADR-0032 — "Open at Login". Form-row grammar (label↔control) so the
+        // checkbox's left edge aligns with the two popups above.
+        loginItemCheckbox.translatesAutoresizingMaskIntoConstraints = false
+        loginItemCheckbox.title = NSL("general.openAtLogin", "Open at login")
+        loginItemCheckbox.target = self
+        loginItemCheckbox.action = #selector(loginItemToggled)
+        let loginItemTip = NSL("general.tip.openAtLogin",
+            "Launch Electronic Clam automatically when you log in, so it's always watching in the menu bar. You can also manage this in System Settings → General → Login Items.")
+        loginItemCheckbox.toolTip = loginItemTip
+        let startupRow = Self.formRow(NSL("general.startup", "Startup"), control: loginItemCheckbox)
+
+        loginItemNote.translatesAutoresizingMaskIntoConstraints = false
+        loginItemNote.font = NSFont.systemFont(ofSize: 11)
+        loginItemNote.textColor = .systemOrange
+        loginItemNote.isSelectable = false
+        loginItemNote.isHidden = true   // renderLoginItemRow() 가 상태에 맞게 갱신
+
+        // ADR-0035 — notify-only "Check for Updates" (no Sparkle/auto-install).
+        // A link-style action + an opt-out auto-check toggle, stacked under the
+        // "Updates" form label.
+        let updatesTip = NSL("general.tip.updates",
+            "Checks GitHub for a newer release and tells you if one is available — it never downloads or installs automatically. Turn off the checkbox to stop the daily background check.")
+        checkUpdatesButton.title = NSL("general.checkForUpdates", "Check for Updates…")
+        checkUpdatesButton.translatesAutoresizingMaskIntoConstraints = false
+        checkUpdatesButton.bezelStyle = .inline
+        checkUpdatesButton.isBordered = false
+        checkUpdatesButton.contentTintColor = .linkColor
+        checkUpdatesButton.font = NSFont.systemFont(ofSize: 13)
+        checkUpdatesButton.target = self
+        checkUpdatesButton.action = #selector(checkForUpdatesTapped)
+        checkUpdatesButton.toolTip = updatesTip
+        autoCheckUpdatesCheckbox.title = NSL("general.autoCheckUpdates", "Automatically check")
+        autoCheckUpdatesCheckbox.translatesAutoresizingMaskIntoConstraints = false
+        autoCheckUpdatesCheckbox.target = self
+        autoCheckUpdatesCheckbox.action = #selector(autoCheckUpdatesToggled)
+        autoCheckUpdatesCheckbox.toolTip = updatesTip
+        let updatesControls = NSStackView(views: [checkUpdatesButton, autoCheckUpdatesCheckbox])
+        updatesControls.orientation = .vertical
+        updatesControls.alignment = .leading
+        updatesControls.spacing = 4
+        let updatesRow = Self.formRow(NSL("general.updates", "Updates"), control: updatesControls)
 
         // MARK: 2. Permission section (ADR-0018).
 
@@ -160,7 +214,7 @@ final class GeneralPaneViewController: NSViewController {
         let reinstallRow = InfoButton.wrap(reinstallButton, reinstallTip)
         let diagnosticsRow = InfoButton.wrap(exportDiagnosticsButton, diagnosticsTip)
         let settingsStack = NSStackView(views: [
-            languageRow, themeRow,
+            languageRow, themeRow, startupRow, loginItemNote, updatesRow,
             formSeparator,
             permissionHeader,
             statusRow, permissionRow, reinstallRow, diagnosticsRow,
@@ -170,7 +224,11 @@ final class GeneralPaneViewController: NSViewController {
         settingsStack.orientation = .vertical
         settingsStack.alignment = .leading
         settingsStack.spacing = 8
-        settingsStack.setCustomSpacing(20, after: themeRow)
+        // ADR-0035 — updatesRow is now the last item in the form zone, so it owns
+        // the 20pt group gap to the divider. startupRow/loginItemNote keep the
+        // default 8pt form spacing (loginItemNote collapses when hidden, harmless
+        // now that it's no longer the element before the divider).
+        settingsStack.setCustomSpacing(20, after: updatesRow)
         settingsStack.setCustomSpacing(20, after: formSeparator)
         settingsStack.setCustomSpacing(6, after: permissionHeader)
         settingsStack.setCustomSpacing(4, after: statusRow)
@@ -299,10 +357,13 @@ final class GeneralPaneViewController: NSViewController {
             // Note wraps within the permission section width.
             helperUnavailableNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
             versionMismatchNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
+            loginItemNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
         ])
         self.view = container
         renderStatusCard()
         renderPermissionRow()
+        renderLoginItemRow()
+        renderUpdatesRow()
     }
 
     /// Re-sync the popups + permission row (called by SettingsWindowController on
@@ -312,6 +373,8 @@ final class GeneralPaneViewController: NSViewController {
         themePopup.selectItem(at: themeOrder.firstIndex(of: store.menuBarTheme) ?? 0)
         renderStatusCard()
         renderPermissionRow()
+        renderLoginItemRow()
+        renderUpdatesRow()
     }
 
     /// Status word + color for a registration state. Shared by the status card
@@ -392,6 +455,26 @@ final class GeneralPaneViewController: NSViewController {
                 + NSL("permission.versionMismatch.reinstall",
                     "Click \"Reinstall Helper\" to update it.")
         }
+    }
+
+    /// ADR-0032 — reflect the live `SMAppService.mainApp` status into the
+    /// checkbox. `.requiresApproval` (user disabled the entry in System Settings)
+    /// surfaces an inline note pointing back at the Login Items pane, since
+    /// `register()` won't override that explicit choice.
+    private func renderLoginItemRow() {
+        let status = LoginItem.status
+        loginItemCheckbox.state = (status == .enabled) ? .on : .off
+        let needsApproval = (status == .requiresApproval)
+        loginItemNote.isHidden = !needsApproval
+        if needsApproval {
+            loginItemNote.stringValue = "⚠\u{FE0E} " + NSL("general.openAtLogin.needsApproval",
+                "Electronic Clam is turned off in System Settings → General → Login Items. Switch it on there to launch at login.")
+        }
+    }
+
+    /// ADR-0035 — sync the auto-check toggle to the persisted opt-out flag.
+    private func renderUpdatesRow() {
+        autoCheckUpdatesCheckbox.state = UpdateChecker.autoCheckEnabled ? .on : .off
     }
 
     private static func themeTitle(_ theme: StateStore.MenuBarTheme) -> String {
@@ -481,6 +564,63 @@ final class GeneralPaneViewController: NSViewController {
         // Fires store.onChange → AppDelegate → menuBar.refresh(), re-rendering
         // the glyph in the chosen theme immediately.
         store.setMenuBarTheme(themeOrder[idx])
+    }
+
+    /// ADR-0032 — register/unregister the app as a login item. If macOS reports
+    /// `.requiresApproval` (the user previously disabled it), `register()` can't
+    /// force it on, so we open the Login Items pane and surface the inline note.
+    @objc private func loginItemToggled() {
+        let wantEnabled = (loginItemCheckbox.state == .on)
+        let (status, _) = LoginItem.setEnabled(wantEnabled)
+        if wantEnabled && status == .requiresApproval {
+            HelperRegistration.openLoginItemsSettings()
+        }
+        renderLoginItemRow()   // reconcile the checkbox to the OS's actual answer
+    }
+
+    /// ADR-0035 — manual update check. Notify-only: shows the result in an alert;
+    /// "Download" opens the releases page in the browser (never auto-installs).
+    @objc private func checkForUpdatesTapped() {
+        let original = NSL("general.checkForUpdates", "Check for Updates…")
+        checkUpdatesButton.isEnabled = false
+        checkUpdatesButton.title = NSL("update.checking", "Checking…")
+        UpdateChecker.checkManually { [weak self] result in
+            guard let self = self else { return }
+            self.checkUpdatesButton.isEnabled = true
+            self.checkUpdatesButton.title = original
+            let alert = NSAlert()
+            switch result {
+            case .upToDate(let current):
+                alert.alertStyle = .informational
+                alert.messageText = NSL("update.upToDate", "You're up to date")
+                alert.informativeText = NSLf("update.upToDate.body",
+                                             "You have the latest version (%@).", current)
+                alert.addButton(withTitle: NSL("common.ok", "OK"))
+            case .updateAvailable(let latest, let current, let page):
+                alert.alertStyle = .informational
+                alert.messageText = NSL("update.available", "Update available")
+                alert.informativeText = NSLf("update.available.body",
+                                             "Version %@ is available — you have %@.", latest, current)
+                alert.addButton(withTitle: NSL("update.download", "Download"))
+                alert.addButton(withTitle: NSL("update.later", "Later"))
+                if alert.runModal() == .alertFirstButtonReturn {
+                    NSWorkspace.shared.open(page)
+                }
+                return
+            case .failed:
+                alert.alertStyle = .warning
+                alert.messageText = NSL("update.failed", "Couldn't check for updates")
+                alert.informativeText = NSL("update.failed.body",
+                                            "Check your internet connection and try again.")
+                alert.addButton(withTitle: NSL("common.ok", "OK"))
+            }
+            alert.runModal()
+        }
+    }
+
+    /// ADR-0035 — opt-out toggle for the daily background update check.
+    @objc private func autoCheckUpdatesToggled() {
+        UpdateChecker.autoCheckEnabled = (autoCheckUpdatesCheckbox.state == .on)
     }
 
     // MARK: - Layout helpers

@@ -1,5 +1,5 @@
 # ci.yml — Electronic Clam 통합 CI
-# private repo에서 macOS 러너는 분당 10x 차감 — 무료 분량 주의
+# macOS 러너는 분당 10x 차감 — 무료 분량 주의
 #
 # push/PR 마다 smoke.sh 를 실행해 빌드 + 단위 테스트 + i18n parity +
 # CLI 동작(debug agents / status)을 자동 검증한다.

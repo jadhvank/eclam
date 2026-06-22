@@ -129,6 +129,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // ADR-0018 — first-run approval nudge, deferred to the next runloop so
         // launch finishes (and the menu bar item exists) before the modal.
         DispatchQueue.main.async { [weak self] in self?.presentApprovalOnboardingIfNeeded() }
+
+        // ADR-0035 — notify-only update check (throttled to once/24h, opt-out).
+        // Deferred so launch completes first; never blocks, downloads, or installs.
+        DispatchQueue.main.async { UpdateChecker.checkInBackgroundIfDue() }
     }
 
     /// Persisted gate so the first-run approval alert shows once per unapproved
