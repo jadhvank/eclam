@@ -10,7 +10,7 @@ It detects *work*, not just a running process.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.1-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -163,6 +163,15 @@ open build/ElectronicClam.app
 - Direct `swiftc` invocation, `arm64-apple-macos13.0` target. Set `ECLAM_SIGN_ID=-` for fast ad-hoc local builds.
 - Bundle layout: `Contents/MacOS/{ElectronicClam, ElectronicClamHelper, eclam-hook}` + `Contents/Library/LaunchDaemons/com.jadhvank.eclam.helper.plist`.
 - Release builds are Developer ID–signed and notarized (stapled by `release.sh`).
+
+## Release history
+
+Recent releases — full history in [CHANGELOG.md](CHANGELOG.md):
+
+- **0.6.1** — Honest helper status: a dead-but-registered helper no longer shows a false "enabled". `eclam status` reports it as `unreachable` (exit 2), the app self-repairs on relaunch, a new `eclam repair` command and a menu-bar warning surface it, and `eclam status` now also reports the Open-at-Login state.
+- **0.6.0** — Open at Login, in-app update notifications, awake history, internationalization (English · 한국어 · 中文 · 日本語 · Español), single-click toggle, menu-bar icon themes, remote idle policy, Telegram status notifications, Developer ID signing + notarization.
+
+Earlier: agent-aware detection and the `watch` / `session` CLI (0.5.x), state-conditioned battery / thermal / timer safety guards (0.4.x), remote-activity awareness and the first CLI (0.3.x).
 
 ## Support
 

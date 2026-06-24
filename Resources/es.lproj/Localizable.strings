@@ -283,6 +283,12 @@
 "permission.versionMismatch.warning" = "El asistente en ejecución usa un protocolo más antiguo que esta app — probablemente quedó de una actualización.";
 "permission.versionMismatch.reinstall" = "Haz clic en \"Reinstalar asistente\" para actualizarlo.";
 
+/* P1-a — asistente registrado (.enabled) pero sin responder a XPC (handoff 2026-06-24) */
+"header.helperUnreachable" = "El asistente no responde — ejecuta repair";
+"a11y.helperUnreachable" = "El asistente no responde";
+"permission.helperUnreachable.warning" = "El asistente está registrado pero no responde, así que mantener activo no funciona de forma silenciosa.";
+"permission.helperUnreachable.reinstall" = "Haz clic en \"Reinstalar asistente\" para recuperarlo.";
+
 /* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
 "agents.tip.hookOptional" = "Omite el hook si el paso de confianza resulta engorroso — la vigilancia de archivos sigue detectando el agente.";
 "agents.tip.lax" = "Mantiene el Mac despierto mientras el proceso de un agente vigilado siga vivo — incluso durante esperas largas, como aguardar la respuesta del modelo.";

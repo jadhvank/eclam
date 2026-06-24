@@ -283,6 +283,12 @@
 "permission.versionMismatch.warning" = "実行中のヘルパーは、このアプリより古いプロトコルを使用しています — アップグレード後に旧バージョンが残っている可能性があります。";
 "permission.versionMismatch.reinstall" = "「ヘルパーを再インストール」をクリックして更新してください。";
 
+/* P1-a — ヘルパー登録済み(.enabled)だが XPC 無応答 (handoff 2026-06-24) */
+"header.helperUnreachable" = "ヘルパー応答なし — 修復が必要";
+"a11y.helperUnreachable" = "ヘルパー応答なし";
+"permission.helperUnreachable.warning" = "ヘルパーは登録されていますが応答しないため、スリープ防止が静かに機能していません。";
+"permission.helperUnreachable.reinstall" = "「ヘルパーを再インストール」をクリックして復旧してください。";
+
 /* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
 "agents.tip.hookOptional" = "信頼設定が面倒ならフックは省略できます — ファイル監視だけでもエージェントを検知します。";
 "agents.tip.lax" = "監視対象エージェントのプロセスが生きている間、Mac をスリープさせません — モデルの応答待ちなど長いアイドル中も維持されます。";

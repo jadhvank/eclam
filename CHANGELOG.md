@@ -2,6 +2,12 @@
 
 All notable changes to Electronic Clam are documented here.
 
+## [0.6.1] — 2026-06-25
+
+- **Honest helper status** — if the background helper that keeps your Mac awake is registered but isn't actually running, Electronic Clam now says so instead of reporting a false "On." `eclam status` reports it as `unreachable` (exit code 2), the menu bar shows a warning, and the app repairs itself the next time it launches.
+- **`eclam repair`** — a new command-line command that recovers a wedged or unreachable helper.
+- `eclam status` now also reports the "Open at login" state.
+
 ## [0.6.0] — 2026-06-23
 
 - **Open at login** — optional setting to launch Electronic Clam automatically when you log in (Settings → General). Off by default.

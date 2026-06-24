@@ -9,6 +9,7 @@ enum HelpCommand: CLISubcommand {
       eclam on [--for <dur>] [--forever]   (default: auto-release in 2h)
       eclam off
       eclam status [--json]
+      eclam repair                         (repair a wedged/unreachable helper)
       eclam keep --while <pid>
       eclam watch <agent> [--grace s] [--check-interval s] [--max minutes] [--json]
       eclam session start <name> [--message <text>] [--json]

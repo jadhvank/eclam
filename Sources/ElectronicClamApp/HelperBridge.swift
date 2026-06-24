@@ -155,11 +155,25 @@ final class HelperBridge {
     var onReportedState: ((Bool, Double) -> Void)?
 
     func refreshCurrentState() {
+        // P1-a — this is also the app's liveness signal. A connection-level XPC
+        // failure (errorHandler) marks the helper unreachable; any reply clears
+        // it. Drives the menu's "Helper not responding" warning for the
+        // dead-but-`.enabled` case (handoff 2026-06-24). Called on launch, on
+        // every menu open, and every 10s while we believe we're holding sleep
+        // off — so a helper that dies mid-hold surfaces within one beat.
         guard let proxy = remoteProxy(errorHandler: { [weak self] err in
-            DispatchQueue.main.async { self?.log.error("refreshCurrentState xpc error: \(err.localizedDescription, privacy: .public)") }
-        }) else { return }
+            DispatchQueue.main.async {
+                self?.log.error("refreshCurrentState xpc error: \(err.localizedDescription, privacy: .public)")
+                self?.store.update(helperUnreachable: true)
+            }
+        }) else {
+            DispatchQueue.main.async { [weak self] in self?.store.update(helperUnreachable: true) }
+            return
+        }
         proxy.currentStateWithHold { [weak self] enabled, holdRemaining, err in
             DispatchQueue.main.async {
+                // A reply landed → the helper is answering, regardless of payload.
+                self?.store.update(helperUnreachable: false)
                 if let err = err {
                     self?.log.error("currentState error: \(err.localizedDescription, privacy: .public)")
                     return

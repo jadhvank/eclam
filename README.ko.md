@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.1-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · **한국어** · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -163,6 +163,15 @@ open build/ElectronicClam.app
 - 직접 `swiftc` 호출, `arm64-apple-macos13.0` 타깃. 빠른 ad-hoc 로컬 빌드는 `ECLAM_SIGN_ID=-`로 설정하세요.
 - 번들 레이아웃: `Contents/MacOS/{ElectronicClam, ElectronicClamHelper, eclam-hook}` + `Contents/Library/LaunchDaemons/com.jadhvank.eclam.helper.plist`.
 - 릴리스 빌드는 Developer ID 서명 + 노터라이즈됩니다 (`release.sh`가 staple).
+
+## 릴리스 내역
+
+최근 릴리스 — 전체 내역은 [CHANGELOG.md](CHANGELOG.md):
+
+- **0.6.1** — 정직한 helper 상태. 죽었는데 등록만 살아있는 helper가 더 이상 거짓 "enabled"로 보고되지 않습니다. `eclam status`가 `unreachable`(exit 2)로 보고하고, 앱이 재실행 시 자가복구하며, 새 `eclam repair` 명령과 메뉴바 경고가 이를 드러냅니다. `eclam status`는 "로그인 시 실행" 상태도 함께 보고합니다.
+- **0.6.0** — 로그인 시 실행, 알림형 인앱 업데이트, awake 히스토리, 다국어(English · 한국어 · 中文 · 日本語 · Español), 단일 클릭 토글, 메뉴바 아이콘 테마, 원격 유휴 정책, Telegram 상태 알림, Developer ID 서명 + 노터라이즈.
+
+이전: 에이전트 인지 감지 및 `watch` / `session` CLI (0.5.x), 상태조건 배터리 / 발열 / 타이머 안전 가드 (0.4.x), 원격 활동 인지 및 첫 CLI (0.3.x).
 
 ## 후원
 

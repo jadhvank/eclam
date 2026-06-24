@@ -197,4 +197,19 @@ else
     echo "==> Skipping hold state tests (Tests/HoldStateTests.swift absent)"
 fi
 
+# ── HelperHealth 순수 판정 테스트 (handoff 2026-06-24 — liveness honest status) ──
+# HelperHealth.swift 는 stdlib-only(도달성 판정 → 상태 문자열·exit code) 라 단독
+# 컴파일 가능 — StatusCommand 의 XPC·ServiceManagement 결합은 끌고 오지 않는다.
+if [ -f "$ROOT/Tests/HelperHealthTests.swift" ]; then
+    echo "==> Compiling helper health tests"
+    swiftc -target "$TARGET" \
+        -o "$TMP/eclam_helperhealthtests" \
+        "$ROOT/Sources/Shared/HelperHealth.swift" \
+        "$ROOT/Tests/HelperHealthTests.swift"
+    echo "==> Running helper health tests"
+    "$TMP/eclam_helperhealthtests"
+else
+    echo "==> Skipping helper health tests (Tests/HelperHealthTests.swift absent)"
+fi
+
 echo "==> All tests passed"

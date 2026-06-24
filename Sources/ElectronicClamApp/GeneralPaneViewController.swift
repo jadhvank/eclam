@@ -47,6 +47,10 @@ final class GeneralPaneViewController: NSViewController {
     /// `store.helperVersionMismatch` 가 true 일 때만 표시; Reinstall Helper
     /// 액션으로 안내한다.
     private let versionMismatchNote = NSTextField(wrappingLabelWithString: "")
+    /// P1-a (handoff 2026-06-24) — registration 은 `.enabled` 인데 helper 가
+    /// XPC 에 응답 안 함("죽었는데 enabled"). `store.helperUnreachable && .enabled`
+    /// 일 때만 표시; 위 Reinstall Helper 액션으로 안내한다.
+    private let helperUnreachableNote = NSTextField(wrappingLabelWithString: "")
     /// proposal §2 — 진단 번들 내보내기 버튼.
     private let exportDiagnosticsButton = NSButton(title: "", target: nil, action: nil)
 
@@ -206,6 +210,13 @@ final class GeneralPaneViewController: NSViewController {
         versionMismatchNote.isSelectable = false
         versionMismatchNote.isHidden = true     // renderPermissionRow() 가 상태에 맞게 갱신
 
+        // P1-a — helper 도달 불가 경고 (registered 인데 XPC 무응답).
+        helperUnreachableNote.translatesAutoresizingMaskIntoConstraints = false
+        helperUnreachableNote.font = NSFont.systemFont(ofSize: 11)
+        helperUnreachableNote.textColor = .systemOrange
+        helperUnreachableNote.isSelectable = false
+        helperUnreachableNote.isHidden = true   // renderPermissionRow() 가 상태에 맞게 갱신
+
         let formSeparator = Self.separator()
         // 권한 줄들에 보이는 ⓘ(클릭 팝오버) 부착 — hover toolTip과 같은 문자열
         // (2026-06-11 사용자 피드백: hover 전용 도움말은 발견 불가).
@@ -218,7 +229,7 @@ final class GeneralPaneViewController: NSViewController {
             formSeparator,
             permissionHeader,
             statusRow, permissionRow, reinstallRow, diagnosticsRow,
-            helperUnavailableNote, versionMismatchNote,
+            helperUnavailableNote, versionMismatchNote, helperUnreachableNote,
         ])
         settingsStack.translatesAutoresizingMaskIntoConstraints = false
         settingsStack.orientation = .vertical
@@ -357,6 +368,7 @@ final class GeneralPaneViewController: NSViewController {
             // Note wraps within the permission section width.
             helperUnavailableNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
             versionMismatchNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
+            helperUnreachableNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
             loginItemNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
         ])
         self.view = container
@@ -455,6 +467,21 @@ final class GeneralPaneViewController: NSViewController {
                 + NSL("permission.versionMismatch.reinstall",
                     "Click \"Reinstall Helper\" to update it.")
         }
+
+        // P1-a — registered (.enabled) 인데 helper 가 XPC 무응답. version
+        // mismatch 와 달리 *등록이 enabled 인 경우에만* 의미가 있다 (미등록/미승인은
+        // 위 상태줄이 이미 설명). 둘 다 같은 Reinstall Helper 로 복구.
+        var helperUnreachable = false
+        if case .enabled = store.registration { helperUnreachable = store.helperUnreachable }
+        helperUnreachableNote.isHidden = !helperUnreachable
+        if helperUnreachable {
+            helperUnreachableNote.stringValue = "⚠\u{FE0E} "
+                + NSL("permission.helperUnreachable.warning",
+                    "The helper is registered but not responding, so keep-awake is silently not working.")
+                + " "
+                + NSL("permission.helperUnreachable.reinstall",
+                    "Click \"Reinstall Helper\" to recover.")
+        }
     }
 
     /// ADR-0032 — reflect the live `SMAppService.mainApp` status into the
@@ -517,11 +544,23 @@ final class GeneralPaneViewController: NSViewController {
         }
     }
 
-    /// ADR-0020 — explicit repair: unregister→register, then reflect new status.
+    /// ADR-0020/0036 — explicit repair. Uses `forceReregister` (unregister →
+    /// retry register) rather than the one-shot `reinstall()`: a `register()`
+    /// immediately after `unregister()` EPERMs until BTM/launchd settles, which
+    /// stranded the helper in `.notRegistered` (live-confirmed 2026-06-24). The
+    /// retry rides out the settle window, so it can block several seconds — run
+    /// off-main to avoid a beachball; the disabled button signals "in progress".
     @objc private func reinstallTapped() {
-        let (status, err) = HelperRegistration.reinstall()
-        store.update(registrationStatus: status, registrationError: err)
-        renderPermissionRow()
+        reinstallButton.isEnabled = false
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let (status, err) = HelperRegistration.forceReregister(timeout: 15)
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.reinstallButton.isEnabled = true
+                self.store.update(registrationStatus: status, registrationError: err)
+                self.renderPermissionRow()
+            }
+        }
     }
 
     /// proposal §2 — 진단 번들 내보내기. 성공 시 Finder에서 파일 선택, 실패 시 NSAlert.

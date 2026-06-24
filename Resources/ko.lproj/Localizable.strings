@@ -282,6 +282,12 @@
 "permission.versionMismatch.warning" = "실행 중인 helper가 이 앱보다 오래된 프로토콜을 사용합니다 — 업그레이드 후 이전 버전이 남아 있는 것일 수 있습니다.";
 "permission.versionMismatch.reinstall" = "\"도우미 재설치\"를 눌러 업데이트하세요.";
 
+/* P1-a — helper 등록(.enabled)됐으나 XPC 무응답 (handoff 2026-06-24) */
+"header.helperUnreachable" = "Helper 응답 없음 — 복구 필요";
+"a11y.helperUnreachable" = "Helper 응답 없음";
+"permission.helperUnreachable.warning" = "helper가 등록되어 있지만 응답하지 않아, 깨어있기 유지가 조용히 동작하지 않고 있습니다.";
+"permission.helperUnreachable.reinstall" = "\"도우미 재설치\"를 눌러 복구하세요.";
+
 /* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
 "agents.tip.hookOptional" = "신뢰 설정이 번거로우면 훅은 건너뛰어도 됩니다 — 파일 감시만으로도 에이전트를 감지합니다.";
 "agents.tip.lax" = "감시 대상 에이전트의 프로세스가 살아있는 동안 Mac을 깨워둡니다 — 모델 응답을 기다리는 긴 대기 중에도 유지됩니다.";

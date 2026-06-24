@@ -283,6 +283,12 @@
 "permission.versionMismatch.warning" = "正在运行的 helper 使用的协议比此应用更旧 — 可能是升级后遗留的旧版本。";
 "permission.versionMismatch.reinstall" = "请点击「重新安装助手」进行更新。";
 
+/* P1-a — 助手已注册(.enabled)但 XPC 无响应 (handoff 2026-06-24) */
+"header.helperUnreachable" = "助手无响应 — 需运行 repair";
+"a11y.helperUnreachable" = "助手无响应";
+"permission.helperUnreachable.warning" = "助手已注册但无响应，保持唤醒已悄然失效。";
+"permission.helperUnreachable.reinstall" = "请点击「重新安装助手」以恢复。";
+
 /* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
 "agents.tip.hookOptional" = "如果信任设置太麻烦,可以跳过 hook — 仅靠文件监视也能检测到代理。";
 "agents.tip.lax" = "只要受监视代理的进程仍在运行,就让 Mac 保持唤醒 — 即使是等待模型回复等较长的空闲期间也不例外。";

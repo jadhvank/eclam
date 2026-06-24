@@ -14,6 +14,7 @@ enum CLI {
         case "on":      return OnCommand.run(args: Array(args.dropFirst()))
         case "off":     return OffCommand.run(args: Array(args.dropFirst()))
         case "status":  return StatusCommand.run(args: Array(args.dropFirst()))
+        case "repair":  return RepairCommand.run(args: Array(args.dropFirst()))
         case "keep":    return KeepCommand.run(args: Array(args.dropFirst()))
         case "watch":   return WatchCommand.run(args: Array(args.dropFirst()))
         case "session": return SessionCommand.run(args: Array(args.dropFirst()))

@@ -126,6 +126,23 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     private func renderStatusButton() {
         guard let button = statusItem.button else { return }
+        // P1-a — registered but the helper isn't answering: never render a
+        // filled "holding awake" glyph (it would lie). Flag it on the menu bar
+        // itself so the silent keep-awake failure is visible without opening the
+        // menu. Template so it tints with the bar (handoff 2026-06-24).
+        if isEnabled && store.helperUnreachable {
+            let a11y = NSL("a11y.helperUnreachable", "Helper not responding")
+            if let warn = NSImage(systemSymbolName: "exclamationmark.triangle.fill",
+                                  accessibilityDescription: a11y) {
+                warn.isTemplate = true
+                button.image = warn
+                button.title = ""
+            } else {
+                button.image = nil
+                button.title = "⚠"
+            }
+            return
+        }
         let on = store.shouldKeepAwake && isEnabled
         // 3-way: off / manual-awake (bolt) / auto-awake (remote = agent, remote,
         // or safety hold). The bolt is reserved for `manualToggle` so the user
@@ -289,6 +306,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     /// At-a-glance state color for the header dot.
     private func statusDotColor() -> NSColor {
         guard case .enabled = store.registration else { return .systemOrange } // needs attention
+        if store.helperUnreachable { return .systemOrange }                     // P1-a — dead-but-enabled
         if store.safetyRelease != nil { return .systemOrange }                  // guard released
         if store.sleepDisabled || store.shouldKeepAwake { return .systemGreen } // holding awake
         return .systemGray                                                      // asleep when idle
@@ -315,6 +333,14 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     /// Nine-case priority per ADR-0004 §"헤더 표시" + ADR-0008 + ADR-0005 §2.
     /// First match wins. Safety releases pre-empt every awake reason.
     private func enabledHeader() -> String {
+        // 0. P1-a — registered (.enabled) but the helper isn't answering XPC.
+        // Pre-empts every "Awake — …" line below, which would otherwise claim
+        // we're holding sleep open while the daemon is actually dead (the silent
+        // failure this fixes — handoff 2026-06-24).
+        if store.helperUnreachable {
+            return NSL("header.helperUnreachable", "Helper not responding — run repair")
+        }
+
         // 1–5. Safety auto-release reasons.
         //
         // ADR-0026 — wording is "guard", not "asleep": a release only means the

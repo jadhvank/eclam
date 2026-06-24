@@ -285,6 +285,12 @@
 "permission.versionMismatch.warning" = "The helper that is running speaks an older protocol than this app — likely left over from an upgrade.";
 "permission.versionMismatch.reinstall" = "Click \"Reinstall Helper\" to update it.";
 
+/* P1-a — helper registered (.enabled) but not answering XPC (handoff 2026-06-24) */
+"header.helperUnreachable" = "Helper not responding — run repair";
+"a11y.helperUnreachable" = "Helper not responding";
+"permission.helperUnreachable.warning" = "The helper is registered but not responding, so keep-awake is silently not working.";
+"permission.helperUnreachable.reinstall" = "Click \"Reinstall Helper\" to recover.";
+
 /* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
 "agents.tip.hookOptional" = "Skip the hook if the trust step is a hassle — file-watching still detects the agent.";
 "agents.tip.lax" = "Keeps the Mac awake while a watched agent's process is alive — even during long idle waits, like waiting on a model reply.";

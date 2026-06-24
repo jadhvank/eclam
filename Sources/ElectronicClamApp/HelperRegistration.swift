@@ -11,7 +11,23 @@ enum HelperRegistration {
     static func registerIfNeeded() -> SMAppService.Status {
         let service = SMAppService.daemon(plistName: plistName)
         if service.status == .enabled {
-            return .enabled
+            // P0-b (handoff 2026-06-24) — `.enabled` is registration *intent*,
+            // not launchd reachability (ADR-0033). A registered-but-dead daemon
+            // stays `.enabled` forever, and the old unconditional short-circuit
+            // meant a relaunch never healed it — only the menu-only `reinstall()`
+            // could. Probe liveness; if it's genuinely unreachable, self-repair
+            // via reinstall() so that *relaunching the app* is enough.
+            if isHelperReachableWithRetry() {
+                return .enabled
+            }
+            log.error(".enabled but helper unreachable on launch — self-repair via forceReregister (P0-b)")
+            let (status, err) = forceReregister(timeout: 10)
+            if let err = err {
+                log.error("P0-b self-repair did not settle: \(err.localizedDescription, privacy: .public)")
+            } else {
+                log.info("P0-b self-repair → \(String(describing: status), privacy: .public)")
+            }
+            return status
         }
         do {
             try service.register()
@@ -19,6 +35,61 @@ enum HelperRegistration {
             log.error("SMAppService.register failed: \(error.localizedDescription, privacy: .public)")
         }
         return service.status
+    }
+
+    /// Two liveness windows before declaring a `.enabled` helper dead (P0-b).
+    ///
+    /// The helper is an on-demand daemon, so this first connect cold-starts it.
+    /// A healthy daemon answers the first window (warm: instant; cold: typically
+    /// sub-second); a wedged one fails its XPC error handler fast. The retry
+    /// only matters for a pathologically slow cold start — it keeps that from
+    /// being misread as death and churning the registration (invariant #4:
+    /// approve once) on every launch. Worst case (a daemon that accepts the
+    /// connection but never replies) is bounded by 2× the probe timeout.
+    private static func isHelperReachableWithRetry() -> Bool {
+        if HelperLiveness.isReachable(timeout: 3.0) { return true }
+        return HelperLiveness.isReachable(timeout: 3.0)
+    }
+
+    /// Robust re-registration that rides out the BTM/launchd settle window.
+    ///
+    /// Live finding (2026-06-24): `register()` *immediately* after `unregister()`
+    /// fails with "Operation not permitted" — BTM/launchd hasn't finished tearing
+    /// the old registration down yet. A `register()` seconds later succeeds. This
+    /// reproduced in BOTH the GUI app and the CLI, so it is a *timing* property,
+    /// not a GUI-context requirement; the one-shot `reinstall()` (unregister then
+    /// immediate register) therefore stranded the helper in `.notRegistered`.
+    ///
+    /// So: unregister once (only if currently registered), then retry
+    /// `register()` with a fixed backoff until the daemon is registered again
+    /// (`.enabled`/`.requiresApproval`) or `timeout` elapses. Returns the final
+    /// status and the last register error (nil on success). Synchronous — the
+    /// caller blocks for up to ~`timeout`; only invoked on the rare dead-helper
+    /// path, so the launch/CLI cost is bounded and paid only when broken.
+    @discardableResult
+    static func forceReregister(timeout: TimeInterval) -> (SMAppService.Status, Error?) {
+        let service = SMAppService.daemon(plistName: plistName)
+        if service.status == .enabled || service.status == .requiresApproval {
+            do {
+                try service.unregister()
+            } catch {
+                log.error("forceReregister unregister failed: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+        let deadline = Date().addingTimeInterval(timeout)
+        var lastErr: Error?
+        repeat {
+            do {
+                try service.register()
+                let s = service.status
+                if s == .enabled || s == .requiresApproval { return (s, nil) }
+            } catch {
+                lastErr = error   // expected EPERM until BTM settles; keep retrying
+            }
+            Thread.sleep(forTimeInterval: 0.6)
+        } while Date() < deadline
+        log.error("forceReregister: register did not settle within \(Int(timeout), privacy: .public)s")
+        return (service.status, lastErr)
     }
 
     /// Manual retry from the menu.
@@ -37,6 +108,13 @@ enum HelperRegistration {
 
     /// ADR-0020 — explicit "Reinstall Helper" repair (Macchiato-style):
     /// `unregister()` then `register()` to rebuild a wedged registration.
+    ///
+    /// ⚠️ SUPERSEDED by `forceReregister(timeout:)` (ADR-0036) — do not call.
+    /// This one-shot version registers *immediately* after unregister, which
+    /// EPERMs until BTM/launchd settles and strands the helper in
+    /// `.notRegistered` (live-confirmed 2026-06-24). Kept only so the historical
+    /// references above resolve; both call sites (P0-b, the menu) now use the
+    /// retrying `forceReregister`.
     ///
     /// This recovers softer wedged states (e.g. a `.requiresApproval` limbo, or a
     /// stale registration left by a messy uninstall). It does **not** clear a

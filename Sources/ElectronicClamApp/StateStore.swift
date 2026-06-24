@@ -90,6 +90,14 @@ final class StateStore {
     /// Settings→General 권한 섹션이 Reinstall Helper 안내를 노출.
     private(set) var helperVersionMismatch: Bool = false
 
+    /// P1-a (handoff 2026-06-24) — registration 은 `.enabled` 인데 helper 가
+    /// XPC 에 응답하지 않는 "죽었는데 enabled" 상태. `HelperBridge`
+    /// (refreshCurrentState) 가 XPC 실패 시 set / 응답 시 clear 한다. ADR-0033
+    /// 의 helperVersionMismatch 가 *살아있는 구버전* 만 잡고 명시적으로 비워둔
+    /// (§Decision "둘 다 실패 → mismatch 아님") 사각을 닫는다. UI 는 registration
+    /// 이 `.enabled` 일 때만 의미가 있으므로 그 게이팅은 표시 측에서.
+    private(set) var helperUnreachable: Bool = false
+
     /// Watched agent identifiers (ADR-0005 §3). M1: a real `AgentDetector` runs
     /// over the corresponding `AgentTrace`s.
     private(set) var watchedAgents: Set<String>
@@ -436,6 +444,15 @@ final class StateStore {
     func update(helperVersionMismatch: Bool) {
         guard self.helperVersionMismatch != helperVersionMismatch else { return }
         self.helperVersionMismatch = helperVersionMismatch
+        onChange?()
+    }
+
+    /// P1-a — reflect the live XPC reachability of an `.enabled` helper. No-op
+    /// when unchanged (a reachable helper's 10s heartbeat poll must not re-render
+    /// the menu every tick). Caller (`HelperBridge`) marshals to main.
+    func update(helperUnreachable: Bool) {
+        guard self.helperUnreachable != helperUnreachable else { return }
+        self.helperUnreachable = helperUnreachable
         onChange?()
     }
 
