@@ -10,7 +10,7 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.2-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.3-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · **Español**
@@ -80,10 +80,8 @@ Conecta tu propio bot de Telegram y recibirás un aviso cuando un agente se dete
 - **CLI + sesiones con nombre** — manéjalo directamente desde la terminal (ver [Usage](#usage)).
 - **Hooks de agente opcionales** — al instalarlos se inyecta un hook de señal de actividad en la configuración de Claude / Codex / Hermes; al desinstalarlos se restauran.
 - **Restauración del sueño garantizada al salir** — tres capas: restauración síncrona al salir, un manejador de SIGTERM y un watchdog de 20 segundos por si la app se cuelga.
-- **Abrir al iniciar sesión (opcional)** — inicia Electronic Clam automáticamente cuando inicias sesión; desactivado por defecto.
-- **Notificaciones de actualización** — consulta GitHub en busca de nuevas versiones y te indica la descarga; solo avisa, nunca instala nada por su cuenta.
-- **Protección contra el bloqueo por VPN en modo clamshell (opcional, desactivada por defecto).** Sin pantalla externa y con batería, cerrar la tapa *bloquea* la pantalla, y ese bloqueo desconecta una VPN SSL de FortiClient (que exige volver a iniciar sesión para reconectar). Una pantalla virtual invisible ancla la sesión para que la pantalla no se bloquee y el túnel sobreviva — sin retroiluminación, apenas consume energía y no necesita hardware ni corriente extra. La acción **Apagar pantalla** también se divide en **Atenuar (Dim)** (oscura pero sin bloquear · segura para la VPN · por defecto) y **Dormir (Sleep)**, con una notificación opcional si la VPN se desconecta.
-- **Configuración del helper más resistente** — no registra el helper en segundo plano desde una descarga en cuarentena ni desde una ubicación temporal (translocada) que macOS bloquea; en su lugar te guía para mover la app a Aplicaciones. Ajustes señala copias duplicadas y versiones que no coinciden, y `eclam repair` recupera un helper atascado o inalcanzable.
+- **Protección de la VPN frente al bloqueo en clamshell (opcional).** Sin pantalla externa y con batería, cerrar la tapa normalmente *bloquea* la pantalla — lo que tira una VPN SSL de FortiClient (necesita volver a iniciar sesión por SAML para reconectar). Una pantalla virtual invisible ancla la sesión, así que la pantalla no se bloquea y el túnel sobrevive. La acción **Apagar pantalla** también se divide en **Dim** (oscura pero segura para la VPN, por defecto) y **Sleep**, con una notificación opcional de desconexión de la VPN.
+- **Registro del helper resiliente** — no registra el helper en segundo plano desde una descarga en cuarentena ni desde una ubicación temporal (translocated), donde macOS lo bloquea; en su lugar te guía para mover la app a Applications. Ajustes → General señala copias duplicadas y discrepancias de versión, y `eclam repair` / **Reinstall Helper** recuperan un registro atascado.
 
 ## Instalación
 
@@ -118,7 +116,8 @@ El cask de Homebrew crea un enlace simbólico `$HOMEBREW_PREFIX/bin/eclam`.
 ```
 eclam on [--for <dur>] [--forever]   # keep awake; default 2h, then the helper auto-releases (no GUI needed, survives reboot)
 eclam off
-eclam status [--json]
+eclam status [--json]                 # also flags a quarantined/outside-Applications app, a failed helper, and duplicate copies
+eclam repair                          # recover a wedged/unreachable helper (relaunches the app; guides you to sfltool resetbtm as a last resort)
 eclam keep --while <pid>
 eclam watch <agent> [--grace s] [--check-interval s] [--max min] [--json]
 eclam session start <name> [--message <text>] / stop <name> / list [--json]
@@ -144,6 +143,7 @@ Consulta [Seguridad y privacidad](docs/security.md) para más detalles.
 
 - **La detección puede tardar unos segundos sin un hook.** Los agentes sin un hook instalado se detectan sondeando sus registros de sesión (~5 s, ~30 s con la pantalla bloqueada). Claude / Codex / Hermes son instantáneos en cuanto instalas sus hooks.
 - **Sin protecciones de seguridad usando solo la CLI.**
+- **Ejecútalo desde Applications.** Si lo abres desde Downloads o una copia aún en cuarentena, macOS no dejará que arranque el helper en segundo plano — mueve Electronic Clam a la carpeta Applications y vuelve a abrirlo.
 - **Agentes integrados en VS Code** (Cline / Roo Code) no tienen un proceso independiente, así que la detección en modo Lax es limitada.
 - **Solo Apple Silicon**, macOS 13+ (Ventura).
 
@@ -165,6 +165,17 @@ open build/ElectronicClam.app
 - Invocación directa de `swiftc`, objetivo `arm64-apple-macos13.0`. Usa `ECLAM_SIGN_ID=-` para compilaciones locales ad-hoc rápidas.
 - Estructura del bundle: `Contents/MacOS/{ElectronicClam, ElectronicClamHelper, eclam-hook}` + `Contents/Library/LaunchDaemons/com.jadhvank.eclam.helper.plist`.
 - Las compilaciones de lanzamiento se firman con Developer ID y se notarizan (con staple por `release.sh`).
+
+## Historial de versiones
+
+Lanzamientos recientes — historial completo en [CHANGELOG.md](CHANGELOG.md):
+
+- **0.6.3** — Corrección: con la protección de bloqueo en clamshell activada, conectar una pantalla externa real ya no altera tu disposición guardada de «interna + externa». El ancla invisible ahora se aparta de inmediato (sin volver a espejar) en cuanto aparece una pantalla real, dejando que macOS restaure la disposición que guardaste; vuelve automáticamente cuando quitas la externa. La protección de bloqueo en clamshell sin pantalla no cambia.
+- **0.6.2** — Protección de la VPN frente al bloqueo en clamshell (opcional): sin pantalla externa y con batería, cerrar la tapa ya no bloquea la pantalla, así que una VPN SSL de FortiClient sobrevive en vez de caerse — una pantalla virtual invisible ancla la sesión. La acción **Apagar pantalla** ahora te deja elegir **Dim** (segura para la VPN, por defecto) o **Sleep**, con una notificación opcional de desconexión de la VPN.
+- **0.6.1** — Estado honesto del helper: un helper muerto pero registrado ya no aparece como falso «activado». `eclam status` lo informa como `unreachable` (código de salida 2), la app se autorrepara al reiniciarse, un nuevo comando `eclam repair` y un aviso en la barra de menús lo muestran, y `eclam status` ahora también informa del estado de inicio al arrancar sesión.
+- **0.6.0** — Inicio al arrancar sesión, notificaciones de actualización en la app, historial de actividad, internacionalización (English · 한국어 · 中文 · 日本語 · Español), interruptor de un clic, temas de icono en la barra de menús, política de inactividad remota, notificaciones de estado por Telegram, firma con Developer ID + notarización.
+
+Anteriormente: detección de agentes y los comandos `watch` / `session` (0.5.x), protecciones de batería / temperatura / temporizador según el estado (0.4.x), detección de actividad remota y la primera CLI (0.3.x).
 
 ## Apóyanos
 

@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.2-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.3-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · **中文** · [日本語](README.ja.md) · [Español](README.es.md)
@@ -80,10 +80,8 @@
 - **CLI + 命名会话** —— 直接从终端操作(见 [Usage](#usage))。
 - **可选的代理 hook** —— 安装后会在 Claude / Codex / Hermes 的配置中注入一个活动信号 hook,卸载时还原。
 - **退出时保证恢复睡眠** —— 三重保障:退出时同步恢复、一个 SIGTERM 处理器,以及 App 崩溃时的 20 秒看门狗。
-- **登录时启动(可选)** —— 登录时自动启动 Electronic Clam;默认关闭。
-- **更新通知** —— 检查 GitHub 上的新版本,并指引你前往下载;只通知,绝不自行安装。
-- **合盖 VPN 锁定防护(可选,默认关闭)** —— 在无外接显示器的电池供电下合盖时,屏幕会*锁定*,而这次锁定会让 FortiClient SSL VPN 断开,需要重新登录才能连回。用一个隐形的虚拟显示器把会话“锚住”,屏幕就不会锁定,隧道也得以保持 —— 没有背光,几乎不耗电,也不需要额外硬件或电源。**仅熄屏** 动作也拆分为 **变暗(Dim)**(屏幕熄灭但不锁定 · VPN 安全 · 默认)与 **睡眠(Sleep)**,并可选择在 VPN 断开时收到通知。
-- **更稳健的 helper 设置** —— 从被检疫(quarantine)的下载副本或 macOS 会拦截的临时(translocation)位置运行时,不再注册后台 helper,而是先引导你把 App 移到 Applications。设置会标记重复副本和版本不一致,`eclam repair` 可恢复卡住或不可达的 helper。
+- **合盖 VPN 锁屏防护(可选)。** 在没有外接显示器的电池供电下,合上盖子通常会*锁屏* —— 这会让 FortiClient SSL VPN 掉线(重连需要重新进行 SAML 登录)。一块隐形的虚拟显示器会锚定会话,于是屏幕不再锁定,隧道得以保留。**仅熄屏**动作也拆分为 **Dim**(变暗但对 VPN 安全,默认)和 **Sleep**,并可选地发送 VPN 断开通知。
+- **稳健的 helper 设置** —— 不会从被隔离(quarantine)的下载副本或临时(translocated)位置注册后台 helper(macOS 会在这些位置阻止它),而是引导你把 App 移到 Applications。设置 → 通用会标记重复副本和版本不一致,`eclam repair` / **Reinstall Helper** 可恢复卡住的注册。
 
 ## 安装
 
@@ -118,7 +116,8 @@ Homebrew cask 会创建一个 `$HOMEBREW_PREFIX/bin/eclam` 符号链接。
 ```
 eclam on [--for <dur>] [--forever]   # keep awake; default 2h, then the helper auto-releases (no GUI needed, survives reboot)
 eclam off
-eclam status [--json]
+eclam status [--json]                 # also flags a quarantined/outside-Applications app, a failed helper, and duplicate copies
+eclam repair                          # recover a wedged/unreachable helper (relaunches the app; guides you to sfltool resetbtm as a last resort)
 eclam keep --while <pid>
 eclam watch <agent> [--grace s] [--check-interval s] [--max min] [--json]
 eclam session start <name> [--message <text>] / stop <name> / list [--json]
@@ -144,6 +143,7 @@ eclam help
 
 - **没有 hook 时检测可能延迟几秒。** 未安装 hook 的代理通过轮询其会话日志来检测(~5 秒,锁屏时 ~30 秒)。Claude / Codex / Hermes 在你安装其 hook 后即时生效。
 - **仅用 CLI 时没有安全防护。**
+- **请从 Applications 运行。** 若从 Downloads 或仍处于隔离(quarantine)状态的副本启动,macOS 不会让后台 helper 启动 —— 请把 Electronic Clam 移到 Applications 文件夹后重新打开。
 - **嵌入 VS Code 的代理**(Cline / Roo Code)没有独立进程,因此 Lax 模式检测受限。
 - **仅支持 Apple Silicon**,macOS 13+ (Ventura)。
 
@@ -165,6 +165,17 @@ open build/ElectronicClam.app
 - 直接调用 `swiftc`,目标 `arm64-apple-macos13.0`。快速的临时本地构建可设置 `ECLAM_SIGN_ID=-`。
 - 包布局:`Contents/MacOS/{ElectronicClam, ElectronicClamHelper, eclam-hook}` + `Contents/Library/LaunchDaemons/com.jadhvank.eclam.helper.plist`。
 - 发布版本经 Developer ID 签名并由 Apple 公证(由 `release.sh` staple)。
+
+## 版本历史
+
+近期版本 —— 完整历史见 [CHANGELOG.md](CHANGELOG.md):
+
+- **0.6.3** —— 修复:启用合盖锁屏防护后,接入真实外接显示器不再打乱你保存的「内置 + 外接」排列。真实显示器一出现,隐形锚点便立即让位(不再重新镜像),让 macOS 恢复你保存的布局;移除外接显示器后锚点会自动回归。合盖无头锁屏防护保持不变。
+- **0.6.2** —— 合盖 VPN 锁屏防护(可选):在没有外接显示器的电池供电下,合盖不再锁屏,于是 FortiClient SSL VPN 得以保留而非掉线 —— 一块隐形的虚拟显示器锚定会话。**仅熄屏**动作现在可选 **Dim**(对 VPN 安全,默认)或 **Sleep**,并可选开启 VPN 断开通知。
+- **0.6.1** —— 诚实的 helper 状态:已死却仍注册的 helper 不再错误显示为「已启用」。`eclam status` 会将其报告为 `unreachable`(退出码 2),App 在重新启动时自我修复,新增的 `eclam repair` 命令与菜单栏警告会加以呈现,`eclam status` 现在也会报告开机自启状态。
+- **0.6.0** —— 开机自启、应用内更新通知、唤醒历史、国际化(English · 한국어 · 中文 · 日本語 · Español)、单击切换、菜单栏图标主题、远程空闲策略、Telegram 状态通知、Developer ID 签名 + 公证。
+
+更早:代理感知检测与 `watch` / `session` CLI(0.5.x)、状态条件下的电池 / 温度 / 定时安全防护(0.4.x)、远程活动感知与首个 CLI(0.3.x)。
 
 ## 赞助
 
