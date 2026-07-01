@@ -27,6 +27,16 @@ enum RepairCommand: CLISubcommand {
             return 1
         }
 
+        // ADR-0039 — split-brain(중복본) 점검. 자동 삭제는 하지 않는다(번들 삭제는
+        // 비가역) — /Applications 밖 복사본을 짚어주고 사용자가 직접 지우게 한다.
+        let copies = BundleScan.copies()
+        if copies.count > 1 {
+            print("eclam repair: multiple installs detected (split-brain risk). Keep only the one in /Applications and remove the rest:")
+            for c in copies where !c.inApplications {
+                print("  \(c.shortVersion ?? "?")  \(c.path)")
+            }
+        }
+
         // 1) Already healthy? Don't disturb a working app — a relaunch would
         //    briefly drop any active keep-awake hold.
         let reg = SMAppService.daemon(plistName: HelperRegistration.plistName).status
@@ -73,6 +83,11 @@ enum RepairCommand: CLISubcommand {
         }
         CLIStderr.print("eclam repair: still unreachable after relaunch. Open Electronic Clam and use "
             + "Settings > General > Reinstall Helper; if it persists, restart your Mac (ADR-0020).")
+        // ADR-0039 — 최후수단 안내(자동 실행 금지: sudo + 전역 영향). 죽은 BTM 레코드가
+        // 이미 제거된 복사본에 묶여 있으면 resetbtm 만 먹혔던 2026-07-01 사건의 복구 경로.
+        CLIStderr.print("If it persists, a stale background record may be bound to a removed copy. "
+            + "Last resort: 'sudo sfltool resetbtm', then reboot and reopen Electronic Clam "
+            + "(this resets ALL apps' login items).")
         return 2
     }
 

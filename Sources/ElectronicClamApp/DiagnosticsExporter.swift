@@ -26,6 +26,7 @@ enum DiagnosticsExporter {
         collectLog(into: tmp)
         collectHistory(into: tmp)
         collectSysinfo(into: tmp)
+        collectBundleEnvironment(into: tmp)
 
         return zipAndPlace(source: tmp)
     }
@@ -124,6 +125,49 @@ enum DiagnosticsExporter {
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
         let buildNumber = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
         lines.append("eclam version: \(appVersion) (\(buildNumber))")
+
+        write(lines.joined(separator: "\n"), to: dest)
+    }
+
+    /// ADR-0039 — 번들 환경(중복본 · launchctl helper job · 설치 위치 차단 판정) →
+    /// bundle-env.txt. 원격 제보에서 split-brain / EX_CONFIG(spawn failed) 원인을
+    /// 추적 가능하게 한다. 각 소스는 빈 결과/nil 을 자체적으로 처리하므로(throw 없음)
+    /// 기존 수집기처럼 실패는 파일 안의 안내 문자열로 격리된다.
+    private static func collectBundleEnvironment(into dir: URL) {
+        let dest = dir.appendingPathComponent("bundle-env.txt")
+        var lines: [String] = []
+
+        // BundleScan.copies() — 같은 bundle id 복사본 (Spotlight off/무결과면 빈 목록)
+        lines.append("== bundle copies (mdfind) ==")
+        let copies = BundleScan.copies()
+        if copies.isEmpty {
+            lines.append("mdfind: no copies found")
+        } else {
+            for c in copies {
+                lines.append("\(c.shortVersion ?? "?")  \(c.path)  (inApplications: \(c.inApplications))")
+            }
+        }
+        lines.append("")
+
+        // LaunchctlInspect.helperJob() — helper 데몬 job 상태 (미적재면 nil)
+        lines.append("== helper job (launchctl) ==")
+        if let job = LaunchctlInspect.helperJob() {
+            lines.append("jobState: \(job.jobState ?? "?")")
+            lines.append("lastExitCode: \(job.lastExitCode.map(String.init) ?? "?")")
+            lines.append("parentBundleVersion: \(job.parentBundleVersion ?? "?")")
+            lines.append("spawnFailed: \(job.spawnFailed)")
+        } else {
+            lines.append("launchctl: job not loaded")
+        }
+        lines.append("")
+
+        // InstallLocation.registrationBlock() — 등록 차단 판정(quarantine/translocation)
+        lines.append("== install location ==")
+        if let block = InstallLocation.registrationBlock(bundlePath: Bundle.main.bundlePath) {
+            lines.append("registrationBlock: \(block.kind.rawValue)")
+        } else {
+            lines.append("registrationBlock: none")
+        }
 
         write(lines.joined(separator: "\n"), to: dest)
     }

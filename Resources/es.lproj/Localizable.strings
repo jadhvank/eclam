@@ -260,6 +260,24 @@
 "end.appQuit" = "app cerrada";
 "end.unknown" = "finalizado";
 
+/* ADR-0038 — control de ubicación de instalación (un paquete en cuarentena/trasladado no puede registrar el ayudante) */
+"installgate.title" = "Mueve Electronic Clam a tu carpeta de Aplicaciones";
+"installgate.message.quarantined" = "Electronic Clam se está ejecutando desde una ubicación de descarga, así que macOS no deja que arranque su ayudante en segundo plano. Muévelo a la carpeta de Aplicaciones y ábrelo desde ahí.";
+"installgate.message.translocated" = "macOS está ejecutando Electronic Clam desde una ubicación temporal de solo lectura. Muévelo a la carpeta de Aplicaciones y vuelve a abrirlo para que su ayudante pueda arrancar.";
+"installgate.openApps" = "Abrir la carpeta Aplicaciones";
+"installgate.later" = "Más tarde";
+
+/* ADR-0039 — nota de estado de instalación en Ajustes → General (split-brain / ubicación / versión desfasada) */
+"installhealth.quarantined" = "Electronic Clam se está ejecutando desde una ubicación de descarga, así que macOS no deja que arranque su ayudante. Muévelo a la carpeta de Aplicaciones y vuelve a abrirlo.";
+"installhealth.translocated" = "macOS está ejecutando Electronic Clam desde una ubicación temporal de solo lectura. Muévelo a la carpeta de Aplicaciones y vuelve a abrirlo.";
+"installhealth.outside" = "Electronic Clam se está ejecutando fuera de la carpeta Aplicaciones, lo que puede impedir que su ayudante arranque de forma fiable. Muévelo a Aplicaciones y vuelve a abrirlo.";
+"installhealth.copies" = "Se encontraron varias copias de Electronic Clam. Conserva solo la de Aplicaciones y elimina el resto:";
+"installhealth.skew" = "La app en ejecución (%1$@) no coincide con el ayudante registrado (%2$@) — probablemente copias sobrantes. Usa Reinstalar asistente o elimina las copias extra de arriba.";
+"installhealth.spawnFailed" = "El ayudante en segundo plano no pudo arrancar (un error de configuración). Prueba Reinstalar asistente; si persiste, reinicia tu Mac.";
+
+/* ADR-0039 — último recurso resetbtm, mostrado cuando Reinstalar asistente sigue fallando */
+"resetbtm.note" = "El ayudante sigue sin responder. Puede que un registro en segundo plano obsoleto esté vinculado a una copia eliminada o duplicada. Como último recurso, abre Terminal y ejecuta “sudo sfltool resetbtm”, luego reinicia tu Mac y vuelve a abrir Electronic Clam. Esto restablece los ítems de inicio de sesión de todas las apps.";
+
 /* ADR-0018 — incorporación de aprobación en el primer arranque */
 "onboarding.title" = "Se necesita aprobación para mantener tu Mac despierto";
 "onboarding.message" = "Electronic Clam necesita que permitas su ayudante en segundo plano en Ajustes del Sistema → General → Ítems de inicio de sesión. Ábrelo ahora y activa Electronic Clam.";
@@ -377,3 +395,26 @@
 "telegram.evtDigest" = "Estado periódico mientras trabaja (silencioso), cada";
 "telegram.tip.evtDigest" = "Un latido mientras algo mantiene el Mac despierto: un mensaje de estado silencioso (sin sonido ni banner) a este intervalo; si el latido deja de llegar, el Mac o la red han caído. Se detiene en cuanto termina el trabajo.";
 "telegram.digest" = "📊 Sigue despierto — %@";
+
+/* ADR-0037 — protección de bloqueo con tapa cerrada · vigilancia de VPN · modo de pantalla apagada (vdisplay) */
+"general.sessions" = "Sesiones";
+"general.clamshellGuard" = "Evitar el bloqueo con la tapa cerrada (mantener la VPN)";
+"general.tip.clamshellGuard" = "Cuando tu Mac sigue despierto con la tapa cerrada y sin pantalla externa, Electronic Clam mantiene viva una pantalla virtual invisible para que macOS no bloquee la pantalla — un bloqueo cortaría sesiones VPN como las de FortiClient. No aparece ninguna ventana y apenas consume energía. Desactivado por defecto.";
+"general.vpnNotify" = "Avisar cuando la VPN se desconecte (Telegram + local)";
+"general.tip.vpnNotify" = "Mientras se mantiene el Mac despierto, Electronic Clam vigila tu VPN con scutil y te avisa si se desconecta — una alerta local más Telegram si lo has configurado. Nunca reconecta automáticamente (FortiClient necesita inicio de sesión SAML). Independiente de la protección con la tapa cerrada. Desactivado por defecto.";
+"general.vpnService" = "Servicio VPN";
+"general.tip.vpnService" = "Elige tu servicio VPN (tal como lo ve macOS en Ajustes → Red). El de FortiClient suele ser \"VPN\". Electronic Clam lo vigila con scutil y, si se cae, te avisa para volver a autenticarte — nunca reconecta automáticamente (se requiere inicio de sesión SAML). Usa Actualizar si tu VPN aún no aparece.";
+"general.vpnRefresh" = "Actualizar";
+"general.tip.vpnRefresh" = "Vuelve a buscar servicios VPN — útil si tu app de VPN estaba cerrada cuando abriste esto.";
+"general.vpnServiceNote" = "Elige la VPN que vigilar y luego activa las notificaciones arriba. Te avisará si se cae (también por Telegram, si lo has configurado). Sin reconexión automática.";
+"general.vpnService.none" = "(no se encontraron servicios VPN — abre tu app de VPN)";
+"general.blankScreen" = "Apagar pantalla";
+"blankMode.dim" = "Atenuar (mantener VPN)";
+"blankMode.sleep" = "Suspender pantallas";
+"general.tip.blankMode" = "Atenuar baja el brillo de la pantalla integrada y la mantiene despierta, así la pantalla se oscurece sin bloquearse — las sesiones VPN como las de FortiClient siguen conectadas y el brillo se restaura al volver. Suspender apaga las pantallas por completo, pero puede bloquear la pantalla y desconectar la VPN.";
+"general.blankSleepWarning" = "Suspender apaga las pantallas por completo, pero puede bloquear la pantalla y desconectar la VPN.";
+
+/* ADR-0037 — notificaciones de desconexión de VPN (local + Telegram) */
+"notify.vpnDropped.title" = "VPN desconectada";
+"notify.vpnDropped.body" = "%@ necesita volver a autenticarse (SAML/SSO). Electronic Clam no reconectará automáticamente — abre FortiClient e inicia sesión de nuevo.";
+"telegram.vpn.dropped" = "🔌 VPN desconectada (%@) — FortiClient necesita volver a autenticarse (SAML). Sin reconexión automática.";

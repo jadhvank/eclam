@@ -212,4 +212,37 @@ else
     echo "==> Skipping helper health tests (Tests/HelperHealthTests.swift absent)"
 fi
 
+# ── InstallLocation 게이트 판정 테스트 (ADR-0038) ──────────────────────────
+# InstallLocation.swift 는 framework-free(Foundation + Darwin getxattr) 라 단독
+# 컴파일 가능 — HelperRegistration 의 SMAppService 결합은 끌고 오지 않는다.
+if [ -f "$ROOT/Tests/InstallLocationTests.swift" ]; then
+    echo "==> Compiling install location tests"
+    swiftc -target "$TARGET" \
+        -framework Foundation \
+        -o "$TMP/eclam_installlocationtests" \
+        "$ROOT/Sources/Shared/InstallLocation.swift" \
+        "$ROOT/Tests/InstallLocationTests.swift"
+    echo "==> Running install location tests"
+    "$TMP/eclam_installlocationtests"
+else
+    echo "==> Skipping install location tests (Tests/InstallLocationTests.swift absent)"
+fi
+
+# ── LaunchctlInspect 파싱 테스트 (ADR-0039) ────────────────────────────────
+# parse(_:) 는 순수 함수라 테스트 가능 — Subprocess.swift 를 함께 컴파일해
+# helperJob() 의 심볼만 해소하고, 테스트는 parse 만 검증한다.
+if [ -f "$ROOT/Tests/LaunchctlInspectTests.swift" ]; then
+    echo "==> Compiling launchctl inspect tests"
+    swiftc -target "$TARGET" \
+        -framework Foundation \
+        -o "$TMP/eclam_launchctlinspecttests" \
+        "$ROOT/Sources/ElectronicClamApp/LaunchctlInspect.swift" \
+        "$ROOT/Sources/ElectronicClamApp/Subprocess.swift" \
+        "$ROOT/Tests/LaunchctlInspectTests.swift"
+    echo "==> Running launchctl inspect tests"
+    "$TMP/eclam_launchctlinspecttests"
+else
+    echo "==> Skipping launchctl inspect tests (Tests/LaunchctlInspectTests.swift absent)"
+fi
+
 echo "==> All tests passed"

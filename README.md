@@ -10,7 +10,7 @@ It detects *work*, not just a running process.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.1-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.2-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -82,6 +82,8 @@ Connect your own Telegram bot and you'll get a ping when an agent stops or your 
 - **Guaranteed sleep restore on exit** — three layers: synchronous restore on quit, a SIGTERM handler, and a 20-second watchdog if the app crashes.
 - **Open at login (optional)** — start Electronic Clam automatically when you log in; off by default.
 - **Update notifications** — checks GitHub for new releases and points you to the download; it only notifies, never installs on its own.
+- **Clamshell VPN lock guard (opt-in).** With no external display on battery, closing the lid normally *locks* the screen — which drops a FortiClient SSL VPN (it needs a fresh sign-in to reconnect). An invisible virtual display anchors the session so the screen doesn't lock and the tunnel survives — no backlight, so essentially no power and no extra hardware. The **Blank screen** action also splits into **Dim** (dark but VPN-safe, default) vs **Sleep**, with an optional VPN-disconnect notification. Off by default, tucked deep in Settings.
+- **Resilient helper setup** — won't register the background helper from a quarantined download or a temporary (translocated) location where macOS blocks it; it guides you to move the app to Applications instead. Settings flags duplicate copies and version mismatches, and `eclam repair` recovers a wedged or unreachable helper.
 
 ## Install
 
@@ -116,7 +118,8 @@ The Homebrew cask creates a `$HOMEBREW_PREFIX/bin/eclam` symlink.
 ```
 eclam on [--for <dur>] [--forever]   # keep awake; default 2h, then the helper auto-releases (no GUI needed, survives reboot)
 eclam off
-eclam status [--json]
+eclam status [--json]                # also flags a quarantined app, a failed helper, and duplicate copies
+eclam repair                         # recover a wedged/unreachable helper
 eclam keep --while <pid>
 eclam watch <agent> [--grace s] [--check-interval s] [--max min] [--json]
 eclam session start <name> [--message <text>] / stop <name> / list [--json]
@@ -168,6 +171,7 @@ open build/ElectronicClam.app
 
 Recent releases — full history in [CHANGELOG.md](CHANGELOG.md):
 
+- **0.6.2** — Clamshell VPN lock guard (opt-in): with no external display on battery, closing the lid no longer locks the screen, so a FortiClient SSL VPN survives instead of dropping — an invisible virtual display anchors the session, the "Blank screen" action now lets you choose **Dim** (VPN-safe, default) or **Sleep**, and an optional notification warns you if the VPN drops. Plus a more resilient helper setup that refuses to register from a quarantined or translocated copy, flags duplicate copies and version mismatches, and recovers via `eclam repair`.
 - **0.6.1** — Honest helper status: a dead-but-registered helper no longer shows a false "enabled". `eclam status` reports it as `unreachable` (exit 2), the app self-repairs on relaunch, a new `eclam repair` command and a menu-bar warning surface it, and `eclam status` now also reports the Open-at-Login state.
 - **0.6.0** — Open at Login, in-app update notifications, awake history, internationalization (English · 한국어 · 中文 · 日本語 · Español), single-click toggle, menu-bar icon themes, remote idle policy, Telegram status notifications, Developer ID signing + notarization.
 

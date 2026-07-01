@@ -12,6 +12,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var detector: AgentDetector?
     private var remoteWatcher: RemoteWatcher?
     private var safetyMonitor: SafetyMonitor?
+    /// ADR-0037 S1 — 헤드리스 클램쉘 잠금 방지 세션 앵커. converge 마다 keep·외장
+    /// 유무에 맞춰 가상 디스플레이를 올리고/내린다(설정 opt-in).
+    private var virtualDisplayController: VirtualDisplayController?
+    /// ADR-0037 S3 §폴백 — VPN disconnect 안전망 감시자. S1 과 같은 opt-in 게이트로
+    /// keep 동안에만 `scutil` 폴링, Connected→Disconnected 에지에서 알림(자동 재연결 X).
+    private var vpnWatcher: VpnWatcher?
 
     /// 10s heartbeat fired while `shouldKeepAwake` is true (ADR-0004 §5).
     ///
@@ -88,6 +94,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         self.detector = detector
 
+        // ADR-0037 S1 — own the clamshell lock-guard controller. Cheap to hold
+        // (creates no display until `apply(...)` decides to); convergeNow drives it.
+        self.virtualDisplayController = VirtualDisplayController(store: store)
+        // ADR-0037 S3 — own the VPN disconnect safety-net watcher. Cheap to hold
+        // (no polling until `apply(...)` arms it); convergeNow drives it beside S1.
+        self.vpnWatcher = VpnWatcher(store: store)
+
         // Wire store → convergence engine (debounced XPC).
         store.onChange = { [weak self] in
             DispatchQueue.main.async {
@@ -128,7 +141,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // ADR-0018 — first-run approval nudge, deferred to the next runloop so
         // launch finishes (and the menu bar item exists) before the modal.
-        DispatchQueue.main.async { [weak self] in self?.presentApprovalOnboardingIfNeeded() }
+        // ADR-0038 — if the bundle's install location blocked registration, the
+        // relocation alert replaces the approval nudge (the two are exclusive).
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if !self.presentInstallLocationAlertIfNeeded() { self.presentApprovalOnboardingIfNeeded() }
+        }
 
         // ADR-0035 — notify-only update check (throttled to once/24h, opt-out).
         // Deferred so launch completes first; never blocks, downloads, or installs.
@@ -166,6 +184,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    /// ADR-0038 — if the app is running from a quarantined/translocated location the helper
+    /// can't register, so guide the user to move it instead of the normal approval nudge.
+    /// Returns true if it presented (caller then suppresses the approval onboarding).
+    /// No persistence — while blocked it's fine to show each launch (fatal until fixed).
+    private func presentInstallLocationAlertIfNeeded() -> Bool {
+        guard let block = HelperRegistration.installBlock else { return false }
+        let alert = NSAlert()
+        alert.messageText = NSL("installgate.title", "Move Electronic Clam to your Applications folder")
+        alert.informativeText = (block.kind == .quarantined)
+            ? NSL("installgate.message.quarantined", "Electronic Clam is running from a download location, so macOS won’t let its background helper start. Move it to the Applications folder and open it from there.")
+            : NSL("installgate.message.translocated", "macOS is running Electronic Clam from a temporary read-only location. Move it to the Applications folder and reopen it so its helper can start.")
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: NSL("installgate.openApps", "Open Applications Folder"))
+        alert.addButton(withTitle: NSL("installgate.later", "Later"))
+        NSApp.activate(ignoringOtherApps: true)
+        if alert.runModal() == .alertFirstButtonReturn {
+            NSWorkspace.shared.open(URL(fileURLWithPath: "/Applications"))
+        }
+        return true
+    }
+
     /// ADR-0018 — reconcile registration whenever the app reactivates. Returning
     /// from approving/revoking the Login Item in System Settings reactivates us,
     /// so this catches both transitions with no timer. Idempotent: `store.update`
@@ -191,6 +230,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         safetyMonitor = nil
         detector?.stop()
         detector = nil
+        // ADR-0037 — drop the virtual-display anchor cleanly on quit (the OS would
+        // reclaim it on process exit anyway, but unmirror/unregister explicitly).
+        virtualDisplayController?.apply(keepAwake: false, externalDisplayPresent: true)
+        virtualDisplayController = nil
+        // ADR-0037 S3 — stop the VPN watcher's poll timer cleanly on quit.
+        vpnWatcher?.apply(keepAwake: false)
+        vpnWatcher = nil
         pendingConverge?.cancel()
         pendingConverge = nil
         pendingActiveAgentsPush?.cancel()
@@ -358,6 +404,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // before the no-op early return below so that lid-only ticks (awake
         // unchanged) still accumulate clamshell time.
         history.observe(awake: target, lidClosed: store.lidClosed, store: store)
+
+        // ADR-0037 S1 — 헤드리스 클램쉘 잠금 방지 세션 앵커. keep 신호와 실물 외장
+        // 유무(SafetyMonitor 가 채운 `store.extDisplayPresent` 재사용)에 맞춰 가상
+        // 디스플레이를 올리거나 내린다. 멱등이라 매 수렴마다 안전하며, 외장
+        // hot-plug 처럼 `target` 이 안 바뀌는 변화도 반영하려고 아래 no-op
+        // early-return 위에 둔다. helper·SleepDisabled 와 무관.
+        virtualDisplayController?.apply(keepAwake: target,
+                                        externalDisplayPresent: store.extDisplayPresent)
+
+        // ADR-0037 S3 §폴백 — VPN disconnect 안전망. S1 과 같은 게이트(keep + opt-in)로
+        // keep 동안에만 `scutil` 폴링을 켜고, release 되면 끈다. no-op early-return 위에
+        // 둬 keep 토글뿐 아니라 opt-in 변경도 반영한다. 알림만, 자동 재연결 안 함.
+        vpnWatcher?.apply(keepAwake: target)
 
         if let last = lastWrittenSleepDisabled, last == target { return }
 

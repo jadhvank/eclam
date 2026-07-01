@@ -10,7 +10,7 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.2-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · **Español**
@@ -82,6 +82,8 @@ Conecta tu propio bot de Telegram y recibirás un aviso cuando un agente se dete
 - **Restauración del sueño garantizada al salir** — tres capas: restauración síncrona al salir, un manejador de SIGTERM y un watchdog de 20 segundos por si la app se cuelga.
 - **Abrir al iniciar sesión (opcional)** — inicia Electronic Clam automáticamente cuando inicias sesión; desactivado por defecto.
 - **Notificaciones de actualización** — consulta GitHub en busca de nuevas versiones y te indica la descarga; solo avisa, nunca instala nada por su cuenta.
+- **Protección contra el bloqueo por VPN en modo clamshell (opcional, desactivada por defecto).** Sin pantalla externa y con batería, cerrar la tapa *bloquea* la pantalla, y ese bloqueo desconecta una VPN SSL de FortiClient (que exige volver a iniciar sesión para reconectar). Una pantalla virtual invisible ancla la sesión para que la pantalla no se bloquee y el túnel sobreviva — sin retroiluminación, apenas consume energía y no necesita hardware ni corriente extra. La acción **Apagar pantalla** también se divide en **Atenuar (Dim)** (oscura pero sin bloquear · segura para la VPN · por defecto) y **Dormir (Sleep)**, con una notificación opcional si la VPN se desconecta.
+- **Configuración del helper más resistente** — no registra el helper en segundo plano desde una descarga en cuarentena ni desde una ubicación temporal (translocada) que macOS bloquea; en su lugar te guía para mover la app a Aplicaciones. Ajustes señala copias duplicadas y versiones que no coinciden, y `eclam repair` recupera un helper atascado o inalcanzable.
 
 ## Instalación
 

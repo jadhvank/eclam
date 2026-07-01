@@ -36,6 +36,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     private let menu = NSMenu()
     private var rightClickMonitor: Any?
 
+    /// ADR-0037 §#8 — "어둡게(dim)" 모드 컨트롤러. 밝기 floor + display-sleep 방지
+    /// assertion 을 잡고 사용자 복귀 시 자동 복원한다. dim 동안에만 타이머가 돈다.
+    private let dimmer = BlankDisplayDimmer()
+
     private func installMenu() {
         menu.delegate = self
         menu.autoenablesItems = false
@@ -631,12 +635,28 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         blankDisplays()
     }
 
-    /// One-shot display sleep for all screens. This is NOT a SleepDisabled
-    /// power-setting write, so it's outside rule 5's "no pmset for power
-    /// settings" constraint; `pmset displaysleepnow` needs no privileges and is
-    /// the most reliable cross-version trigger. The displays go dark but each
-    /// monitor stays powered (USB-C PD continues) because we only blank.
+    /// ADR-0037 §#8 — 사용자가 고른 모드로 화면을 끈다. `.dim`(기본·VPN-안전)은
+    /// 밝기 floor + display-sleep 방지 assertion 으로 *잠그지 않고* 깜깜하게 만들고
+    /// 사용자 복귀 시 자동 복원한다; `.sleep`은 기존 `pmset displaysleepnow`로
+    /// display 를 재운다(즉시-잠금 Mac 에선 화면 잠금→VPN 끊김 가능). keep 보장은
+    /// 호출부(`blankDisplaysTapped`)에서 선행한다.
     private func blankDisplays() {
+        switch store.blankDisplaysMode {
+        case .dim:
+            dimmer.dim()
+        case .sleep:
+            sleepDisplaysNow()
+        }
+    }
+
+    /// ADR-0037 §#8 "재우기" — one-shot display sleep for all screens. This is NOT
+    /// a SleepDisabled power-setting write, so it's outside rule 5's "no pmset for
+    /// power settings" constraint; `pmset displaysleepnow` needs no privileges and
+    /// is the most reliable cross-version trigger. The displays go dark but each
+    /// monitor stays powered (USB-C PD continues) because we only blank.
+    /// ⚠ 즉시-잠금 Mac 에선 display sleep 이 화면 잠금을 유발해 FortiClient 같은 VPN
+    /// 을 끊을 수 있다(Settings 의 Sleep 옵션에 경고). 그래서 기본 모드는 `.dim`.
+    private func sleepDisplaysNow() {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/pmset")
         p.arguments = ["displaysleepnow"]

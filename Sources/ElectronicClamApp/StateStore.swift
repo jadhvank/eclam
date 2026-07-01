@@ -29,6 +29,17 @@ final class StateStore {
         case system, light, dark
     }
 
+    /// ADR-0037 §#8 — "blank displays"(#8) 동작 모드.
+    ///   `dim`   (기본·VPN-안전): 내장 밝기 최저 + `PreventUserIdleDisplaySleep`
+    ///            assertion → 화면을 *잠그지 않고* 깜깜하게. VPN(FortiClient) 유지.
+    ///   `sleep` (기존): `pmset displaysleepnow` → display 를 재워 화면이 잠기고
+    ///            VPN 이 끊길 수 있다(⚠ 경고 표시).
+    /// 현 silently-locks 동작은 footgun 이라 기본을 안전한 `dim` 으로 전환한다.
+    /// `MenuBarTheme` 와 동일한 String-raw 저장 패턴.
+    enum BlankDisplaysMode: String, CaseIterable {
+        case dim, sleep
+    }
+
     /// ADR-0004 §1·§2·§4 — persisted safety thresholds.
     struct SafetySettings: Codable, Equatable {
         var batteryLow: Int        // % threshold; effective threshold is state-conditioned at evaluation time
@@ -115,6 +126,30 @@ final class StateStore {
 
     /// Menu-bar icon appearance (see `MenuBarTheme`). Default `.system`.
     private(set) var menuBarTheme: MenuBarTheme
+
+    /// ADR-0037 — 헤드리스 클램쉘 잠금 방지(가상 디스플레이 세션 앵커) opt-in.
+    /// 기본 OFF. keep 신호 + 외장 없음일 때만 `VirtualDisplayController` 가
+    /// 앵커를 띄워 화면 잠금을 막아 VPN 세션을 유지한다.
+    private(set) var clamshellLockGuardEnabled: Bool
+
+    /// ADR-0037 §#8 — "blank displays"(메뉴 "Blank screen") 동작 모드. Default
+    /// `.dim`(VPN-안전). `MenuBarController` 의 blank 액션이 이 값으로 dim(어둡게)/
+    /// sleep(재우기)을 분기한다.
+    private(set) var blankDisplaysMode: BlankDisplaysMode
+
+    /// ADR-0037 S3 §폴백 — VPN 끊김 알림 opt-in (Telegram + 로컬). 기본 OFF.
+    /// **클램쉘 잠금 가드(`clamshellLockGuardEnabled`)와 독립**된 토글이다 — 잠금
+    /// 가드를 안 켜도 VPN 끊김만 알리고 싶을 수 있고, 반대도 가능하다. 이 값이
+    /// true 이고 keep 신호가 살아있을 때만 `VpnWatcher` 가 `scutil` 폴링을 켜고
+    /// Connected→Disconnected 에지에서 알린다. 자동 재연결은 하지 않는다.
+    private(set) var vpnDisconnectNotifyEnabled: Bool
+
+    /// ADR-0037 S3 §폴백 — `VpnWatcher` 가 `scutil --nc status <name>` 로 상태를
+    /// 읽을 NetworkExtension 서비스 표시 이름. 기본 "VPN"(FortiClient 의 macOS
+    /// 기본 서비스명). 비면 "VPN" 으로 폴백한다(빈 이름은 scutil 에서 무의미).
+    /// 이 이름으로 서비스를 못 찾으면 `VpnWatcher` 가 `scutil --nc list` 에서
+    /// FortiClient/SSL VPN 을 자동 탐지한다.
+    private(set) var vpnServiceName: String
 
     /// v0.4.0 — User explicitly forced sleep on despite active auto signals.
     /// Set by a double-left-click on the menu bar icon (ADR-0010). Suppresses
@@ -237,6 +272,10 @@ final class StateStore {
     private static let customTracesKey          = "CustomAgentTraces"
     private static let agentModeKey             = "AgentMode"
     private static let menuBarThemeKey          = "MenuBarTheme"
+    private static let clamshellLockGuardKey    = "ClamshellLockGuardEnabled"
+    private static let blankDisplaysModeKey     = "BlankDisplaysMode"
+    private static let vpnNotifyEnabledKey      = "VpnDisconnectNotifyEnabled"
+    private static let vpnServiceNameKey        = "VpnServiceName"
     private static let remoteIdleTimeoutKey     = "RemoteIdleTimeoutMin"
     private static let remoteCountsLegacyKey    = "RemoteCountsAsActivity"  // pre-ADR-0016
     private static let safetySettingsKey        = "SafetySettings"
@@ -288,6 +327,30 @@ final class StateStore {
         } else {
             self.menuBarTheme = .system
         }
+
+        // ADR-0037 — opt-in, default OFF. `bool(forKey:)` returns false when the
+        // key is absent, which is exactly the desired default.
+        self.clamshellLockGuardEnabled =
+            UserDefaults.standard.bool(forKey: Self.clamshellLockGuardKey)
+
+        // ADR-0037 §#8 — blank displays 동작 모드. 기본 `.dim`(VPN-안전); 키가
+        // 없거나 미지의 값이면 dim 으로 폴백(`MenuBarTheme` 와 동일 패턴).
+        if let raw = UserDefaults.standard.string(forKey: Self.blankDisplaysModeKey),
+           let parsed = BlankDisplaysMode(rawValue: raw) {
+            self.blankDisplaysMode = parsed
+        } else {
+            self.blankDisplaysMode = .dim
+        }
+
+        // ADR-0037 S3 §폴백 — VPN 끊김 알림 opt-in. `bool(forKey:)` 은 키 부재 시
+        // false 를 반환하므로 기본 OFF 가 그대로 적용된다(잠금 가드와 동일 패턴).
+        self.vpnDisconnectNotifyEnabled =
+            UserDefaults.standard.bool(forKey: Self.vpnNotifyEnabledKey)
+
+        // ADR-0037 S3 §폴백 — VPN 서비스명. 키가 없으면 "VPN"(FortiClient 기본).
+        let storedVpnName = UserDefaults.standard.string(forKey: Self.vpnServiceNameKey)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        self.vpnServiceName = (storedVpnName?.isEmpty == false) ? storedVpnName! : "VPN"
 
         // ADR-0016 — single idle-timeout knob. Default is "never expire", which
         // preserves the ADR-0008 stay-reachable behaviour and never surprises a
@@ -402,6 +465,48 @@ final class StateStore {
         self.menuBarTheme = theme
         UserDefaults.standard.set(theme.rawValue, forKey: Self.menuBarThemeKey)
         // onChange → AppDelegate → menuBar.refresh() re-renders the glyph.
+        onChange?()
+    }
+
+    /// ADR-0037 — toggle the clamshell lock guard (opt-in). onChange → AppDelegate
+    /// → convergeNow → `VirtualDisplayController.apply(...)` brings the anchor up
+    /// or down to match the new setting.
+    func setClamshellLockGuard(_ on: Bool) {
+        guard self.clamshellLockGuardEnabled != on else { return }
+        self.clamshellLockGuardEnabled = on
+        UserDefaults.standard.set(on, forKey: Self.clamshellLockGuardKey)
+        onChange?()
+    }
+
+    /// ADR-0037 S3 §폴백 — VPN 끊김 알림 opt-in 토글(잠금 가드와 독립). onChange →
+    /// AppDelegate → convergeNow → `VpnWatcher.apply(...)` 가 폴링을 켜고 끈다.
+    func setVpnDisconnectNotify(_ on: Bool) {
+        guard self.vpnDisconnectNotifyEnabled != on else { return }
+        self.vpnDisconnectNotifyEnabled = on
+        UserDefaults.standard.set(on, forKey: Self.vpnNotifyEnabledKey)
+        onChange?()
+    }
+
+    /// ADR-0037 §#8 — "blank displays" 동작 모드 전환. 다음 blank 액션부터
+    /// dim(어둡게·VPN 유지) 또는 sleep(재우기·잠금 위험)으로 분기한다. 즉시 부수효과는
+    /// 없다(현재 dim 세션을 회수하지 않음) — Settings 갱신용으로 onChange 만 발화.
+    func setBlankDisplaysMode(_ mode: BlankDisplaysMode) {
+        guard self.blankDisplaysMode != mode else { return }
+        self.blankDisplaysMode = mode
+        UserDefaults.standard.set(mode.rawValue, forKey: Self.blankDisplaysModeKey)
+        onChange?()
+    }
+
+    /// ADR-0037 S3 §폴백 — `VpnWatcher` 가 폴링할 VPN 서비스명 영속. 공백은
+    /// "VPN"(FortiClient 기본)으로 정규화한다 — 빈 이름은 `scutil` 에서 무의미.
+    /// `VpnWatcher` 는 매 폴마다 `store.vpnServiceName` 을 즉시 다시 읽으므로,
+    /// 감시 중에 바꿔도 다음 폴부터 새 이름이 반영된다.
+    func setVpnServiceName(_ name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let next = trimmed.isEmpty ? "VPN" : trimmed
+        guard self.vpnServiceName != next else { return }
+        self.vpnServiceName = next
+        UserDefaults.standard.set(next, forKey: Self.vpnServiceNameKey)
         onChange?()
     }
 

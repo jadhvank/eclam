@@ -260,6 +260,24 @@
 "end.appQuit" = "应用退出";
 "end.unknown" = "已结束";
 
+/* ADR-0038 — 安装位置门控（被隔离/转移的程序包无法注册帮助程序） */
+"installgate.title" = "请将 Electronic Clam 移到「应用程序」文件夹";
+"installgate.message.quarantined" = "Electronic Clam 正从下载位置运行，所以 macOS 不允许其后台帮助程序启动。请将它移到「应用程序」文件夹，并从那里打开。";
+"installgate.message.translocated" = "macOS 正从临时的只读位置运行 Electronic Clam。请将它移到「应用程序」文件夹并重新打开，帮助程序才能启动。";
+"installgate.openApps" = "打开「应用程序」文件夹";
+"installgate.later" = "稍后";
+
+/* ADR-0039 — 设置 → 通用中的安装健康提示（脑裂 / 位置 / 版本不一致） */
+"installhealth.quarantined" = "Electronic Clam 正从下载位置运行，所以 macOS 不允许其帮助程序启动。请将它移到「应用程序」文件夹并重新打开。";
+"installhealth.translocated" = "macOS 正从临时的只读位置运行 Electronic Clam。请将它移到「应用程序」文件夹并重新打开。";
+"installhealth.outside" = "Electronic Clam 正在「应用程序」文件夹之外运行，这可能导致其帮助程序无法可靠地启动。请将它移到「应用程序」并重新打开。";
+"installhealth.copies" = "发现了多个 Electronic Clam 副本。请只保留「应用程序」中的那一个，并删除其余副本:";
+"installhealth.skew" = "正在运行的应用（%1$@）与已注册的帮助程序（%2$@）不一致 — 很可能是残留的副本。请使用「重新安装助手」，或删除上方多余的副本。";
+"installhealth.spawnFailed" = "后台帮助程序启动失败（配置错误）。请尝试「重新安装助手」；如果仍然如此，请重启 Mac。";
+
+/* ADR-0039 — 当「重新安装助手」仍失败时显示的 resetbtm 最后手段 */
+"resetbtm.note" = "帮助程序仍无响应。可能有一条过时的后台记录绑定到了已删除或重复的副本。作为最后手段，请打开终端运行「sudo sfltool resetbtm」，然后重启 Mac 并重新打开 Electronic Clam。这会重置所有应用的登录项。";
+
 /* ADR-0018 — 首次启动授权引导 */
 "onboarding.title" = "需要授权才能让 Mac 保持唤醒";
 "onboarding.message" = "请在「系统设置 → 通用 → 登录项」中允许 Electronic Clam 的后台帮助程序。立即打开并开启 Electronic Clam。";
@@ -377,3 +395,26 @@
 "telegram.evtDigest" = "工作期间定期状态 (静默),间隔";
 "telegram.tip.evtDigest" = "Mac 保持唤醒期间的心跳:按此间隔发送静默状态消息(无声音、无横幅)。如果心跳中断,说明 Mac 或网络出了问题。工作结束立即停止。";
 "telegram.digest" = "📊 仍在唤醒中 — %@";
+
+/* ADR-0037 — 合盖锁定防护 · VPN 监视 · 熄屏模式 (vdisplay) */
+"general.sessions" = "会话";
+"general.clamshellGuard" = "合盖时防止锁定（保持 VPN 在线）";
+"general.tip.clamshellGuard" = "当 Mac 合上盖子且没有外接显示器仍保持唤醒时，Electronic Clam 会维持一个不可见的虚拟显示器，让 macOS 不锁定屏幕 — 一旦锁定就会断开 FortiClient 之类的 VPN 会话。不会出现任何窗口，几乎不耗电。默认关闭。";
+"general.vpnNotify" = "VPN 断开时通知（Telegram + 本地）";
+"general.tip.vpnNotify" = "在保持 Mac 唤醒期间，Electronic Clam 用 scutil 监视你的 VPN，断开时通知你 — 本地提醒，若已配置还会发 Telegram。它绝不会自动重连（FortiClient 需要 SAML 登录）。与合盖防护相互独立。默认关闭。";
+"general.vpnService" = "VPN 服务";
+"general.tip.vpnService" = "选择你的 VPN 服务（即 macOS 在系统设置 → 网络中显示的名称）。FortiClient 通常是「VPN」。Electronic Clam 用 scutil 监视它，一旦断开就提醒你重新认证 — 绝不会自动重连（需要 SAML 登录）。如果还没列出你的 VPN，请点击「刷新」。";
+"general.vpnRefresh" = "刷新";
+"general.tip.vpnRefresh" = "重新扫描 VPN 服务 — 如果打开此处时 VPN 应用是关着的，会很有用。";
+"general.vpnServiceNote" = "选择要监视的 VPN，然后在上方开启通知。断开时会提醒你（若已配置也会发 Telegram）。不会自动重连。";
+"general.vpnService.none" = "（未找到 VPN 服务 — 请打开你的 VPN 应用）";
+"general.blankScreen" = "熄屏";
+"blankMode.dim" = "调暗（保持 VPN）";
+"blankMode.sleep" = "显示器睡眠";
+"general.tip.blankMode" = "「调暗」会降低内置显示器亮度并让显示器保持唤醒，于是屏幕变暗但不锁定 — FortiClient 之类的 VPN 会话保持连接，你回来时亮度会恢复。「显示器睡眠」会完全关闭显示器，但可能锁屏并断开 VPN。";
+"general.blankSleepWarning" = "「显示器睡眠」会完全关闭显示器，但可能锁屏并断开 VPN。";
+
+/* ADR-0037 — VPN 断开通知 (本地 + Telegram) */
+"notify.vpnDropped.title" = "VPN 已断开";
+"notify.vpnDropped.body" = "%@ 需要重新认证（SAML/SSO）。Electronic Clam 不会自动重连 — 请打开 FortiClient 重新登录。";
+"telegram.vpn.dropped" = "🔌 VPN 已断开（%@）— FortiClient 需要重新认证（SAML）。不会自动重连。";

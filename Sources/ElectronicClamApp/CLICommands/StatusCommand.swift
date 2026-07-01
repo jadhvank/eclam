@@ -42,6 +42,15 @@ enum StatusCommand: CLISubcommand {
         // 잘 안 되는 것 같다"를 추측이 아니라 `eclam status` 로 확인.
         let loginItem = readLoginItem()
 
+        // ADR-0039 — split-brain(중복본)·spawn-failure·버전 스큐를 정직하게 노출하기
+        // 위한 읽기 전용 신호. mdfind/launchctl 서브프로세스를 돌지만 status 는 이미
+        // pmset 을 도는 진단 명령이라 허용 범위. 한 번만 수집해 두 출력 분기에서 공유.
+        // 경고는 stdout 진단 텍스트일 뿐 — verdict.exit 는 절대 바꾸지 않는다(ADR-0036).
+        let block = InstallLocation.registrationBlock(bundlePath: Bundle.main.bundlePath)
+        let job = LaunchctlInspect.helperJob()
+        let copies = BundleScan.copies()
+        let appVer = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+
         if json {
             let root: [String: Any] = [
                 "helperStatus": verdict.raw,
@@ -54,6 +63,15 @@ enum StatusCommand: CLISubcommand {
                 "watchedAgents": watched.sorted(),
                 "activeAgents": activeAgents.sorted(),
                 "holdRemainingSeconds": holdRemaining as Any,
+                // ADR-0039 — split-brain/spawn-failure/version-skew 진단 필드.
+                "installBlocked": (block != nil),
+                "installBlockKind": block?.kind.rawValue as Any,
+                "daemonSpawnFailed": (job?.spawnFailed ?? false),
+                "daemonLastExitCode": job?.lastExitCode as Any,
+                "registeredVersion": job?.parentBundleVersion as Any,
+                "bundleCopies": copies.map {
+                    ["path": $0.path, "version": $0.shortVersion as Any, "inApplications": $0.inApplications]
+                },
             ]
             if let data = try? JSONSerialization.data(withJSONObject: root,
                                                       options: [.prettyPrinted, .sortedKeys]),
@@ -72,6 +90,24 @@ enum StatusCommand: CLISubcommand {
             print("agent mode:  \(agentMode)")
             print("watched:     \(watchedStr.isEmpty ? "(none)" : watchedStr)")
             print("login item:  \(loginItem)")
+            // ADR-0039 — 문제가 있을 때만 경고 라인 추가(정상 머신은 새 노이즈 없음).
+            if let block = block {
+                print("install:     ⚠ \(block.kind.rawValue) — move to /Applications and reopen")
+            } else if !InstallLocation.isInApplications(Bundle.main.bundlePath) {
+                print("install:     ⚠ running outside /Applications")
+            }
+            if job?.spawnFailed == true {
+                print("daemon:      ⚠ spawn failed (exit \(job?.lastExitCode.map(String.init) ?? "?") / EX_CONFIG) — app may be quarantined or outside /Applications")
+            }
+            if copies.count > 1 {
+                print("copies:      ⚠ \(copies.count) installs found (split-brain risk):")
+                for c in copies {
+                    print("               \(c.shortVersion ?? "?")  \(c.path)")
+                }
+            }
+            if let reg = job?.parentBundleVersion, let appVer = appVer, reg != appVer {
+                print("version:     ⚠ app \(appVer) but registered daemon \(reg) (version skew)")
+            }
         }
         // 0 ok / 2 enabled-but-unreachable. Non-enabled states stay 0 — see
         // HelperHealthVerdict.exit (CI smoke.sh invariant).

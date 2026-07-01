@@ -260,6 +260,24 @@
 "end.appQuit" = "アプリ終了";
 "end.unknown" = "終了";
 
+/* ADR-0038 — インストール場所のゲート（隔離/再配置されたバンドルはヘルパーを登録できない） */
+"installgate.title" = "Electronic Clam を「アプリケーション」フォルダに移動してください";
+"installgate.message.quarantined" = "Electronic Clam がダウンロード先から実行されているため、macOS がバックグラウンドヘルパーの起動を許可しません。「アプリケーション」フォルダに移動し、そこから開いてください。";
+"installgate.message.translocated" = "macOS が Electronic Clam を一時的な読み取り専用の場所から実行しています。ヘルパーが起動できるよう、「アプリケーション」フォルダに移動して開き直してください。";
+"installgate.openApps" = "「アプリケーション」フォルダを開く";
+"installgate.later" = "後で";
+
+/* ADR-0039 — 設定 → 一般のインストール状態ノート（split-brain / 場所 / バージョン不整合） */
+"installhealth.quarantined" = "Electronic Clam がダウンロード先から実行されているため、macOS がヘルパーの起動を許可しません。「アプリケーション」フォルダに移動して開き直してください。";
+"installhealth.translocated" = "macOS が Electronic Clam を一時的な読み取り専用の場所から実行しています。「アプリケーション」フォルダに移動して開き直してください。";
+"installhealth.outside" = "Electronic Clam が「アプリケーション」フォルダの外で実行されているため、ヘルパーが安定して起動できないことがあります。「アプリケーション」に移動して開き直してください。";
+"installhealth.copies" = "Electronic Clam のコピーが複数見つかりました。「アプリケーション」内の 1 つだけを残し、ほかは削除してください:";
+"installhealth.skew" = "実行中のアプリ（%1$@）が登録済みのヘルパー（%2$@）と一致しません — 残ったコピーの可能性があります。「ヘルパーを再インストール」を使うか、上の余分なコピーを削除してください。";
+"installhealth.spawnFailed" = "バックグラウンドヘルパーの起動に失敗しました（構成エラー）。「ヘルパーを再インストール」をお試しください。それでも続く場合は Mac を再起動してください。";
+
+/* ADR-0039 — 「ヘルパーを再インストール」でも失敗するときに表示する resetbtm 最終手段 */
+"resetbtm.note" = "ヘルパーがまだ応答しません。削除済みまたは重複したコピーに古いバックグラウンドレコードがひも付いている可能性があります。最終手段として、ターミナルを開いて「sudo sfltool resetbtm」を実行し、Mac を再起動してから Electronic Clam を開き直してください。これはすべてのアプリのログイン項目をリセットします。";
+
 /* ADR-0018 — 初回起動時の承認オンボーディング */
 "onboarding.title" = "Mac をスリープさせないには承認が必要です";
 "onboarding.message" = "システム設定 → 一般 → ログイン項目で Electronic Clam のバックグラウンドヘルパーを許可してください。今すぐ開いて Electronic Clam をオンにしてください。";
@@ -377,3 +395,26 @@
 "telegram.evtDigest" = "作業中の定期ステータス (サイレント)、間隔";
 "telegram.tip.evtDigest" = "Mac が起きている間のハートビート: この間隔でサイレントなステータスメッセージ(音・バナーなし)を送ります。届いていたハートビートが途切れたら、Mac かネットワークが落ちた合図です。作業が終わると即座に止まります。";
 "telegram.digest" = "📊 まだ起きています — %@";
+
+/* ADR-0037 — クラムシェルロック防止 · VPN 監視 · 画面オフモード (vdisplay) */
+"general.sessions" = "セッション";
+"general.clamshellGuard" = "クラムシェルでロックを防ぐ（VPN を維持）";
+"general.tip.clamshellGuard" = "蓋を閉じて外部ディスプレイもない状態で Mac が起きているとき、Electronic Clam が見えない仮想ディスプレイを生かしておき、macOS が画面をロックしないようにします — ロックされると FortiClient のような VPN セッションが切れてしまいます。ウインドウは表示されず、電力もほとんど消費しません。デフォルトはオフです。";
+"general.vpnNotify" = "VPN が切断されたら通知（Telegram + ローカル）";
+"general.tip.vpnNotify" = "Mac を起こしている間、Electronic Clam が scutil で VPN を監視し、切断されたら知らせます — ローカル通知に加え、設定していれば Telegram にも。自動では再接続しません（FortiClient は SAML サインインが必要）。クラムシェルガードとは独立しています。デフォルトはオフです。";
+"general.vpnService" = "VPN サービス";
+"general.tip.vpnService" = "VPN サービスを選びます（macOS がシステム設定 → ネットワークで表示する名前のまま）。FortiClient は通常「VPN」です。Electronic Clam が scutil で監視し、切断されたら再認証を促します — 自動では再接続しません（SAML サインインが必要）。VPN がまだ一覧にない場合は「更新」を使ってください。";
+"general.vpnRefresh" = "更新";
+"general.tip.vpnRefresh" = "VPN サービスを再スキャンします — これを開いたときに VPN アプリが閉じていた場合に便利です。";
+"general.vpnServiceNote" = "監視する VPN を選び、上で通知をオンにしてください。切断されると知らせます（設定していれば Telegram にも）。自動再接続はありません。";
+"general.vpnService.none" = "（VPN サービスが見つかりません — VPN アプリを開いてください）";
+"general.blankScreen" = "画面オフ";
+"blankMode.dim" = "暗くする（VPN 維持）";
+"blankMode.sleep" = "ディスプレイをスリープ";
+"general.tip.blankMode" = "「暗くする」は内蔵ディスプレイの輝度を下げ、ディスプレイを起こしたまま画面を暗くします。ロックされないので FortiClient のような VPN セッションは接続を維持し、戻ると輝度が復元します。「ディスプレイをスリープ」はディスプレイを完全にオフにしますが、画面がロックされて VPN が切れることがあります。";
+"general.blankSleepWarning" = "「ディスプレイをスリープ」はディスプレイを完全にオフにしますが、画面がロックされて VPN が切れることがあります。";
+
+/* ADR-0037 — VPN 切断通知 (ローカル + Telegram) */
+"notify.vpnDropped.title" = "VPN が切断されました";
+"notify.vpnDropped.body" = "%@ は再認証が必要です（SAML/SSO）。Electronic Clam は自動再接続しません — FortiClient を開いて再度サインインしてください。";
+"telegram.vpn.dropped" = "🔌 VPN が切断されました（%@）— FortiClient は再認証が必要です（SAML）。自動再接続なし。";

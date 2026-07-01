@@ -25,6 +25,33 @@ final class GeneralPaneViewController: NSViewController {
     /// Inline guidance shown only when the OS reports `.requiresApproval` — the
     /// user disabled the entry in System Settings, so `register()` won't force it.
     private let loginItemNote = NSTextField(wrappingLabelWithString: "")
+    /// ADR-0037 — opt-in "클램쉘 잠금 방지" toggle. State is mirrored from
+    /// `store.clamshellLockGuardEnabled`; `clamshellGuardToggled()` persists it via
+    /// the StateStore setter (→ converge → VirtualDisplayController).
+    private let clamshellGuardCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+    /// ADR-0037 S3 §폴백 — VPN 끊김 알림 opt-in 체크박스(잠금 가드와 독립). State 는
+    /// `store.vpnDisconnectNotifyEnabled` 미러; `vpnNotifyToggled()` 가 StateStore
+    /// 세터로 영속(→ converge → VpnWatcher).
+    private let vpnNotifyCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+    /// ADR-0037 S3 §폴백 — VPN 서비스 선택 팝업(자유 입력 → 드롭다운). `scutil --nc
+    /// list` 의 표시 이름들로 채우고 선택 시 `store.setVpnServiceName` 으로 영속한다.
+    /// 사용자가 이름을 오타내 "No service" 가 나던 문제를 아예 제거(못 고르게).
+    /// `themePopup`/`blankModePopup` 과 동일한 popup idiom. `reloadVpnServices()` 가
+    /// loadView·refresh·Refresh 버튼에서 채운다.
+    private let vpnServicePopup = NSPopUpButton(frame: .zero, pullsDown: false)
+    /// 팝업을 `scutil --nc list` 로 다시 스캔하는 새로고침 버튼(VPN 앱이 꺼져 있다
+    /// 켜졌을 때 등 — 패널이 떠 있는 동안 서비스 목록이 바뀔 수 있다).
+    private let vpnRefreshButton = NSButton(title: "", target: nil, action: nil)
+    /// VPN 안전망 동작 설명(잠금 가드 + Telegram opt-in 에 올라타며, 끊김 시 알림만 함).
+    private let vpnServiceNote = NSTextField(wrappingLabelWithString: "")
+    /// ADR-0037 §#8 — "Blank screen" 동작 모드 선택 (dim/sleep). State 는
+    /// `store.blankDisplaysMode` 미러; `blankModeChanged()` 가 StateStore 세터로 영속.
+    /// themePopup 과 동일한 popup form-row 패턴.
+    private let blankModePopup = NSPopUpButton(frame: .zero, pullsDown: false)
+    /// Blank-mode popup row order — index maps to this array, not `allCases`.
+    private let blankModeOrder: [StateStore.BlankDisplaysMode] = [.dim, .sleep]
+    /// ADR-0037 §#8 — Sleep 선택 시에만 보이는 경고(화면 잠금→VPN 끊김). `.dim` 일 땐 숨김.
+    private let blankModeNote = NSTextField(wrappingLabelWithString: "")
     /// ADR-0035 — notify-only update controls. The link button runs a manual
     /// check; the checkbox is an opt-out for the daily background check
     /// (`renderUpdatesRow()` syncs it from `UpdateChecker.autoCheckEnabled`).
@@ -51,6 +78,17 @@ final class GeneralPaneViewController: NSViewController {
     /// XPC 에 응답 안 함("죽었는데 enabled"). `store.helperUnreachable && .enabled`
     /// 일 때만 표시; 위 Reinstall Helper 액션으로 안내한다.
     private let helperUnreachableNote = NSTextField(wrappingLabelWithString: "")
+    /// ADR-0039 — split-brain(중복본)·설치 위치·버전 스큐 진단을 설정 화면에 노출
+    /// (CLI `eclam status` 신호를 터미널 안 쓰는 유저에게도). mdfind/launchctl 을
+    /// 도는 스캔이라 off-main 으로 수집(`refreshInstallHealth`) 후 메인에서 렌더한다.
+    /// 문제가 없으면 숨김 — 정상 머신엔 노이즈 없음.
+    private let installHealthNote = NSTextField(wrappingLabelWithString: "")
+    /// ADR-0039 — "Reinstall Helper" 가 재등록 후에도 helper 를 못 살리면(죽은 BTM
+    /// 레코드가 제거된/중복 복사본에 묶인 2026-07-01 사건), CLI `eclam repair` 가 주는
+    /// 것과 같은 최후수단(`sudo sfltool resetbtm`)을 안내한다. 앱은 sudo 명령을 직접
+    /// 실행할 수 없으므로(admin+터미널) 명령을 보여줄 뿐. `reinstallTapped` 가 실패
+    /// 판정 시에만 표시; 기본 숨김(패널 재표시 시에도 숨김 — reinstall 액션 종속).
+    private let resetBtmNote = NSTextField(wrappingLabelWithString: "")
     /// proposal §2 — 진단 번들 내보내기 버튼.
     private let exportDiagnosticsButton = NSButton(title: "", target: nil, action: nil)
 
@@ -120,6 +158,111 @@ final class GeneralPaneViewController: NSViewController {
         loginItemNote.textColor = .systemOrange
         loginItemNote.isSelectable = false
         loginItemNote.isHidden = true   // renderLoginItemRow() 가 상태에 맞게 갱신
+
+        // ADR-0037 — opt-in "클램쉘 잠금 방지". 헤드리스 클램쉘(덮개 닫힘·외장
+        // 없음)에서 보이지 않는 가상 디스플레이로 세션을 앵커해 화면 잠금을 막아
+        // VPN(예: FortiClient) 연속성을 지킨다. 카피는 디스플레이 축이 아니라 VPN/
+        // 세션 연속성 맥락(ADR-0037 §노출). loginItemCheckbox 와 같은 form-row 문법.
+        clamshellGuardCheckbox.translatesAutoresizingMaskIntoConstraints = false
+        clamshellGuardCheckbox.title = NSL("general.clamshellGuard",
+            "Prevent lock in clamshell (keep VPN alive)")
+        clamshellGuardCheckbox.target = self
+        clamshellGuardCheckbox.action = #selector(clamshellGuardToggled)
+        clamshellGuardCheckbox.state = store.clamshellLockGuardEnabled ? .on : .off
+        clamshellGuardCheckbox.toolTip = NSL("general.tip.clamshellGuard",
+            "When your Mac stays awake with the lid closed and no external display, "
+            + "Electronic Clam keeps an invisible virtual display alive so macOS "
+            + "doesn't lock the screen — a lock would drop VPN sessions like "
+            + "FortiClient. No window appears and it draws essentially no power. "
+            + "Off by default.")
+
+        // ADR-0037 S3 — VPN 끊김 알림 opt-in. 잠금 가드와 **독립**된 토글이라(가드를
+        // 안 켜도 끊김만 알리고 싶을 수 있다) 같은 "Sessions" 그룹에 세로로 묶되 별도
+        // 체크박스로 둔다. updatesRow 가 한 라벨 아래 컨트롤 둘을 묶는 패턴과 동일.
+        vpnNotifyCheckbox.translatesAutoresizingMaskIntoConstraints = false
+        vpnNotifyCheckbox.title = NSL("general.vpnNotify",
+            "Notify when VPN disconnects (Telegram + local)")
+        vpnNotifyCheckbox.target = self
+        vpnNotifyCheckbox.action = #selector(vpnNotifyToggled)
+        vpnNotifyCheckbox.state = store.vpnDisconnectNotifyEnabled ? .on : .off
+        vpnNotifyCheckbox.toolTip = NSL("general.tip.vpnNotify",
+            "While the Mac is kept awake, Electronic Clam watches your VPN with scutil "
+            + "and notifies you if it disconnects — a local alert plus Telegram if you've "
+            + "configured it. It never reconnects automatically (FortiClient needs SAML "
+            + "sign-in). Independent of the clamshell guard. Off by default.")
+        let sessionsControls = NSStackView(views: [clamshellGuardCheckbox, vpnNotifyCheckbox])
+        sessionsControls.orientation = .vertical
+        sessionsControls.alignment = .leading
+        sessionsControls.spacing = 6
+        let clamshellGuardRow = Self.formRow(NSL("general.sessions", "Sessions"),
+                                             control: sessionsControls)
+
+        // ADR-0037 S3 §폴백 — VPN 서비스 선택 팝업 + 새로고침. 자유 입력은 오타로
+        // "No service" 를 유발했다(실측) → `scutil --nc list` 의 표시 이름에서 고르게
+        // 한다. `themePopup`/`blankModePopup` 과 동일한 popup form-row idiom. 항목은
+        // `reloadVpnServices()` 가 채운다(loadView·refresh·Refresh 버튼).
+        vpnServicePopup.translatesAutoresizingMaskIntoConstraints = false
+        vpnServicePopup.target = self
+        vpnServicePopup.action = #selector(vpnServiceSelected)
+        // 비활성 "(서비스 없음)" 힌트를 신뢰성 있게 비활성으로 유지하려면 자동
+        // 활성화를 끈다(켜져 있으면 메뉴가 표시 때 재검증해 덮어쓸 수 있다).
+        vpnServicePopup.autoenablesItems = false
+        let vpnServiceTip = NSL("general.tip.vpnService",
+            "Pick your VPN service (as macOS sees it in Settings → Network). FortiClient's "
+            + "is usually \"VPN\". Electronic Clam watches it with scutil and, if it drops, "
+            + "notifies you to re-auth — it never reconnects automatically (SAML sign-in "
+            + "required). Use Refresh if your VPN isn't listed yet.")
+        vpnServicePopup.toolTip = vpnServiceTip
+
+        vpnRefreshButton.title = NSL("general.vpnRefresh", "Refresh")
+        vpnRefreshButton.translatesAutoresizingMaskIntoConstraints = false
+        vpnRefreshButton.bezelStyle = .inline
+        vpnRefreshButton.isBordered = false
+        vpnRefreshButton.contentTintColor = .linkColor
+        vpnRefreshButton.font = NSFont.systemFont(ofSize: 12)
+        vpnRefreshButton.target = self
+        vpnRefreshButton.action = #selector(vpnRefreshTapped)
+        vpnRefreshButton.toolTip = NSL("general.tip.vpnRefresh",
+            "Re-scan for VPN services — handy if your VPN app was closed when this opened.")
+
+        let vpnControls = NSStackView(views: [vpnServicePopup, vpnRefreshButton])
+        vpnControls.orientation = .horizontal
+        vpnControls.alignment = .firstBaseline
+        vpnControls.spacing = 8
+        let vpnServiceRow = Self.formRow(NSL("general.vpnService", "VPN service"),
+                                         control: vpnControls)
+
+        vpnServiceNote.translatesAutoresizingMaskIntoConstraints = false
+        vpnServiceNote.font = NSFont.systemFont(ofSize: 11)
+        vpnServiceNote.textColor = .secondaryLabelColor
+        vpnServiceNote.isSelectable = false
+        vpnServiceNote.stringValue = NSL("general.vpnServiceNote",
+            "Pick the VPN to watch, then turn on notifications above. You'll be alerted if "
+            + "it drops (Telegram too, if configured). No auto-reconnect.")
+
+        // ADR-0037 §#8 — "Blank screen" 동작 모드: Dim(기본·VPN-안전) vs Sleep.
+        // themePopup 과 동일한 popup form-row 문법. Sleep 선택 시 아래 경고 노트가
+        // 화면 잠금→VPN 끊김 위험을 알린다(ADR-0037 §#8 — 잠금은 Sleep 경로에서만).
+        blankModePopup.translatesAutoresizingMaskIntoConstraints = false
+        blankModePopup.addItems(withTitles: blankModeOrder.map(Self.blankModeTitle))
+        blankModePopup.selectItem(at: blankModeOrder.firstIndex(of: store.blankDisplaysMode) ?? 0)
+        blankModePopup.target = self
+        blankModePopup.action = #selector(blankModeChanged)
+        blankModePopup.toolTip = NSL("general.tip.blankMode",
+            "Dim lowers the built-in brightness and holds the display awake so the "
+            + "screen goes dark without locking — VPN sessions like FortiClient stay "
+            + "connected, and brightness restores when you return. Sleep fully turns "
+            + "displays off but may lock the screen and disconnect VPN.")
+        let blankModeRow = Self.formRow(NSL("general.blankScreen", "Blank screen"),
+                                        control: blankModePopup)
+
+        blankModeNote.translatesAutoresizingMaskIntoConstraints = false
+        blankModeNote.font = NSFont.systemFont(ofSize: 11)
+        blankModeNote.textColor = .systemOrange
+        blankModeNote.isSelectable = false
+        blankModeNote.stringValue = NSL("general.blankSleepWarning",
+            "Sleep fully turns displays off but may lock the screen and disconnect VPN.")
+        blankModeNote.isHidden = (store.blankDisplaysMode != .sleep)  // refresh() 가 동기화
 
         // ADR-0035 — notify-only "Check for Updates" (no Sparkle/auto-install).
         // A link-style action + an opt-out auto-check toggle, stacked under the
@@ -217,6 +360,22 @@ final class GeneralPaneViewController: NSViewController {
         helperUnreachableNote.isSelectable = false
         helperUnreachableNote.isHidden = true   // renderPermissionRow() 가 상태에 맞게 갱신
 
+        // ADR-0039 — 설치 상태 노트. 경로를 담을 수 있어 isSelectable=true (복사용).
+        // refreshInstallHealth() 가 off-main 스캔 후 갱신; 기본 숨김.
+        installHealthNote.translatesAutoresizingMaskIntoConstraints = false
+        installHealthNote.font = NSFont.systemFont(ofSize: 11)
+        installHealthNote.textColor = .systemOrange
+        installHealthNote.isSelectable = true
+        installHealthNote.isHidden = true
+
+        // ADR-0039 — resetbtm 최후수단 노트. 명령(`sudo sfltool resetbtm`)을 담아
+        // 복사할 수 있게 isSelectable=true. reinstallTapped() 실패 시에만 표시.
+        resetBtmNote.translatesAutoresizingMaskIntoConstraints = false
+        resetBtmNote.font = NSFont.systemFont(ofSize: 11)
+        resetBtmNote.textColor = .systemOrange
+        resetBtmNote.isSelectable = true
+        resetBtmNote.isHidden = true
+
         let formSeparator = Self.separator()
         // 권한 줄들에 보이는 ⓘ(클릭 팝오버) 부착 — hover toolTip과 같은 문자열
         // (2026-06-11 사용자 피드백: hover 전용 도움말은 발견 불가).
@@ -225,11 +384,14 @@ final class GeneralPaneViewController: NSViewController {
         let reinstallRow = InfoButton.wrap(reinstallButton, reinstallTip)
         let diagnosticsRow = InfoButton.wrap(exportDiagnosticsButton, diagnosticsTip)
         let settingsStack = NSStackView(views: [
-            languageRow, themeRow, startupRow, loginItemNote, updatesRow,
+            languageRow, themeRow, startupRow, loginItemNote, clamshellGuardRow,
+            vpnServiceRow, vpnServiceNote,
+            blankModeRow, blankModeNote, updatesRow,
             formSeparator,
             permissionHeader,
             statusRow, permissionRow, reinstallRow, diagnosticsRow,
             helperUnavailableNote, versionMismatchNote, helperUnreachableNote,
+            installHealthNote, resetBtmNote,
         ])
         settingsStack.translatesAutoresizingMaskIntoConstraints = false
         settingsStack.orientation = .vertical
@@ -369,6 +531,8 @@ final class GeneralPaneViewController: NSViewController {
             helperUnavailableNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
             versionMismatchNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
             helperUnreachableNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
+            installHealthNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
+            resetBtmNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
             loginItemNote.widthAnchor.constraint(equalTo: settingsStack.widthAnchor),
         ])
         self.view = container
@@ -376,6 +540,8 @@ final class GeneralPaneViewController: NSViewController {
         renderPermissionRow()
         renderLoginItemRow()
         renderUpdatesRow()
+        reloadVpnServices()
+        refreshInstallHealth()
     }
 
     /// Re-sync the popups + permission row (called by SettingsWindowController on
@@ -383,10 +549,71 @@ final class GeneralPaneViewController: NSViewController {
     func refresh() {
         languagePopup.selectItem(at: AppLanguage.currentIndex)
         themePopup.selectItem(at: themeOrder.firstIndex(of: store.menuBarTheme) ?? 0)
+        clamshellGuardCheckbox.state = store.clamshellLockGuardEnabled ? .on : .off
+        vpnNotifyCheckbox.state = store.vpnDisconnectNotifyEnabled ? .on : .off
+        // ADR-0037 S3 — pane 표시·앱 재활성마다 VPN 서비스 목록을 다시 스캔한다(VPN
+        // 앱이 그새 켜졌을 수 있다). 저장값은 reloadVpnServices 가 항상 보존한다.
+        reloadVpnServices()
+        blankModePopup.selectItem(at: blankModeOrder.firstIndex(of: store.blankDisplaysMode) ?? 0)
+        renderBlankModeNote()
         renderStatusCard()
         renderPermissionRow()
         renderLoginItemRow()
         renderUpdatesRow()
+        refreshInstallHealth()
+    }
+
+    /// ADR-0039 — scan for split-brain / install-location / version-skew problems
+    /// off the main thread (mdfind + launchctl shell-outs), then render the result
+    /// on main. The note stays hidden until (and unless) a problem is found, so a
+    /// healthy install shows nothing. Mirrors the CLI `eclam status` warnings for
+    /// users who never open a terminal.
+    private func refreshInstallHealth() {
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let bundlePath = Bundle.main.bundlePath
+            let block = InstallLocation.registrationBlock(bundlePath: bundlePath)
+            let inApps = InstallLocation.isInApplications(bundlePath)
+            let job = LaunchctlInspect.helperJob()
+            let copies = BundleScan.copies()
+            let appVer = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+            DispatchQueue.main.async {
+                self?.renderInstallHealth(block: block, inApps: inApps,
+                                          copies: copies, job: job, appVer: appVer)
+            }
+        }
+    }
+
+    /// Build the install-health message on main (all NSL on main) from the data
+    /// scanned in `refreshInstallHealth`. Empty ⇒ hide the note.
+    private func renderInstallHealth(block: InstallLocation.Block?, inApps: Bool,
+                                     copies: [BundleScan.Copy],
+                                     job: LaunchctlInspect.JobInfo?, appVer: String?) {
+        var lines: [String] = []
+        if let block = block {
+            lines.append(block.kind == .quarantined
+                ? NSL("installhealth.quarantined", "Electronic Clam is running from a download location, so macOS won’t let its helper start. Move it to the Applications folder and reopen it.")
+                : NSL("installhealth.translocated", "macOS is running Electronic Clam from a temporary read-only location. Move it to the Applications folder and reopen it."))
+        } else if !inApps {
+            lines.append(NSL("installhealth.outside", "Electronic Clam is running outside the Applications folder, which can stop its helper from starting reliably. Move it to Applications and reopen it."))
+        }
+        if copies.count > 1 {
+            let paths = copies.map { "  • \($0.shortVersion ?? "?")  \($0.path)" }.joined(separator: "\n")
+            lines.append(NSL("installhealth.copies",
+                "Multiple copies of Electronic Clam were found. Keep only the one in Applications and delete the rest:") + "\n" + paths)
+        }
+        if let reg = job?.parentBundleVersion, let appVer = appVer, reg != appVer {
+            lines.append(NSLf("installhealth.skew",
+                "The running app (%1$@) doesn’t match the registered helper (%2$@) — likely leftover copies. Use Reinstall Helper, or remove the extra copies above.", appVer, reg))
+        } else if job?.spawnFailed == true, block == nil, inApps {
+            // spawn-failed without a location/skew cause we already explained above.
+            lines.append(NSL("installhealth.spawnFailed",
+                "The background helper failed to start (a configuration error). Try Reinstall Helper; if it persists, restart your Mac."))
+        }
+
+        let message = lines.isEmpty ? nil
+            : lines.map { "⚠\u{FE0E} \($0)" }.joined(separator: "\n\n")
+        installHealthNote.isHidden = (message == nil)
+        installHealthNote.stringValue = message ?? ""
     }
 
     /// Status word + color for a registration state. Shared by the status card
@@ -512,6 +739,14 @@ final class GeneralPaneViewController: NSViewController {
         }
     }
 
+    /// ADR-0037 §#8 — popup titles for the blank-displays mode.
+    private static func blankModeTitle(_ mode: StateStore.BlankDisplaysMode) -> String {
+        switch mode {
+        case .dim:   return NSL("blankMode.dim", "Dim (keep VPN)")
+        case .sleep: return NSL("blankMode.sleep", "Sleep displays")
+        }
+    }
+
     // MARK: - Actions
 
     @objc private func openRepo() {
@@ -552,15 +787,34 @@ final class GeneralPaneViewController: NSViewController {
     /// off-main to avoid a beachball; the disabled button signals "in progress".
     @objc private func reinstallTapped() {
         reinstallButton.isEnabled = false
+        resetBtmNote.isHidden = true   // clear any prior escalation while retrying
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let (status, err) = HelperRegistration.forceReregister(timeout: 15)
+            // ADR-0039 — verify it actually came back (registration intent ≠ launchd
+            // liveness): probe XPC like CLI `eclam repair` does, so a re-registration
+            // that "succeeds" but leaves a dead daemon still escalates to resetbtm.
+            let recovered = (status == .enabled) && HelperLiveness.isReachable(timeout: 3.0)
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.reinstallButton.isEnabled = true
                 self.store.update(registrationStatus: status, registrationError: err)
                 self.renderPermissionRow()
+                self.renderResetBtmNote(recovered: recovered)
+                self.refreshInstallHealth()   // re-scan duplicates/skew after the attempt
             }
         }
+    }
+
+    /// ADR-0039 — escalate to the `sudo sfltool resetbtm` last resort when a
+    /// reinstall didn't bring the helper back (the 2026-07-01 incident: a stale BTM
+    /// record bound to a removed/duplicate copy, which only resetbtm cleared). The
+    /// app can't run the sudo command itself, so it shows it for the user to run in
+    /// Terminal. Only shown right after a failed reinstall; hidden on success.
+    private func renderResetBtmNote(recovered: Bool) {
+        resetBtmNote.isHidden = recovered
+        guard !recovered else { return }
+        resetBtmNote.stringValue = "⚠\u{FE0E} " + NSL("resetbtm.note",
+            "The helper still isn’t responding. A stale background record may be bound to a removed or duplicate copy. As a last resort, open Terminal and run “sudo sfltool resetbtm”, then restart your Mac and reopen Electronic Clam. This resets every app’s login items.")
     }
 
     /// proposal §2 — 진단 번들 내보내기. 성공 시 Finder에서 파일 선택, 실패 시 NSAlert.
@@ -615,6 +869,88 @@ final class GeneralPaneViewController: NSViewController {
             HelperRegistration.openLoginItemsSettings()
         }
         renderLoginItemRow()   // reconcile the checkbox to the OS's actual answer
+    }
+
+    /// ADR-0037 — persist the opt-in clamshell lock guard. The StateStore setter
+    /// fires onChange → AppDelegate.convergeNow → VirtualDisplayController.apply,
+    /// which brings the virtual-display anchor up or down to match.
+    @objc private func clamshellGuardToggled() {
+        store.setClamshellLockGuard(clamshellGuardCheckbox.state == .on)
+    }
+
+    /// ADR-0037 S3 — persist the opt-in VPN-disconnect notification (independent of
+    /// the clamshell guard). The StateStore setter fires onChange → convergeNow →
+    /// VpnWatcher.apply, which arms or stops the scutil poll to match.
+    @objc private func vpnNotifyToggled() {
+        store.setVpnDisconnectNotify(vpnNotifyCheckbox.state == .on)
+    }
+
+    /// ADR-0037 S3 §폴백 — "서비스 없음" 힌트(비활성 항목). 라이브 언어를 따르도록
+    /// 계산 프로퍼티로 둔다.
+    private static var vpnNoServicesHint: String {
+        NSL("general.vpnService.none", "(no VPN services found — open your VPN app)")
+    }
+
+    /// ADR-0037 S3 §폴백 — VPN 서비스 팝업을 `scutil --nc list` 로 (재)채운다. 저장값을
+    /// 항상 선두에 포함해(라이브 목록에 없어도) 잃지 않고 그걸 선택한다. 라이브가
+    /// 비면(VPN 앱 꺼짐) 저장값 뒤에 비활성 힌트를 덧붙여 이유를 알리고, 저장값도
+    /// 라이브도 없으면 비활성 힌트 1개만 보인다. 런타임 `VpnWatcher.autodetectVpnService`
+    /// 폴백과는 별개의 UI 편의로, 둘 다 유지한다(belt-and-suspenders).
+    private func reloadVpnServices() {
+        let stored = store.vpnServiceName        // init/setter 가 항상 비어있지 않게 정규화.
+        let live = VpnWatcher.listVpnServices()
+        vpnServicePopup.removeAllItems()
+
+        var titles: [String] = []
+        if !stored.isEmpty { titles.append(stored) }
+        for name in live where name != stored { titles.append(name) }
+
+        if titles.isEmpty {
+            vpnServicePopup.addItem(withTitle: Self.vpnNoServicesHint)
+            vpnServicePopup.item(at: 0)?.isEnabled = false
+            vpnServicePopup.selectItem(at: 0)
+            return
+        }
+
+        vpnServicePopup.addItems(withTitles: titles)
+        if live.isEmpty {
+            // 저장값만 있고 라이브 스캔이 빔 — 비활성 힌트로 이유를 보여준다.
+            vpnServicePopup.menu?.addItem(.separator())
+            let hint = NSMenuItem(title: Self.vpnNoServicesHint, action: nil, keyEquivalent: "")
+            hint.isEnabled = false
+            vpnServicePopup.menu?.addItem(hint)
+        }
+        vpnServicePopup.selectItem(withTitle: stored)
+        if vpnServicePopup.indexOfSelectedItem < 0 { vpnServicePopup.selectItem(at: 0) }
+    }
+
+    /// ADR-0037 S3 §폴백 — 팝업에서 고른 VPN 서비스명을 영속한다(→ converge →
+    /// VpnWatcher). 비활성 힌트 항목은 사용자가 못 고르지만 방어적으로 가드한다.
+    @objc private func vpnServiceSelected() {
+        guard let title = vpnServicePopup.titleOfSelectedItem,
+              title != Self.vpnNoServicesHint else { return }
+        store.setVpnServiceName(title)
+    }
+
+    /// ADR-0037 S3 §폴백 — VPN 서비스 목록을 즉시 다시 스캔한다(Refresh 버튼).
+    @objc private func vpnRefreshTapped() {
+        reloadVpnServices()
+    }
+
+    /// ADR-0037 §#8 — persist the chosen blank-displays mode (dim/sleep) and
+    /// re-render the Sleep warning note's visibility.
+    @objc private func blankModeChanged() {
+        let idx = blankModePopup.indexOfSelectedItem
+        guard idx >= 0, idx < blankModeOrder.count else { return }
+        store.setBlankDisplaysMode(blankModeOrder[idx])
+        renderBlankModeNote()
+    }
+
+    /// Sleep 모드일 때만 경고 노트(화면 잠금→VPN 끊김)를 보인다.
+    private func renderBlankModeNote() {
+        let idx = blankModePopup.indexOfSelectedItem
+        let mode = (idx >= 0 && idx < blankModeOrder.count) ? blankModeOrder[idx] : store.blankDisplaysMode
+        blankModeNote.isHidden = (mode != .sleep)
     }
 
     /// ADR-0035 — manual update check. Notify-only: shows the result in an alert;

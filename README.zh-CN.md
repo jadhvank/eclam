@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.2-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · **中文** · [日本語](README.ja.md) · [Español](README.es.md)
@@ -82,6 +82,8 @@
 - **退出时保证恢复睡眠** —— 三重保障:退出时同步恢复、一个 SIGTERM 处理器,以及 App 崩溃时的 20 秒看门狗。
 - **登录时启动(可选)** —— 登录时自动启动 Electronic Clam;默认关闭。
 - **更新通知** —— 检查 GitHub 上的新版本,并指引你前往下载;只通知,绝不自行安装。
+- **合盖 VPN 锁定防护(可选,默认关闭)** —— 在无外接显示器的电池供电下合盖时,屏幕会*锁定*,而这次锁定会让 FortiClient SSL VPN 断开,需要重新登录才能连回。用一个隐形的虚拟显示器把会话“锚住”,屏幕就不会锁定,隧道也得以保持 —— 没有背光,几乎不耗电,也不需要额外硬件或电源。**仅熄屏** 动作也拆分为 **变暗(Dim)**(屏幕熄灭但不锁定 · VPN 安全 · 默认)与 **睡眠(Sleep)**,并可选择在 VPN 断开时收到通知。
+- **更稳健的 helper 设置** —— 从被检疫(quarantine)的下载副本或 macOS 会拦截的临时(translocation)位置运行时,不再注册后台 helper,而是先引导你把 App 移到 Applications。设置会标记重复副本和版本不一致,`eclam repair` 可恢复卡住或不可达的 helper。
 
 ## 安装
 

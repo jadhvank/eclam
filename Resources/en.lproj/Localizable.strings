@@ -262,6 +262,24 @@
 "end.appQuit" = "app quit";
 "end.unknown" = "ended";
 
+/* ADR-0038 — install-location gate (quarantined/translocated bundle can't register the helper) */
+"installgate.title" = "Move Electronic Clam to your Applications folder";
+"installgate.message.quarantined" = "Electronic Clam is running from a download location, so macOS won’t let its background helper start. Move it to the Applications folder and open it from there.";
+"installgate.message.translocated" = "macOS is running Electronic Clam from a temporary read-only location. Move it to the Applications folder and reopen it so its helper can start.";
+"installgate.openApps" = "Open Applications Folder";
+"installgate.later" = "Later";
+
+/* ADR-0039 — install-health note in Settings → General (split-brain / location / version skew) */
+"installhealth.quarantined" = "Electronic Clam is running from a download location, so macOS won’t let its helper start. Move it to the Applications folder and reopen it.";
+"installhealth.translocated" = "macOS is running Electronic Clam from a temporary read-only location. Move it to the Applications folder and reopen it.";
+"installhealth.outside" = "Electronic Clam is running outside the Applications folder, which can stop its helper from starting reliably. Move it to Applications and reopen it.";
+"installhealth.copies" = "Multiple copies of Electronic Clam were found. Keep only the one in Applications and delete the rest:";
+"installhealth.skew" = "The running app (%1$@) doesn’t match the registered helper (%2$@) — likely leftover copies. Use Reinstall Helper, or remove the extra copies above.";
+"installhealth.spawnFailed" = "The background helper failed to start (a configuration error). Try Reinstall Helper; if it persists, restart your Mac.";
+
+/* ADR-0039 — resetbtm last resort shown when Reinstall Helper still fails */
+"resetbtm.note" = "The helper still isn’t responding. A stale background record may be bound to a removed or duplicate copy. As a last resort, open Terminal and run “sudo sfltool resetbtm”, then restart your Mac and reopen Electronic Clam. This resets every app’s login items.";
+
 /* ADR-0018 — first-run approval onboarding */
 "onboarding.title" = "Approval needed to keep your Mac awake";
 "onboarding.message" = "Electronic Clam needs you to allow its background helper in System Settings → General → Login Items. Open it now and switch Electronic Clam on.";
@@ -379,3 +397,26 @@
 "telegram.evtDigest" = "Periodic status while working (silent), every";
 "telegram.tip.evtDigest" = "A heartbeat while something is keeping the Mac awake: a silent status message (no sound, no banner) at this interval, so a missing heartbeat tells you the Mac or network died. Stops the moment work ends.";
 "telegram.digest" = "📊 Still awake — %@";
+
+/* ADR-0037 — clamshell guard · VPN watch · blank-screen mode (vdisplay) */
+"general.sessions" = "Sessions";
+"general.clamshellGuard" = "Prevent lock in clamshell (keep VPN alive)";
+"general.tip.clamshellGuard" = "When your Mac stays awake with the lid closed and no external display, Electronic Clam keeps an invisible virtual display alive so macOS doesn't lock the screen — a lock would drop VPN sessions like FortiClient. No window appears and it draws essentially no power. Off by default.";
+"general.vpnNotify" = "Notify when VPN disconnects (Telegram + local)";
+"general.tip.vpnNotify" = "While the Mac is kept awake, Electronic Clam watches your VPN with scutil and notifies you if it disconnects — a local alert plus Telegram if you've configured it. It never reconnects automatically (FortiClient needs SAML sign-in). Independent of the clamshell guard. Off by default.";
+"general.vpnService" = "VPN service";
+"general.tip.vpnService" = "Pick your VPN service (as macOS sees it in Settings → Network). FortiClient's is usually \"VPN\". Electronic Clam watches it with scutil and, if it drops, notifies you to re-auth — it never reconnects automatically (SAML sign-in required). Use Refresh if your VPN isn't listed yet.";
+"general.vpnRefresh" = "Refresh";
+"general.tip.vpnRefresh" = "Re-scan for VPN services — handy if your VPN app was closed when this opened.";
+"general.vpnServiceNote" = "Pick the VPN to watch, then turn on notifications above. You'll be alerted if it drops (Telegram too, if configured). No auto-reconnect.";
+"general.vpnService.none" = "(no VPN services found — open your VPN app)";
+"general.blankScreen" = "Blank screen";
+"blankMode.dim" = "Dim (keep VPN)";
+"blankMode.sleep" = "Sleep displays";
+"general.tip.blankMode" = "Dim lowers the built-in brightness and holds the display awake so the screen goes dark without locking — VPN sessions like FortiClient stay connected, and brightness restores when you return. Sleep fully turns displays off but may lock the screen and disconnect VPN.";
+"general.blankSleepWarning" = "Sleep fully turns displays off but may lock the screen and disconnect VPN.";
+
+/* ADR-0037 — VPN-disconnect notifications (local + Telegram) */
+"notify.vpnDropped.title" = "VPN disconnected";
+"notify.vpnDropped.body" = "%@ needs re-auth (SAML/SSO). Electronic Clam won't auto-reconnect — open FortiClient and sign in again.";
+"telegram.vpn.dropped" = "🔌 VPN disconnected (%@) — FortiClient needs re-auth (SAML). No auto-reconnect.";

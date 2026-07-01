@@ -191,6 +191,27 @@ final class TelegramNotifier {
         send(compose(head))
     }
 
+    // MARK: - VPN safety-net (ADR-0037 S3 §폴백)
+
+    /// ADR-0037 §폴백 — VPN(예: FortiClient) 세션이 Connected→Disconnected 로
+    /// 떨어졌을 때의 안전망 알림. 가상 디스플레이 앵커(S1)가 실패했거나 잠금이
+    /// 새어나가 VPN 이 끊긴 경우 사용자에게 "재인증 필요"를 알린다. **자동 재연결은
+    /// 시도하지 않는다**(SAML 재인증 불가 — ADR-0037 §대안 `scutil --nc start` 실패).
+    ///
+    /// 마스터 opt-in(`isConfigured`) 게이트만 거친다 — 끊김은 SAML 재인증을 요구하는
+    /// 치명적 이벤트라 하위 토글로 묵살되지 않게 한다. `VpnWatcher` 가 disconnect
+    /// 에지에서 1회 호출(에피소드당 1회 디바운스). 메인 스레드에서 호출할 것
+    /// (`compose` 가 store 를, `send` 가 `lastSend*` 를 메인 전제로 읽는다).
+    func notifyVpnDisconnected(serviceName: String) {
+        // 게이트 결정 로그(BUG2 진단용) — master opt-in 이 꺼져 있으면 send 가 조용히
+        // no-op 한다. 로컬 알림은 VpnWatcher 가 별도로 띄우므로 여기서 안 막힌다.
+        log.notice("vpn-drop telegram: isConfigured(master opt-in)=\(self.settings.isConfigured, privacy: .public) — \(self.settings.isConfigured ? "attempting send" : "skipped (configure Telegram to enable)", privacy: .public)")
+        let head = NSLf("telegram.vpn.dropped",
+            "🔌 VPN disconnected (%@) — FortiClient needs re-auth (SAML). No auto-reconnect.",
+            serviceName)
+        send(compose(head))
+    }
+
     // MARK: - Test / Detect (Settings 패널)
 
     /// 테스트 전송. completion 은 메인 스레드, nil ⇒ 성공 / 문자열 ⇒ 에러.
@@ -276,8 +297,11 @@ final class TelegramNotifier {
         if silent { body["disable_notification"] = true }
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
-        let task = session.dataTask(with: request) { [weak self] data, _, error in
+        let task = session.dataTask(with: request) { [weak self] data, response, error in
             guard let self = self else { return }
+            // 전송 시도 + HTTP 상태 로그(BUG2 진단용). 토큰·본문은 남기지 않는다.
+            let httpStatus = (response as? HTTPURLResponse)?.statusCode
+            self.log.info("telegram send attempt → http=\(httpStatus.map(String.init) ?? "none", privacy: .public)\(error != nil ? " (transport error)" : "", privacy: .public)")
             if let error = error {
                 if !isRetry {
                     self.log.notice("telegram send failed (\(error.localizedDescription, privacy: .public)); retrying once in 5s")

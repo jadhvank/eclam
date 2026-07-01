@@ -1,5 +1,5 @@
 cask "eclam" do
-  version "0.6.1"
+  version "0.6.2"
   sha256 :no_check # placeholder; scripts/release.sh rewrites this to the real digest at release
 
   url "https://github.com/jadhvank/eclam/releases/download/v#{version}/ElectronicClam-#{version}.zip"

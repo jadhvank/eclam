@@ -59,11 +59,30 @@ swiftc -O -target "$TARGET" \
     -o "$MACOS_DIR/eclam-hook" \
     "${HOOK_SRC[@]}" "${SHARED_SRC[@]}"
 
+# ADR-0037 S1 — ObjC shim for the private CGVirtualDisplay SPI (clamshell lock
+# guard). Reached via NSClassFromString inside the .m, so there is no link-time
+# class symbol: a missing class degrades to NO instead of failing the link. ARC
+# on, same arm64 target as the app. APP_SRC globs only *.swift, so swiftc never
+# sees the .m/.h except via -import-objc-header below.
+echo "==> Compiling virtual-display ObjC shim (ADR-0037)"
+VD_SHIM_O="$ROOT/build/VirtualDisplayShim.o"
+xcrun clang -c -fobjc-arc -target "$TARGET" \
+    -o "$VD_SHIM_O" \
+    "$ROOT/Sources/ElectronicClamApp/VirtualDisplayShim.m"
+
 echo "==> Compiling app"
+# ADR-0037 S1 — link the shim .o, import its clean header as the Swift bridging
+# header, and pin -framework CoreGraphics (the shim's mirror/reconfig calls).
 swiftc -O -target "$TARGET" \
     -framework AppKit -framework Foundation -framework ServiceManagement -framework IOKit \
+    -framework CoreGraphics \
+    -import-objc-header "$ROOT/Sources/ElectronicClamApp/VirtualDisplayShim.h" \
     -o "$MACOS_DIR/ElectronicClam" \
-    "${APP_SRC[@]}" "${SHARED_SRC[@]}"
+    "${APP_SRC[@]}" "${SHARED_SRC[@]}" \
+    "$VD_SHIM_O"
+# 링크 완료 — 중간 .o 는 이미 앱 바이너리에 링크됐으므로 제거한다. 산출물 폴더
+# (build/) 에 .app 옆에 남으면 "이것도 배포해야 하나?" 혼란을 준다(셸 산출물 청소).
+rm -f "$VD_SHIM_O"
 
 echo "==> Assembling bundle"
 cp "$ROOT/Resources/App-Info.plist" "$APP/Contents/Info.plist"

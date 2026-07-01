@@ -259,6 +259,24 @@
 "end.appQuit" = "앱 종료";
 "end.unknown" = "종료됨";
 
+/* ADR-0038 — 설치 위치 게이트 (quarantine/translocation 번들은 헬퍼 등록 불가) */
+"installgate.title" = "Electronic Clam을 응용 프로그램 폴더로 옮기세요";
+"installgate.message.quarantined" = "Electronic Clam이 다운로드한 위치에서 실행되고 있어 macOS가 백그라운드 도우미 실행을 막고 있습니다. 응용 프로그램 폴더로 옮긴 뒤 거기서 열어 주세요.";
+"installgate.message.translocated" = "macOS가 Electronic Clam을 임시 읽기 전용 위치에서 실행하고 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어야 도우미가 실행됩니다.";
+"installgate.openApps" = "응용 프로그램 폴더 열기";
+"installgate.later" = "나중에";
+
+/* ADR-0039 — 설정 → 일반의 설치 상태 노트 (중복본 / 위치 / 버전 스큐) */
+"installhealth.quarantined" = "Electronic Clam이 다운로드한 위치에서 실행되고 있어 macOS가 도우미 실행을 막고 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어 주세요.";
+"installhealth.translocated" = "macOS가 Electronic Clam을 임시 읽기 전용 위치에서 실행하고 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어 주세요.";
+"installhealth.outside" = "Electronic Clam이 응용 프로그램 폴더 밖에서 실행되고 있어 도우미가 안정적으로 시작되지 않을 수 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어 주세요.";
+"installhealth.copies" = "Electronic Clam 복사본이 여러 개 발견됐습니다. 응용 프로그램 폴더의 것 하나만 남기고 나머지는 삭제하세요:";
+"installhealth.skew" = "실행 중인 앱(%1$@)이 등록된 도우미(%2$@)와 일치하지 않습니다 — 남은 복사본 때문일 수 있습니다. ‘도우미 재설치’를 쓰거나 위의 여분 복사본을 삭제하세요.";
+"installhealth.spawnFailed" = "백그라운드 도우미가 시작에 실패했습니다(구성 오류). ‘도우미 재설치’를 시도하고, 계속되면 Mac을 재시작하세요.";
+
+/* ADR-0039 — ‘도우미 재설치’도 실패할 때 보여 주는 resetbtm 최후수단 */
+"resetbtm.note" = "도우미가 여전히 응답하지 않습니다. 제거됐거나 중복된 복사본에 묶인 오래된 백그라운드 레코드 때문일 수 있습니다. 최후수단으로 터미널에서 “sudo sfltool resetbtm”을 실행한 뒤, Mac을 재시작하고 Electronic Clam을 다시 열어 주세요. 이 명령은 모든 앱의 로그인 항목을 초기화합니다.";
+
 /* ADR-0018 — 첫 실행 승인 온보딩 */
 "onboarding.title" = "Mac을 깨어있게 하려면 승인이 필요합니다";
 "onboarding.message" = "시스템 설정 → 일반 → 로그인 항목에서 Electronic Clam 백그라운드 도우미를 허용해야 합니다. 지금 열어 Electronic Clam을 켜 주세요.";
@@ -376,3 +394,26 @@
 "telegram.evtDigest" = "작업 중 주기 상태 (무음), 간격";
 "telegram.tip.evtDigest" = "Mac이 깨어있는 동안의 하트비트: 이 간격으로 무음 상태 메시지(소리·배너 없음)를 보냅니다. 오던 하트비트가 끊기면 Mac이나 네트워크가 죽었다는 신호입니다. 작업이 끝나면 즉시 멈춥니다.";
 "telegram.digest" = "📊 아직 깨어있음 — %@";
+
+/* ADR-0037 — 클램쉘 잠금 방지 · VPN 감시 · 화면 끄기 모드 (vdisplay) */
+"general.sessions" = "세션";
+"general.clamshellGuard" = "클램쉘에서 잠금 방지 (VPN 유지)";
+"general.tip.clamshellGuard" = "덮개를 닫고 외부 디스플레이도 없이 Mac이 깨어있을 때, Electronic Clam이 보이지 않는 가상 디스플레이를 띄워 macOS가 화면을 잠그지 않게 합니다 — 화면이 잠기면 FortiClient 같은 VPN 세션이 끊깁니다. 창은 뜨지 않고 전력도 거의 쓰지 않습니다. 기본값은 꺼짐.";
+"general.vpnNotify" = "VPN이 끊기면 알림 (Telegram + 로컬)";
+"general.tip.vpnNotify" = "Mac을 깨워두는 동안 Electronic Clam이 scutil로 VPN을 지켜보다가 끊기면 알려줍니다 — 로컬 알림과, 설정해 두었다면 Telegram도 함께. 자동으로 재연결하지는 않습니다(FortiClient는 SAML 로그인이 필요합니다). 클램쉘 가드와는 별개입니다. 기본값은 꺼짐.";
+"general.vpnService" = "VPN 서비스";
+"general.tip.vpnService" = "VPN 서비스를 고르세요(macOS가 시스템 설정 → 네트워크에서 보는 이름 그대로). FortiClient는 보통 \"VPN\"입니다. Electronic Clam이 scutil로 지켜보다가 끊기면 재인증하라고 알려줍니다 — 자동으로 재연결하지는 않습니다(SAML 로그인 필요). VPN이 아직 목록에 없으면 새로고침을 누르세요.";
+"general.vpnRefresh" = "새로고침";
+"general.tip.vpnRefresh" = "VPN 서비스를 다시 검색합니다 — 이 화면을 열 때 VPN 앱이 꺼져 있었다면 유용합니다.";
+"general.vpnServiceNote" = "지켜볼 VPN을 고른 뒤 위에서 알림을 켜세요. 끊기면 알려줍니다(설정해 두었다면 Telegram도). 자동 재연결은 없습니다.";
+"general.vpnService.none" = "(VPN 서비스를 찾지 못함 — VPN 앱을 여세요)";
+"general.blankScreen" = "화면 끄기";
+"blankMode.dim" = "어둡게 (VPN 유지)";
+"blankMode.sleep" = "디스플레이 잠자기";
+"general.tip.blankMode" = "어둡게는 내장 디스플레이 밝기를 낮추고 디스플레이를 깨워둬, 잠금 없이 화면만 어두워집니다 — FortiClient 같은 VPN 세션이 연결을 유지하고, 돌아오면 밝기가 복원됩니다. 잠자기는 디스플레이를 완전히 끄지만 화면이 잠기고 VPN이 끊길 수 있습니다.";
+"general.blankSleepWarning" = "잠자기는 디스플레이를 완전히 끄지만 화면이 잠기고 VPN이 끊길 수 있습니다.";
+
+/* ADR-0037 — VPN 끊김 알림 (로컬 + Telegram) */
+"notify.vpnDropped.title" = "VPN 끊김";
+"notify.vpnDropped.body" = "%@ 재인증이 필요합니다(SAML/SSO). Electronic Clam은 자동 재연결하지 않습니다 — FortiClient를 열어 다시 로그인하세요.";
+"telegram.vpn.dropped" = "🔌 VPN 끊김 (%@) — FortiClient 재인증 필요(SAML). 자동 재연결 없음.";

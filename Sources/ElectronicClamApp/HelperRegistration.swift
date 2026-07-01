@@ -7,8 +7,20 @@ enum HelperRegistration {
     static let plistName = "com.jadhvank.eclam.helper.plist"
     private static let log = Logger(subsystem: "com.jadhvank.eclam", category: "app")
 
+    /// ADR-0038 — why the gate refused to register (nil ⇒ not blocked). AppDelegate reads it
+    /// to show the relocation alert instead of the normal approval onboarding.
+    static private(set) var installBlock: InstallLocation.Block?
+
     /// Register the daemon with SMAppService. ADR-0002 §5: single attempt per launch.
     static func registerIfNeeded() -> SMAppService.Status {
+        // ADR-0038 — gate before register(): a quarantined/translocated bundle can't
+        // spawn a privileged daemon (EX_CONFIG), so don't leave a dead BTM record.
+        if let block = InstallLocation.registrationBlock(bundlePath: Bundle.main.bundlePath) {
+            installBlock = block
+            log.error("registration blocked (\(block.kind.rawValue, privacy: .public)): app at \(Bundle.main.bundlePath, privacy: .public) — not registering (ADR-0038)")
+            return SMAppService.daemon(plistName: plistName).status   // do NOT register — avoid leaving a dead BTM record
+        }
+        installBlock = nil
         let service = SMAppService.daemon(plistName: plistName)
         if service.status == .enabled {
             // P0-b (handoff 2026-06-24) — `.enabled` is registration *intent*,
