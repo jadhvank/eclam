@@ -2,6 +2,10 @@
 
 All notable changes to Electronic Clam are documented here.
 
+## [0.6.3] — 2026-07-02
+
+- **Fix: attaching an external display no longer disturbs your saved arrangement** — with the clamshell lock guard turned on, the invisible anchor used to fight the topology change when you plugged in a real monitor, which could re-shuffle your saved built-in + external layout. It now steps aside immediately — no re-mirror — as soon as a real display appears, so macOS restores the arrangement you set, and the anchor returns automatically when you unplug the external. Headless clamshell lock protection is unchanged.
+
 ## [0.6.2] — 2026-07-01
 
 - **Clamshell VPN lock guard (opt-in, off by default)** — with no external display on battery, closing the lid normally locks the screen, which drops a FortiClient SSL VPN and forces a fresh sign-in to reconnect. When you turn this on, Electronic Clam anchors the session to an invisible virtual display so the screen never locks and the tunnel survives. There's no backlight, so it draws essentially no power, and it needs no extra hardware or power adapter. It's a deliberately deep setting, off unless you go looking for it.

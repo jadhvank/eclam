@@ -59,12 +59,14 @@ static void EClamReconfigCallback(CGDirectDisplayID display,
     dispatch_queue_t _queue;
     BOOL _active;
     BOOL _reconfigRegistered;
+    BOOL _stopScheduled;         // 실물 외장 감지 → main queue teardown 예약 중복 방지
 }
 
 - (BOOL)active { return _active; }
 
 - (BOOL)start {
     if (_active) return YES;
+    _stopScheduled = NO;         // 새 라이프사이클 — 이전 teardown 예약 흔적 리셋
 
     Class descCls     = NSClassFromString(@"CGVirtualDisplayDescriptor");
     Class displayCls  = NSClassFromString(@"CGVirtualDisplay");
@@ -179,6 +181,39 @@ static void EClamReconfigCallback(CGDirectDisplayID display,
     }
     [self teardown];
     _active = NO;
+    _stopScheduled = NO;         // 라이프사이클 종료 — 다음 start→외장연결 사이클 대비
+}
+
+/// 활성 디스플레이 목록에 우리 가상(`_displayID`)도, 내장 패널(built-in)도 아닌
+/// **실물 외장** 디스플레이가 하나라도 있으면 YES. 재미러 억제·즉시 teardown 판단용.
+/// 덮개 닫힌 헤드리스(내장 없음, 가상만 활성)에선 NO — 앵커를 유지한다.
+- (BOOL)realExternalDisplayPresent {
+    if (_displayID == 0) return NO;
+    CGDirectDisplayID ids[16];
+    uint32_t count = 0;
+    if (CGGetActiveDisplayList(16, ids, &count) != kCGErrorSuccess) return NO;
+    for (uint32_t i = 0; i < count; i++) {
+        CGDirectDisplayID d = ids[i];
+        if (d == _displayID) continue;       // 우리 가상 앵커
+        if (CGDisplayIsBuiltin(d)) continue; // 내장 패널
+        return YES;                          // 그 외 활성 = 실물 외장
+    }
+    return NO;
+}
+
+/// 실물 외장이 붙으면 앵커를 즉시 비켜준다. 재구성 콜백 안에서 `stop()`(=CG 재구성)을
+/// 동기로 부르면 콜백→unmirror→콜백 재진입 위험이 있어 main queue 로 태워 `AppDelegate`
+/// 의 500ms converge 디바운스를 우회해 ~즉시 내린다. reconfig 이벤트가 몰려도 한 번만
+/// 예약(`_stopScheduled` 가드) — `stop()` 이 콜백을 먼저 해제하므로 unmirror 재구성이
+/// 콜백을 다시 부르지 않는다(무한루프 없음).
+- (void)scheduleExternalTeardown {
+    if (_stopScheduled) return;
+    _stopScheduled = YES;
+    os_log(EClamVDLog(),
+        "clamshell lock guard: real external display attached — yielding anchor immediately (no re-mirror)");
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self stop];
+    });
 }
 
 /// 미러 적용/재적용 — 멱등. 메인이 가상 자신이면(덮개 닫혀 내장이 빠진 단독
@@ -186,6 +221,17 @@ static void EClamReconfigCallback(CGDirectDisplayID display,
 /// 조기 반환한다.
 - (void)reapplyMirror {
     if (_displayID == 0) return;
+
+    // ADR-0037 refinement — 실물 외장이 붙는 순간엔 **절대 재미러하지 않는다.**
+    // 재미러(`CGConfigureDisplayMirrorOfDisplay`)는 새 main 기준으로 토폴로지를
+    // 재구성하는데, 이게 macOS 가 저장해 둔 {내장, 외장} 정렬을 뭉갠다. 실물
+    // 외장이 있으면 앵커는 애초에 필요 없으므로(활성 디스플레이 0 이 안 됨 → 잠금
+    // 안 남) 싸우지 말고 즉시 비켜준다. 그러면 macOS 가 저장된 정렬을 스스로 복원.
+    if ([self realExternalDisplayPresent]) {
+        [self scheduleExternalTeardown];
+        return;
+    }
+
     CGDirectDisplayID main = CGMainDisplayID();
     if (main == _displayID) return;                          // 단독 활성(덮개 닫힘) — 미러 불가/불필요
     if (CGDisplayMirrorsDisplay(_displayID) == main) return; // 이미 미러 중 — 루프 차단

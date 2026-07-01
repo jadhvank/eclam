@@ -21,9 +21,9 @@
         <string>es</string>
     </array>
     <key>CFBundleVersion</key>
-    <string>0.6.2</string>
+    <string>0.6.3</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.6.2</string>
+    <string>0.6.3</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundlePackageType</key>

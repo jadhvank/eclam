@@ -10,7 +10,7 @@ It detects *work*, not just a running process.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.2-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.3-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -171,6 +171,7 @@ open build/ElectronicClam.app
 
 Recent releases — full history in [CHANGELOG.md](CHANGELOG.md):
 
+- **0.6.3** — Fix: with the clamshell lock guard enabled, attaching a real external display no longer disturbs your saved built-in + external arrangement. The invisible anchor now steps aside immediately (no re-mirror) when a real display appears, letting macOS restore your saved layout; it returns automatically when the external is removed. Headless clamshell lock protection is unchanged.
 - **0.6.2** — Clamshell VPN lock guard (opt-in): with no external display on battery, closing the lid no longer locks the screen, so a FortiClient SSL VPN survives instead of dropping — an invisible virtual display anchors the session, the "Blank screen" action now lets you choose **Dim** (VPN-safe, default) or **Sleep**, and an optional notification warns you if the VPN drops. Plus a more resilient helper setup that refuses to register from a quarantined or translocated copy, flags duplicate copies and version mismatches, and recovers via `eclam repair`.
 - **0.6.1** — Honest helper status: a dead-but-registered helper no longer shows a false "enabled". `eclam status` reports it as `unreachable` (exit 2), the app self-repairs on relaunch, a new `eclam repair` command and a menu-bar warning surface it, and `eclam status` now also reports the Open-at-Login state.
 - **0.6.0** — Open at Login, in-app update notifications, awake history, internationalization (English · 한국어 · 中文 · 日本語 · Español), single-click toggle, menu-bar icon themes, remote idle policy, Telegram status notifications, Developer ID signing + notarization.
