@@ -569,7 +569,6 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         let form = NSStackView()
         form.orientation = .vertical
         form.spacing = 6
-        form.translatesAutoresizingMaskIntoConstraints = false
         let idField    = NSTextField(string: "")
         let labelField = NSTextField(string: "")
         let globField  = NSTextField(string: "~/")
@@ -577,10 +576,16 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         labelField.placeholderString = NSL("agents.ph.label", "Label (e.g. My Agent)")
         globField.placeholderString  = NSL("agents.ph.glob", "Glob (e.g. ~/.my-agent/logs/*.log)")
         for field in [idField, labelField, globField] {
+            field.translatesAutoresizingMaskIntoConstraints = false
             field.widthAnchor.constraint(equalToConstant: 320).isActive = true
             form.addArrangedSubview(field)
         }
+        // NSAlert does not size an Auto Layout-only accessory root. Give it a
+        // concrete frame so drawing and hit testing use the same bounds.
+        form.frame.size = form.fittingSize
         alert.accessoryView = form
+        alert.layout()
+        alert.window.initialFirstResponder = idField
         let response = alert.runModal()
         guard response == .alertFirstButtonReturn else { return }
 

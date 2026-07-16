@@ -20,7 +20,12 @@ final class SettingsWindowController: NSWindowController {
     private var telegramViewController: TelegramPaneViewController
     private var historyViewController: HistoryPaneViewController
     private var generalViewController: GeneralPaneViewController
+    // Keep the selector separate from NSTabView's private segmented control.
+    // Current AppKit gives that control a frame wider than its fitting size,
+    // which offsets the focus ring on the first and last segments.
     private let tabView = NSTabView()
+    private let tabSelector = NSSegmentedControl()
+    private let tabSeparator = NSBox()
 
     init(store: StateStore, history: AwakeHistoryStore, onRelocalize: @escaping () -> Void) {
         self.store = store
@@ -59,7 +64,7 @@ final class SettingsWindowController: NSWindowController {
 
     func show(pane: Pane = .general) {
         window?.center()
-        tabView.selectTabViewItem(at: pane.rawValue)
+        selectPane(at: pane.rawValue)
         agentsViewController.refresh()
         remoteViewController.refresh()
         safetyViewController.refresh()
@@ -73,6 +78,15 @@ final class SettingsWindowController: NSWindowController {
     private func buildContent() {
         guard let window = window, let contentView = window.contentView else { return }
         tabView.translatesAutoresizingMaskIntoConstraints = false
+        tabView.tabViewType = .noTabsNoBorder
+
+        tabSelector.translatesAutoresizingMaskIntoConstraints = false
+        tabSelector.trackingMode = .selectOne
+        tabSelector.target = self
+        tabSelector.action = #selector(tabSelectionChanged(_:))
+
+        tabSeparator.translatesAutoresizingMaskIntoConstraints = false
+        tabSeparator.boxType = .separator
 
         let generalTab = NSTabViewItem(identifier: "general")
         generalTab.label = NSL("tab.general", "General")
@@ -104,13 +118,37 @@ final class SettingsWindowController: NSWindowController {
         historyTab.view = historyViewController.view
         tabView.addTabViewItem(historyTab)
 
+        let tabItems = [generalTab, agentsTab, remoteTab, safetyTab, telegramTab, historyTab]
+        tabSelector.segmentCount = tabItems.count
+        for (index, item) in tabItems.enumerated() {
+            tabSelector.setLabel(item.label, forSegment: index)
+        }
+        tabSelector.selectedSegment = Pane.general.rawValue
+
+        contentView.addSubview(tabSelector)
+        contentView.addSubview(tabSeparator)
         contentView.addSubview(tabView)
         NSLayoutConstraint.activate([
-            tabView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            tabSelector.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            tabSelector.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            tabSeparator.topAnchor.constraint(equalTo: tabSelector.bottomAnchor, constant: 4),
+            tabSeparator.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            tabSeparator.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            tabView.topAnchor.constraint(equalTo: tabSeparator.bottomAnchor),
             tabView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             tabView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
             tabView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
         ])
+    }
+
+    @objc private func tabSelectionChanged(_ sender: NSSegmentedControl) {
+        selectPane(at: sender.selectedSegment)
+    }
+
+    private func selectPane(at index: Int) {
+        guard index >= 0, index < tabView.numberOfTabViewItems else { return }
+        tabSelector.selectedSegment = index
+        tabView.selectTabViewItem(at: index)
     }
 
     /// ADR-0011 §C v3 — 재시작도, 창 재생성도 없는 라이브 언어 전환.
@@ -140,9 +178,11 @@ final class SettingsWindowController: NSWindowController {
             let item = tabView.tabViewItem(at: i)
             item.label = label
             item.view = vc.view
+            tabSelector.setLabel(label, forSegment: i)
         }
+        tabSelector.invalidateIntrinsicContentSize()
         window?.title = NSL("settings.title", "Electronic Clam Settings")
-        tabView.selectTabViewItem(at: selectedIndex)
+        selectPane(at: selectedIndex)
         generalViewController.refresh()
     }
 }
