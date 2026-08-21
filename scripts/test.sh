@@ -165,7 +165,8 @@ else
 fi
 
 # ── TelegramSupport 게이팅·파싱 테스트 (ADR-0028) ──────────────────────────
-# 순수 계층(TelegramSupport.swift)만 컴파일 — TelegramNotifier 는 URLSession·NSL 결합.
+# 순수 계층(TelegramSupport.swift + 공통 게이팅 ChatNotifySupport.swift)만
+# 컴파일 — TelegramNotifier 는 URLSession·NSL 결합.
 if [ -f "$ROOT/Tests/TelegramSupportTests.swift" ]; then
     echo "==> Compiling telegram support tests"
     swiftc -target "$TARGET" \
@@ -173,12 +174,32 @@ if [ -f "$ROOT/Tests/TelegramSupportTests.swift" ]; then
         -o "$TMP/eclam_telegramtests" \
         "$ROOT/Sources/ElectronicClamApp/SafetyPolicy.swift" \
         "$ROOT/Sources/ElectronicClamApp/AwakeEpisode.swift" \
+        "$ROOT/Sources/ElectronicClamApp/ChatNotifySupport.swift" \
         "$ROOT/Sources/ElectronicClamApp/TelegramSupport.swift" \
         "$ROOT/Tests/TelegramSupportTests.swift"
     echo "==> Running telegram support tests"
     "$TMP/eclam_telegramtests"
 else
     echo "==> Skipping telegram support tests (Tests/TelegramSupportTests.swift absent)"
+fi
+
+# ── SlackSupport 게이팅·파싱 테스트 ────────────────────────────────────────
+# Telegram 쪽과 같은 구성 — 순수 계층만 컴파일하고 SlackNotifier(URLSession·
+# NSL 결합)는 끌고 오지 않는다.
+if [ -f "$ROOT/Tests/SlackSupportTests.swift" ]; then
+    echo "==> Compiling slack support tests"
+    swiftc -target "$TARGET" \
+        -framework Foundation \
+        -o "$TMP/eclam_slacktests" \
+        "$ROOT/Sources/ElectronicClamApp/SafetyPolicy.swift" \
+        "$ROOT/Sources/ElectronicClamApp/AwakeEpisode.swift" \
+        "$ROOT/Sources/ElectronicClamApp/ChatNotifySupport.swift" \
+        "$ROOT/Sources/ElectronicClamApp/SlackSupport.swift" \
+        "$ROOT/Tests/SlackSupportTests.swift"
+    echo "==> Running slack support tests"
+    "$TMP/eclam_slacktests"
+else
+    echo "==> Skipping slack support tests (Tests/SlackSupportTests.swift absent)"
 fi
 
 # ── HoldState 직렬화/파싱 테스트 (P3, ADR-0025) ────────────────────────────

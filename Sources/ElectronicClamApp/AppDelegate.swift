@@ -77,12 +77,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             onOpenAgentsPane: { [weak self] in self?.openSettings(pane: .agents) })
         self.menuBar = menuBar
 
-        // ADR-0028 — Telegram 상태 푸시. History 의 에피소드 탭이 유일한
-        // 이벤트 소스: 귀속(원인·사유·디테일)이 끝난 전환만 흘러온다.
-        // 기본 OFF — 설정에서 opt-in 전까지 어떤 네트워크 송신도 없다.
+        // ADR-0028 — 채팅 상태 푸시(Telegram · Slack). History 의 에피소드 탭이
+        // 유일한 이벤트 소스: 귀속(원인·사유·디테일)이 끝난 전환만 흘러온다.
+        // 둘 다 기본 OFF — 설정에서 opt-in 전까지 어떤 네트워크 송신도 없다.
+        // 두 백엔드는 서로를 모른다: 각자 자기 설정만 보고 게이팅한다.
         TelegramNotifier.shared.configure(store: store)
-        history.onEpisodeStart = { TelegramNotifier.shared.episodeStarted($0) }
-        history.onEpisodeEnd = { TelegramNotifier.shared.episodeEnded($0) }
+        SlackNotifier.shared.configure(store: store)
+        history.onEpisodeStart = {
+            TelegramNotifier.shared.episodeStarted($0)
+            SlackNotifier.shared.episodeStarted($0)
+        }
+        history.onEpisodeEnd = {
+            TelegramNotifier.shared.episodeEnded($0)
+            SlackNotifier.shared.episodeEnded($0)
+        }
 
         // Wire detector → store.
         let detector = AgentDetector()

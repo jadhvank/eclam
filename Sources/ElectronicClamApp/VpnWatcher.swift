@@ -182,13 +182,14 @@ final class VpnWatcher {
         unresolvedLogged = false
     }
 
-    /// Connected→Disconnected 에지에서 1회 — Telegram(opt-in) + 로컬 알림 양쪽.
+    /// Connected→Disconnected 에지에서 1회 — 채팅 알림(opt-in) + 로컬 알림 양쪽.
     /// 자동 재연결은 하지 않는다(SAML 재인증 불가 — ADR-0037 §대안). `service` 는
     /// 해석된(실제 폴링 중인) 서비스명이라 메시지가 실물 서비스를 가리킨다.
     private func notifyDropped(service svc: String) {
         log.notice("vpn: \(svc, privacy: .public) Connected→Disconnected — notifying user (no auto-reconnect; SAML re-auth required)")
-        // Telegram: 마스터 opt-in 게이트만 — 설정 안 했으면 조용히 no-op.
+        // Telegram·Slack: 마스터 opt-in 게이트만 — 설정 안 했으면 조용히 no-op.
         TelegramNotifier.shared.notifyVpnDisconnected(serviceName: svc)
+        SlackNotifier.shared.notifyVpnDisconnected(serviceName: svc)
         // 로컬 사용자 알림: ReleaseNotifier 의 일반 정보 경로 재사용(NotificationCenter.swift).
         // 고정 identifier 라 반복 끊김은 배너를 교체(coalesce)하지만, 디바운스로 어차피
         // 에피소드당 1회다.
