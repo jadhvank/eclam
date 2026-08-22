@@ -14,11 +14,17 @@ import Foundation
 struct SlackSettings: Codable, Equatable, ChatNotifySettings {
     /// 마스터 토글. false ⇒ 어떤 메시지도 전송하지 않음 (기본값 — opt-in).
     var enabled: Bool
-    /// 봇 사용자 OAuth 토큰 (`xoxb-…`). 필요한 scope 는 `chat:write`,
-    /// 채널 이름 조회까지 쓰려면 `channels:read`(+ 비공개 채널은 `groups:read`).
-    var botToken: String
+    /// 목적지 자격 정보. 두 형태를 받고, 값의 생김새로 구분한다
+    /// (`credentialKind` — 별도 모드 스위치를 두지 않는 이유는 두 값이 서로
+    /// 헷갈릴 수 없게 생겼고, 상태가 하나 늘면 값과 어긋날 수 있어서다):
+    ///   · 봇 사용자 OAuth 토큰 `xoxb-…` — scope `chat:write`, 채널 이름
+    ///     조회까지 쓰려면 `channels:read`(+ 비공개 채널은 `groups:read`).
+    ///   · Incoming Webhook URL `https://hooks.slack.com/services/…` — scope 도
+    ///     봇 초대도 필요 없는 대신, 채널이 webhook 을 만들 때 고정된다.
+    var credential: String
     /// 채널 ID (`C0123ABCD`) 또는 `#general` 같은 이름. 이름은 "Look up ID"
     /// 버튼이 conversations.list 로 ID 로 바꿔 저장한다.
+    /// ★webhook 자격 정보에서는 쓰이지 않는다 — 채널이 이미 고정돼 있다.
     var channel: String
     /// 깨어있음 시작 알림 (에이전트 시작 등). 빈도가 높아 기본 OFF.
     var notifyAwakeStart: Bool
@@ -34,27 +40,36 @@ struct SlackSettings: Codable, Equatable, ChatNotifySettings {
 
     static let `default` = SlackSettings(
         enabled: false,
-        botToken: "",
+        credential: "",
         channel: "",
         notifyAwakeStart: false,
         notifyAwakeEnd: true,
         notifySafety: true)
 
-    /// 보낼 수 있는 최소 조건 — 마스터 ON + 토큰·채널 모두 존재.
+    /// 보낼 수 있는 최소 조건 — 마스터 ON + 자격 정보. 봇 토큰은 채널까지
+    /// 있어야 하고, webhook 은 채널이 URL 안에 이미 들어 있어 자격 정보만으로
+    /// 충분하다.
     var isConfigured: Bool {
-        enabled && !botToken.isEmpty && !channel.isEmpty
+        enabled && isConfiguredIgnoringMaster
+    }
+
+    /// 마스터 토글을 뺀 나머지 조건. "켜기 전에 배선부터 확인"하는 테스트
+    /// 전송이 이 값을 본다 (마스터 OFF 여도 테스트는 나가야 한다).
+    var isConfiguredIgnoringMaster: Bool {
+        guard !credential.isEmpty else { return false }
+        return SlackSupport.credentialKind(credential) == .webhook || !channel.isEmpty
     }
 
     // 미래 키 추가에 대비한 back-compat 디코더 (TelegramSettings 패턴).
     enum CodingKeys: String, CodingKey {
-        case enabled, botToken, channel, notifyAwakeStart, notifyAwakeEnd, notifySafety
+        case enabled, credential, channel, notifyAwakeStart, notifyAwakeEnd, notifySafety
         case digestIntervalMin
     }
-    init(enabled: Bool, botToken: String, channel: String,
+    init(enabled: Bool, credential: String, channel: String,
          notifyAwakeStart: Bool, notifyAwakeEnd: Bool, notifySafety: Bool,
          digestIntervalMin: Int = 0) {
         self.enabled = enabled
-        self.botToken = botToken
+        self.credential = credential
         self.channel = channel
         self.notifyAwakeStart = notifyAwakeStart
         self.notifyAwakeEnd = notifyAwakeEnd
@@ -64,7 +79,7 @@ struct SlackSettings: Codable, Equatable, ChatNotifySettings {
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.enabled          = try c.decodeIfPresent(Bool.self,   forKey: .enabled) ?? false
-        self.botToken         = try c.decodeIfPresent(String.self, forKey: .botToken) ?? ""
+        self.credential       = try c.decodeIfPresent(String.self, forKey: .credential) ?? ""
         self.channel          = try c.decodeIfPresent(String.self, forKey: .channel) ?? ""
         self.notifyAwakeStart = try c.decodeIfPresent(Bool.self,   forKey: .notifyAwakeStart) ?? false
         self.notifyAwakeEnd   = try c.decodeIfPresent(Bool.self,   forKey: .notifyAwakeEnd) ?? true
@@ -106,7 +121,22 @@ enum SlackSupport {
                                      lastStartAt: lastStartAt, now: now)
     }
 
-    // MARK: - 토큰 · 채널 표기
+    // MARK: - 자격 정보 · 채널 표기
+
+    /// 사용자가 넣은 자격 정보의 갈래. 값의 생김새로만 정하고, 별도 모드
+    /// 스위치를 두지 않는다 — 두 형태가 서로 헷갈릴 수 없게 생겼다.
+    enum CredentialKind: Equatable {
+        case botToken   // xoxb-… / xoxp-… → chat.postMessage + 채널 지정
+        case webhook    // https://hooks.slack.com/services/… → 채널 고정
+        case unknown    // 둘 다 아님 (오타)
+    }
+
+    static func credentialKind(_ value: String) -> CredentialKind {
+        let t = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if looksLikeWebhookURL(t) { return .webhook }
+        if looksLikeBotToken(t) { return .botToken }
+        return .unknown
+    }
 
     /// 토큰 형식 대충 검사 — `xoxb-…`(봇) 또는 `xoxp-…`(사용자). API 호출 전
     /// 명백한 오타를 UI 단에서 거르는 용도일 뿐, 통과가 유효성을 보장하지는
@@ -117,6 +147,15 @@ enum SlackSupport {
         let rest = t.dropFirst(5)
         return rest.count >= 10
             && rest.allSatisfy { $0.isLetter || $0.isNumber || $0 == "-" }
+    }
+
+    /// Incoming Webhook URL 검사. 호스트를 `hooks.slack.com` 으로 못 박는다 —
+    /// 자격 정보 필드에 들어온 임의의 URL 로 전송하지 않기 위해서다.
+    static func looksLikeWebhookURL(_ value: String) -> Bool {
+        let t = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard t.hasPrefix("https://hooks.slack.com/services/") else { return false }
+        // 접두사 뒤에 실제 경로가 있어야 한다 (T…/B…/secret).
+        return t.dropFirst("https://hooks.slack.com/services/".count).contains("/")
     }
 
     /// 사용자가 친 채널 표기를 정규화 — 앞뒤 공백과 선행 `#` 를 떼어낸다.
@@ -158,6 +197,16 @@ enum SlackSupport {
         return (nil, (cursor?.isEmpty ?? true) ? nil : cursor)
     }
 
+    /// Incoming Webhook 응답 해석. Web API 와 달리 JSON 이 아니라 평문
+    /// `ok` 를 주고, 실패는 HTTP 4xx + `invalid_payload` 같은 한 낱말이다.
+    static func parseWebhookResult(status: Int, body: Data) -> (ok: Bool, error: String?) {
+        let text = String(data: body, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if status == 200 && text.lowercased() == "ok" { return (true, nil) }
+        if text.isEmpty { return (false, "HTTP \(status)") }
+        return (false, text)
+    }
+
     /// chat.postMessage 응답의 성공 여부 + 실패 시 Slack 의 error 코드.
     /// Slack 은 실패해도 HTTP 200 을 주므로 본문을 봐야 한다.
     static func parsePostResult(_ data: Data) -> (ok: Bool, error: String?) {
@@ -187,6 +236,9 @@ enum SlackSupport {
             return .missingScope
         case "not_in_channel", "channel_not_found", "is_archived":
             return .botNotInChannel
+        case "no_service", "no_team", "invalid_token":
+            // webhook 이 삭제됐거나 URL 이 틀린 경우 — 자격 정보 문제로 묶는다.
+            return .badToken
         case "ratelimited", "rate_limited":
             return .rateLimited
         default:

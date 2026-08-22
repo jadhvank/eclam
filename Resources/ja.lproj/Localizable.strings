@@ -422,15 +422,16 @@
 /* Slack 通知 — Telegram バックエンドの兄弟 (同じイベント、Slack Web API) */
 "notifications.backend.telegram" = "Telegram";
 "notifications.backend.slack" = "Slack";
-"slack.privacy" = "デフォルトはオフです。有効にすると、ステータスメッセージはあなた自身が作成・所有する Slack アプリのボットトークンを使って Slack の API のみに送信されます — 開発者や他のサーバーには一切データを送りません。トークンはこの Mac にのみ、ユーザー専用のファイル権限で保存されます。";
+"slack.privacy" = "デフォルトはオフです。有効にすると、ステータスメッセージはあなた自身が作成・所有する Slack アプリのボットトークンまたは incoming webhook を使って Slack にのみ送信されます — 開発者や他のサーバーには一切データを送りません。認証情報はこの Mac にのみ、ユーザー専用のファイル権限で保存されます。";
 "slack.master" = "自分の Slack ボットにステータスを送る";
 "slack.tip.master" = "マスタースイッチです。オフの間、Electronic Clam は Slack に何も送信しません。下の設定フィールドとテストボタンはオフでも使えるので、先に接続を確認できます。";
-"slack.setup.help" = "設定: ① api.slack.com/apps でアプリを作成し、chat:write のボットスコープを追加(チャンネル名で検索するには channels:read も追加)。② ワークスペースにインストールし、Bot User OAuth Token をコピー。③ /invite @ボット名 でボットをチャンネルに招待してから、下にトークンとチャンネルを入力。";
-"slack.tokenLabel" = "ボットトークン";
-"slack.tip.token" = "Slack アプリの Bot User OAuth Token です(xoxb- で始まります)。あなたのアプリを認証する秘密の値なので公開しないでください。この Mac にのみ保存され(ユーザー専用ファイル)、ログには残りません。";
+"slack.setup.help" = "設定(どちらか一方): ① api.slack.com/apps でアプリを作成。② ボットトークンを使う場合は chat:write スコープを追加し(チャンネル名の検索には channels:read)、ワークスペースにインストールして Bot User OAuth Token をコピーし、/invite @ボット名 で招待。incoming webhook を使う場合は Incoming Webhooks を有効にし、チャンネルごとに webhook を追加して URL をコピー。③ 下に貼り付けてください — webhook はチャンネル不要、ボットトークンは必要です。";
+"slack.tokenLabel" = "トークンまたは webhook";
+"slack.tip.token" = "Slack アプリの Bot User OAuth Token(xoxb- で始まる)または incoming webhook URL(https://hooks.slack.com/services/…)です。webhook はスコープも招待も不要ですが、作成時に決めた1つのチャンネルにのみ送られます。どちらもあなたのアプリを認証する秘密の値なので公開しないでください。この Mac にのみ保存され(ユーザー専用ファイル)、ログには残りません。";
 "slack.channelLabel" = "チャンネル";
 "slack.lookup" = "ID を検索";
 "slack.tip.lookup" = "チャンネル名を Slack が推奨するチャンネル ID に変換します。ボットが既にそのチャンネルにいる必要があります — /invite @ボット名 で招待してください。チャンネル ID(C…)を直接貼り付けることもできます。";
+"slack.tip.channelWebhook" = "webhook では使いません — 既に固定された1つのチャンネルに送られます。";
 "slack.eventsHeader" = "メッセージを送るタイミング:";
 "slack.evtSafety" = "安全ガードがスリープを許可したとき (バッテリー · 発熱 · タイマー)";
 "slack.tip.evtSafety" = "外出中に最も欲しいメッセージ: ガードがスリープ抑制を解除し、Mac がまもなくスリープする可能性があります — バッテリー低下、過熱、最大起床時間の超過。";
@@ -446,10 +447,11 @@
 "slack.result.found" = "✓ チャンネル ID を検出";
 "slack.result.sending" = "送信中…";
 "slack.result.sent" = "✓ 送信済み — Slack のチャンネルを確認してください";
-"slack.error.notConfigured" = "先にボットトークンとチャンネルを入力してください。";
-"slack.error.badTokenFormat" = "Slack のトークン形式ではないようです (例: xoxb-…)。";
+"slack.error.notConfigured" = "先にボットトークンとチャンネル、または incoming webhook URL を入力してください。";
+"slack.error.badTokenFormat" = "Slack のトークン(xoxb-…)にも incoming webhook URL にも見えません。";
 "slack.error.noChannelTyped" = "先にチャンネル名(例: #general)を入力してから検索してください。";
 "slack.error.noMatch" = "その名前のチャンネルはボットから見えません。ボットをチャンネルに招待するか、チャンネル ID(C…)を直接入力してください。";
+"slack.error.webhookHasChannel" = "incoming webhook は既に固定のチャンネルに送信します — 検索は不要です。";
 "slack.error.badToken" = "Slack がトークンを拒否しました。Slack アプリの OAuth ページからボットトークンをコピーし直してください。";
 "slack.error.missingScope" = "トークンにスコープが足りません。chat:write を追加し(チャンネル名の検索には channels:read も)、ワークスペースにアプリを再インストールしてください。";
 "slack.error.notInChannel" = "ボットがそのチャンネルに投稿できません。/invite @ボット名 で招待してから再試行してください。";

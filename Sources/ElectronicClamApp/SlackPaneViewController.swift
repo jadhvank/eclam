@@ -18,10 +18,10 @@ final class SlackPaneViewController: NSViewController, NSTextFieldDelegate {
 
     private let privacyLabel = NSTextField(wrappingLabelWithString:
         NSL("slack.privacy",
-        "Off by default. When enabled, status messages go only to Slack's API "
-        + "using a bot token from a Slack app you create and own — nothing is ever "
-        + "sent to the developer or any other server. The token is stored locally "
-        + "with user-only file permissions."))
+        "Off by default. When enabled, status messages go only to Slack, using a "
+        + "bot token or an incoming webhook from a Slack app you create and own — "
+        + "nothing is ever sent to the developer or any other server. The "
+        + "credential is stored locally with user-only file permissions."))
 
     private let masterCheckbox = NSButton(checkboxWithTitle:
         NSL("slack.master", "Send status to my Slack bot"),
@@ -29,17 +29,24 @@ final class SlackPaneViewController: NSViewController, NSTextFieldDelegate {
 
     private let setupHelp = NSTextField(wrappingLabelWithString:
         NSL("slack.setup.help",
-        "Setup: ① At api.slack.com/apps, create an app and add the chat:write bot "
-        + "scope (add channels:read to look up channel names). ② Install it to your "
-        + "workspace and copy the Bot User OAuth Token. ③ Invite the bot to the "
-        + "channel with /invite @your-bot, then paste the token and channel below."))
+        "Setup, either way: ① At api.slack.com/apps, create an app. ② For a bot "
+        + "token, add the chat:write scope (channels:read to look up channel names), "
+        + "install to your workspace, copy the Bot User OAuth Token, and invite the "
+        + "bot with /invite @your-bot. For an incoming webhook, turn on Incoming "
+        + "Webhooks, add one for a channel, and copy its URL. ③ Paste it below — a "
+        + "webhook needs no channel, a bot token does."))
 
-    private let tokenLabel = NSTextField(labelWithString: NSL("slack.tokenLabel", "Bot token"))
+    private let tokenLabel = NSTextField(labelWithString:
+        NSL("slack.tokenLabel", "Token or webhook"))
     private let tokenField = NSSecureTextField(string: "")
     private let channelLabel = NSTextField(labelWithString: NSL("slack.channelLabel", "Channel"))
     private let channelField = NSTextField(string: "")
     private let lookupButton = NSButton(title: NSL("slack.lookup", "Look up ID"),
                                         target: nil, action: nil)
+    /// 채널 행 3종(라벨·필드·버튼)이 함께 쓰는 설명. 자격 정보가 webhook 이면
+    /// syncEnabled 가 "쓰이지 않음" 문구로 갈아 끼운다.
+    private let lookupHelpText = NSL("slack.tip.lookup",
+        "Turns the channel name into the channel ID Slack prefers. The bot must already be in the channel — invite it with /invite @your-bot. You can also paste a channel ID (C…) directly.")
 
     private let eventsHeader = NSTextField(labelWithString:
         NSL("slack.eventsHeader", "Send a message when:"))
@@ -83,12 +90,12 @@ final class SlackPaneViewController: NSViewController, NSTextFieldDelegate {
         setupHelp.textColor = .secondaryLabelColor
         setupHelp.preferredMaxLayoutWidth = 460
 
-        tokenField.placeholderString = "xoxb-…"
+        tokenField.placeholderString = "xoxb-… or https://hooks.slack.com/services/…"
         tokenField.delegate = self
         tokenField.translatesAutoresizingMaskIntoConstraints = false
         tokenField.widthAnchor.constraint(equalToConstant: 280).isActive = true
         let tokenTip = NSL("slack.tip.token",
-            "The Bot User OAuth Token from your Slack app (starts with xoxb-). It authenticates *your* app — keep it private. Stored on this Mac only (user-readable file), never logged.")
+            "Either the Bot User OAuth Token from your Slack app (starts with xoxb-), or an incoming webhook URL (https://hooks.slack.com/services/…). A webhook needs no scopes and no invite, but posts to the one channel it was created for. Either way it authenticates *your* app — keep it private. Stored on this Mac only (user-readable file), never logged.")
         tokenField.toolTip = tokenTip
         tokenLabel.toolTip = tokenTip
 
@@ -98,11 +105,9 @@ final class SlackPaneViewController: NSViewController, NSTextFieldDelegate {
         channelField.widthAnchor.constraint(equalToConstant: 180).isActive = true
         lookupButton.target = self
         lookupButton.action = #selector(lookupTapped)
-        let lookupTip = NSL("slack.tip.lookup",
-            "Turns the channel name into the channel ID Slack prefers. The bot must already be in the channel — invite it with /invite @your-bot. You can also paste a channel ID (C…) directly.")
-        lookupButton.toolTip = lookupTip
-        channelField.toolTip = lookupTip
-        channelLabel.toolTip = lookupTip
+        lookupButton.toolTip = lookupHelpText
+        channelField.toolTip = lookupHelpText
+        channelLabel.toolTip = lookupHelpText
 
         eventsHeader.font = NSFont.boldSystemFont(ofSize: 13)
 
@@ -211,8 +216,8 @@ final class SlackPaneViewController: NSViewController, NSTextFieldDelegate {
         let s = notifier.settings
         masterCheckbox.state = s.enabled ? .on : .off
         // 편집 중이 아닐 때만 필드 동기화 — 입력 중 덮어쓰기 방지.
-        if tokenField.currentEditor() == nil, tokenField.stringValue != s.botToken {
-            tokenField.stringValue = s.botToken
+        if tokenField.currentEditor() == nil, tokenField.stringValue != s.credential {
+            tokenField.stringValue = s.credential
         }
         if channelField.currentEditor() == nil, channelField.stringValue != s.channel {
             channelField.stringValue = s.channel
@@ -230,6 +235,8 @@ final class SlackPaneViewController: NSViewController, NSTextFieldDelegate {
     }
 
     /// 이벤트 체크박스만 master 종속 (헤더 주석 참고).
+    /// 채널 행은 자격 정보 갈래에 종속된다 — webhook 은 채널이 URL 에 이미
+    /// 박혀 있어 여기서 정할 것이 없다.
     private func syncEnabled() {
         let on = masterCheckbox.state == .on
         safetyCheckbox.isEnabled = on
@@ -237,6 +244,17 @@ final class SlackPaneViewController: NSViewController, NSTextFieldDelegate {
         startCheckbox.isEnabled = on
         digestCheckbox.isEnabled = on
         digestPopup.isEnabled = on && digestCheckbox.state == .on
+
+        let isWebhook = SlackSupport.credentialKind(tokenField.stringValue) == .webhook
+        channelField.isEnabled = !isWebhook
+        lookupButton.isEnabled = !isWebhook
+        let channelTip = isWebhook
+            ? NSL("slack.tip.channelWebhook",
+                  "Not used with a webhook — it already posts to one fixed channel.")
+            : lookupHelpText
+        channelField.toolTip = channelTip
+        channelLabel.toolTip = channelTip
+        lookupButton.toolTip = channelTip
     }
 
     /// 마지막 비-off 다이제스트 간격. 기본 30분.
@@ -256,7 +274,7 @@ final class SlackPaneViewController: NSViewController, NSTextFieldDelegate {
         }
         let next = SlackSettings(
             enabled: masterCheckbox.state == .on,
-            botToken: tokenField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines),
+            credential: tokenField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines),
             channel: SlackSupport.normalizeChannel(channelField.stringValue),
             notifyAwakeStart: startCheckbox.state == .on,
             notifyAwakeEnd: endCheckbox.state == .on,

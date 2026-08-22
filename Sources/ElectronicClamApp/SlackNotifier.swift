@@ -10,9 +10,14 @@ import OSLog
 /// 보내지 않는다. ADR-0028 의 "이 앱의 유일한 네트워크 egress" 문장은 이제
 /// "사용자가 직접 설정한 채팅 백엔드(Telegram·Slack)로만 나간다"로 넓어진다.
 ///
+/// 자격 정보는 두 갈래를 받고 값의 생김새로 고른다 (SlackSupport.credentialKind):
+/// 봇 토큰이면 `chat.postMessage` 에 채널을 실어 보내고, Incoming Webhook URL
+/// 이면 그 URL 로 바로 POST 한다 (채널은 webhook 에 이미 박혀 있다).
+///
 /// Telegram 과 다른 점 둘:
-///   ① Slack Web API 에는 무음 전송이 없다 → 다이제스트도 일반 메시지로 간다.
-///   ② 실패해도 HTTP 200 이 온다 → 본문 `ok` 를 봐야 한다 (SlackSupport).
+///   ① Slack 에는 무음 전송이 없다 → 다이제스트도 일반 메시지로 간다.
+///   ② Web API 는 실패해도 HTTP 200 이 온다 → 본문 `ok` 를 봐야 한다.
+///      webhook 은 반대로 평문 `ok` + HTTP 4xx 다 (SlackSupport 가 둘 다 판정).
 ///
 /// 토큰 저장: `~/Library/Application Support/eclam/slack.json` (0600).
 /// Keychain 을 쓰지 않는 이유는 TelegramNotifier 주석과 같다.
@@ -204,8 +209,9 @@ final class SlackNotifier {
     /// 테스트 전송. completion 은 메인 스레드, nil ⇒ 성공 / 문자열 ⇒ 에러.
     /// 게이팅을 우회해 master OFF 여도 토큰·채널만 있으면 보낸다.
     func sendTest(completion: @escaping (String?) -> Void) {
-        guard !settings.botToken.isEmpty, !settings.channel.isEmpty else {
-            completion(NSL("slack.error.notConfigured", "Enter a bot token and a channel first."))
+        guard settings.isConfiguredIgnoringMaster else {
+            completion(NSL("slack.error.notConfigured",
+                "Enter a bot token and a channel, or an incoming webhook URL, first."))
             return
         }
         let head = NSL("slack.test", "🐚 Electronic Clam — test message. Notifications are wired up.")
@@ -215,10 +221,15 @@ final class SlackNotifier {
     /// 채널 이름 → 채널 ID 조회 ("Look up ID" 버튼). 이미 ID 형태면 그대로
     /// 돌려준다. completion 은 메인 스레드 (channelId, errorMessage).
     func lookupChannelId(completion: @escaping (String?, String?) -> Void) {
-        let token = settings.botToken.trimmingCharacters(in: .whitespacesAndNewlines)
+        let token = settings.credential.trimmingCharacters(in: .whitespacesAndNewlines)
+        if SlackSupport.credentialKind(token) == .webhook {
+            completion(nil, NSL("slack.error.webhookHasChannel",
+                "An incoming webhook already posts to one fixed channel — no lookup needed."))
+            return
+        }
         guard SlackSupport.looksLikeBotToken(token) else {
             completion(nil, NSL("slack.error.badTokenFormat",
-                "That doesn't look like a Slack token (expected xoxb-…)."))
+                "That doesn't look like a Slack token (expected xoxb-…) or an incoming webhook URL."))
             return
         }
         let name = SlackSupport.normalizeChannel(settings.channel)
@@ -326,8 +337,9 @@ final class SlackNotifier {
         }
     }
 
-    /// chat.postMessage POST. 네트워크 오류(전송 자체 실패)에 한해 5초 뒤 1회
-    /// 재시도. Slack 이 ok=false 로 답한 경우(scope 누락 등)는 재시도 무의미.
+    /// 전송. 자격 정보 갈래에 따라 요청을 만들고, 네트워크 오류(전송 자체
+    /// 실패)에 한해 5초 뒤 1회 재시도한다. Slack 이 내용을 보고 거절한 경우
+    /// (scope 누락·채널 없음 등)는 재시도가 무의미하므로 즉시 실패로 끝낸다.
     private func send(_ text: String,
                       bypassGate: Bool = false,
                       completion: ((String?) -> Void)? = nil,
@@ -335,27 +347,20 @@ final class SlackNotifier {
         if !bypassGate {
             guard settings.isConfigured else { return }
         }
-        let token = settings.botToken.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let url = URL(string: "https://slack.com/api/chat.postMessage") else {
-            finish("bad URL", completion: completion)
+        let credential = settings.credential.trimmingCharacters(in: .whitespacesAndNewlines)
+        let kind = SlackSupport.credentialKind(credential)
+        guard let request = buildRequest(credential: credential, kind: kind, text: text) else {
+            finish(NSL("slack.error.badTokenFormat",
+                "That doesn't look like a Slack token (expected xoxb-…) or an incoming webhook URL."),
+                   completion: completion)
             return
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        // 채널은 ID 를 그대로 쓰고, 이름이 저장돼 있으면 `#name` 으로 보낸다 —
-        // Slack 은 둘 다 받는다 (이름은 봇이 그 채널에 있어야 한다).
-        let channel = SlackSupport.normalizeChannel(settings.channel)
-        let target = SlackSupport.looksLikeChannelId(channel) ? channel : "#" + channel
-        let body: [String: Any] = ["channel": target, "text": text]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
         let task = session.dataTask(with: request) { [weak self] data, response, error in
             guard let self = self else { return }
-            // 전송 시도 + HTTP 상태 로그. 토큰·본문은 남기지 않는다.
+            // 전송 시도 + HTTP 상태 로그. 자격 정보·본문은 남기지 않는다.
             let httpStatus = (response as? HTTPURLResponse)?.statusCode
-            self.log.info("slack send attempt → http=\(httpStatus.map(String.init) ?? "none", privacy: .public)\(error != nil ? " (transport error)" : "", privacy: .public)")
+            self.log.info("slack send attempt (\(kind == .webhook ? "webhook" : "api", privacy: .public)) → http=\(httpStatus.map(String.init) ?? "none", privacy: .public)\(error != nil ? " (transport error)" : "", privacy: .public)")
             if let error = error {
                 if !isRetry {
                     self.log.notice("slack send failed (\(error.localizedDescription, privacy: .public)); retrying once in 5s")
@@ -372,7 +377,9 @@ final class SlackNotifier {
                 self.finish("empty response", completion: completion)
                 return
             }
-            let parsed = SlackSupport.parsePostResult(data)
+            let parsed = kind == .webhook
+                ? SlackSupport.parseWebhookResult(status: httpStatus ?? 0, body: data)
+                : SlackSupport.parsePostResult(data)
             if parsed.ok {
                 self.finish(nil, completion: completion)
             } else {
@@ -382,6 +389,36 @@ final class SlackNotifier {
             }
         }
         task.resume()
+    }
+
+    /// 갈래별 요청 조립. webhook 은 URL 자체가 목적지이자 자격 증명이라
+    /// Authorization 헤더가 없고 채널도 싣지 않는다.
+    private func buildRequest(credential: String,
+                              kind: SlackSupport.CredentialKind,
+                              text: String) -> URLRequest? {
+        let url: URL?
+        var body: [String: Any] = ["text": text]
+        switch kind {
+        case .webhook:
+            url = URL(string: credential)
+        case .botToken:
+            url = URL(string: "https://slack.com/api/chat.postMessage")
+            // 채널은 ID 를 그대로 쓰고, 이름이 저장돼 있으면 `#name` 으로 보낸다 —
+            // Slack 은 둘 다 받는다 (이름은 봇이 그 채널에 있어야 한다).
+            let channel = SlackSupport.normalizeChannel(settings.channel)
+            body["channel"] = SlackSupport.looksLikeChannelId(channel) ? channel : "#" + channel
+        case .unknown:
+            return nil
+        }
+        guard let url = url else { return nil }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        if kind == .botToken {
+            request.setValue("Bearer \(credential)", forHTTPHeaderField: "Authorization")
+        }
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        return request
     }
 
     /// 결과 기록 + completion 마샬링. 토큰은 절대 로그에 남기지 않는다.

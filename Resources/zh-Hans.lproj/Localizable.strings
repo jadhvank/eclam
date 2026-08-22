@@ -422,15 +422,16 @@
 /* Slack 通知 — Telegram 后端的兄弟 (相同事件,Slack Web API) */
 "notifications.backend.telegram" = "Telegram";
 "notifications.backend.slack" = "Slack";
-"slack.privacy" = "默认关闭。启用后,状态消息仅通过你自己创建并拥有的 Slack 应用的机器人令牌发送到 Slack 的 API — 不会向开发者或任何其他服务器发送任何数据。令牌仅保存在这台 Mac 上,使用仅限用户读取的文件权限。";
+"slack.privacy" = "默认关闭。启用后,状态消息仅通过你自己创建并拥有的 Slack 应用的机器人令牌或 incoming webhook 发送到 Slack — 不会向开发者或任何其他服务器发送任何数据。凭据仅保存在这台 Mac 上,使用仅限用户读取的文件权限。";
 "slack.master" = "向我的 Slack 机器人发送状态";
 "slack.tip.master" = "总开关。关闭时 Electronic Clam 不会向 Slack 发送任何内容。下方的设置字段和测试按钮在关闭时仍可使用,方便先确认连接。";
-"slack.setup.help" = "设置: ① 在 api.slack.com/apps 创建应用并添加 chat:write 机器人权限(按频道名查找还需 channels:read)。② 安装到你的工作区并复制 Bot User OAuth Token。③ 用 /invite @你的机器人 把机器人邀请进频道,然后在下方填入令牌和频道。";
-"slack.tokenLabel" = "机器人令牌";
-"slack.tip.token" = "Slack 应用的 Bot User OAuth Token(以 xoxb- 开头)。它用于认证你的应用 — 请保密。仅保存在这台 Mac 上(仅限用户读取的文件),不会写入日志。";
+"slack.setup.help" = "设置(二选一): ① 在 api.slack.com/apps 创建应用。② 用机器人令牌:添加 chat:write 权限(按频道名查找还需 channels:read),安装到工作区,复制 Bot User OAuth Token,并用 /invite @你的机器人 邀请。用 incoming webhook:启用 Incoming Webhooks,为某个频道添加一个 webhook 并复制其 URL。③ 粘贴到下方 — webhook 不需要填频道,机器人令牌需要。";
+"slack.tokenLabel" = "令牌或 webhook";
+"slack.tip.token" = "Slack 应用的 Bot User OAuth Token(以 xoxb- 开头),或 incoming webhook URL(https://hooks.slack.com/services/…)。webhook 不需要权限范围,也不用邀请机器人,但只会发到创建时指定的那个频道。两者都用于认证你的应用 — 请保密。仅保存在这台 Mac 上(仅限用户读取的文件),不会写入日志。";
 "slack.channelLabel" = "频道";
 "slack.lookup" = "查找 ID";
 "slack.tip.lookup" = "把频道名转换成 Slack 更推荐的频道 ID。机器人必须已在该频道中 — 用 /invite @你的机器人 邀请。也可以直接粘贴频道 ID(C…)。";
+"slack.tip.channelWebhook" = "webhook 不使用此项 — 它已固定发送到一个频道。";
 "slack.eventsHeader" = "在以下情况发送消息:";
 "slack.evtSafety" = "安全防护允许睡眠时 (电池 · 过热 · 计时器)";
 "slack.tip.evtSafety" = "离开时最需要的消息:防护刚刚解除了睡眠抑制,Mac 可能很快入睡 — 电池不足、过热或达到最长唤醒时间。";
@@ -446,10 +447,11 @@
 "slack.result.found" = "✓ 已找到频道 ID";
 "slack.result.sending" = "发送中…";
 "slack.result.sent" = "✓ 已发送 — 请查看 Slack 频道";
-"slack.error.notConfigured" = "请先输入机器人令牌和频道。";
-"slack.error.badTokenFormat" = "这看起来不像 Slack 令牌 (应为 xoxb-…)。";
+"slack.error.notConfigured" = "请先输入机器人令牌和频道,或输入 incoming webhook URL。";
+"slack.error.badTokenFormat" = "这看起来既不像 Slack 令牌 (xoxb-…),也不像 incoming webhook URL。";
 "slack.error.noChannelTyped" = "请先输入频道名(如 #general),然后再查找。";
 "slack.error.noMatch" = "机器人看不到该名称的频道。请把机器人邀请进频道,或直接粘贴频道 ID(C…)。";
+"slack.error.webhookHasChannel" = "incoming webhook 已固定发送到一个频道 — 无需查找。";
 "slack.error.badToken" = "Slack 拒绝了该令牌。请从 Slack 应用的 OAuth 页面重新复制机器人令牌。";
 "slack.error.missingScope" = "令牌缺少权限。请添加 chat:write(按频道名查找还需 channels:read),然后把应用重新安装到工作区。";
 "slack.error.notInChannel" = "机器人无法在该频道发言。请用 /invite @你的机器人 邀请后重试。";

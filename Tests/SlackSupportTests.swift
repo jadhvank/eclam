@@ -1,7 +1,7 @@
 /// SlackSupportTests.swift — Slack 알림 순수 계층 검증.
 ///
 /// 1) 게이팅: 마스터·체크박스·최소 길이·시작 스로틀 (ChatNotify 위임분 포함)
-/// 2) 토큰·채널 표기 검사 (looksLikeBotToken / normalizeChannel / looksLikeChannelId)
+/// 2) 자격 정보·채널 표기 검사 (봇 토큰 / webhook URL / 채널 ID)
 /// 3) conversations.list 채널 ID 파싱 + 페이지 커서
 /// 4) chat.postMessage 결과 파싱 + error 코드 분류
 ///
@@ -28,7 +28,7 @@ func assert(_ cond: Bool, _ msg: String) {
 func cfg(enabled: Bool = true, token: String = "xoxb-123456789012-abcdefghijkl",
          channel: String = "C0123ABCD", start: Bool = true, end: Bool = true,
          safety: Bool = true, digest: Int = 0) -> SlackSettings {
-    SlackSettings(enabled: enabled, botToken: token, channel: channel,
+    SlackSettings(enabled: enabled, credential: token, channel: channel,
                   notifyAwakeStart: start, notifyAwakeEnd: end, notifySafety: safety,
                   digestIntervalMin: digest)
 }
@@ -121,6 +121,46 @@ enum SlackSupportTestMain {
         assert(!SlackSupport.looksLikeChannelId("C0123abc"), "소문자 섞이면 ID 아님")
         assert(!SlackSupport.looksLikeChannelId("C012"), "너무 짧으면 ID 아님")
 
+        print("── 자격 정보 갈래")
+        assert(SlackSupport.credentialKind("xoxb-123456789012-abcdefghijkl") == .botToken,
+               "xoxb- ⇒ 봇 토큰")
+        assert(SlackSupport.credentialKind(
+                "https://hooks.slack.com/services/T01ABCDEF/B02GHIJKL/xxxxxxxxxxxxxxxx") == .webhook,
+               "hooks.slack.com URL ⇒ webhook")
+        assert(SlackSupport.credentialKind("  https://hooks.slack.com/services/T0/B0/s  ") == .webhook,
+               "앞뒤 공백은 무시")
+        assert(SlackSupport.credentialKind("https://example.com/services/T0/B0/s") == .unknown,
+               "다른 호스트는 거부 — 임의 URL 로 전송하지 않는다")
+        assert(SlackSupport.credentialKind("https://hooks.slack.com/services/") == .unknown,
+               "경로 없는 접두사만으로는 안 됨")
+        assert(SlackSupport.credentialKind("not-a-credential") == .unknown, "오타는 unknown")
+
+        print("── webhook 은 채널 없이도 보낼 수 있다")
+        let hook = "https://hooks.slack.com/services/T01ABCDEF/B02GHIJKL/xxxxxxxxxxxxxxxx"
+        assert(cfg(token: hook, channel: "").isConfigured,
+               "webhook + 채널 없음 ⇒ 전송 가능")
+        assert(!cfg(token: "xoxb-123456789012-abcdefghijkl", channel: "").isConfigured,
+               "봇 토큰 + 채널 없음 ⇒ 전송 불가")
+        assert(!cfg(enabled: false, token: hook, channel: "").isConfigured,
+               "마스터 OFF ⇒ 전송 불가")
+        assert(cfg(enabled: false, token: hook, channel: "").isConfiguredIgnoringMaster,
+               "마스터 OFF 여도 테스트 전송 조건은 충족")
+
+        print("── webhook 응답 파싱")
+        assert(SlackSupport.parseWebhookResult(status: 200, body: Data("ok".utf8)).ok,
+               "HTTP 200 + 평문 ok ⇒ 성공")
+        assert(SlackSupport.parseWebhookResult(status: 200, body: Data("ok\n".utf8)).ok,
+               "줄바꿈 붙어도 성공")
+        let badPayload = SlackSupport.parseWebhookResult(
+            status: 400, body: Data("invalid_payload".utf8))
+        assert(!badPayload.ok && badPayload.error == "invalid_payload", "실패 본문 그대로 노출")
+        assert(SlackSupport.parseWebhookResult(status: 500, body: Data()).error == "HTTP 500",
+               "본문이 비면 상태 코드로 대체")
+        assert(SlackSupport.parseWebhookResult(status: 200, body: Data("ok".utf8)).error == nil,
+               "성공이면 에러 문구 없음")
+        assert(SlackSupport.classify(error: "no_service") == .badToken,
+               "삭제된 webhook ⇒ 자격 정보 문제")
+
         print("── conversations.list 파싱")
         let page1 = listPage([("C111AAAAA", "random"), ("C222BBBBB", "general")])
         assert(SlackSupport.parseChannelId(fromConversationsList: page1, name: "general").id
@@ -165,7 +205,7 @@ enum SlackSupportTestMain {
 
         print("── 설정 back-compat")
         let legacy = Data("""
-        {"enabled":true,"botToken":"xoxb-123456789012-abcdefghijkl","channel":"C0123ABCD"}
+        {"enabled":true,"credential":"xoxb-123456789012-abcdefghijkl","channel":"C0123ABCD"}
         """.utf8)
         let decoded = try! JSONDecoder().decode(SlackSettings.self, from: legacy)
         assert(decoded.digestIntervalMin == 0, "없는 키는 off 로 디코드")
