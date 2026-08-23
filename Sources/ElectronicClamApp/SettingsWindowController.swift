@@ -17,7 +17,7 @@ final class SettingsWindowController: NSWindowController {
     private var agentsViewController: AgentsPaneViewController
     private var remoteViewController: RemotePaneViewController
     private var safetyViewController: SafetyPaneViewController
-    private var telegramViewController: TelegramPaneViewController
+    private var notificationsViewController: NotificationsPaneViewController
     private var historyViewController: HistoryPaneViewController
     private var generalViewController: GeneralPaneViewController
     // Keep the selector separate from NSTabView's private segmented control.
@@ -34,7 +34,7 @@ final class SettingsWindowController: NSWindowController {
         self.agentsViewController = AgentsPaneViewController(store: store)
         self.remoteViewController = RemotePaneViewController(store: store)
         self.safetyViewController = SafetyPaneViewController(store: store)
-        self.telegramViewController = TelegramPaneViewController()
+        self.notificationsViewController = NotificationsPaneViewController()
         self.historyViewController = HistoryPaneViewController(store: store, history: history)
         self.generalViewController = GeneralPaneViewController(store: store, onLanguageChanged: onRelocalize)
         let window = NSWindow(
@@ -68,7 +68,7 @@ final class SettingsWindowController: NSWindowController {
         agentsViewController.refresh()
         remoteViewController.refresh()
         safetyViewController.refresh()
-        telegramViewController.refresh()
+        notificationsViewController.refresh()
         historyViewController.refresh()
         generalViewController.refresh()
         showWindow(nil)
@@ -108,17 +108,17 @@ final class SettingsWindowController: NSWindowController {
         safetyTab.view = safetyViewController.view
         tabView.addTabViewItem(safetyTab)
 
-        let telegramTab = NSTabViewItem(identifier: "notifications")
-        telegramTab.label = NSL("tab.notifications", "Notifications")
-        telegramTab.view = telegramViewController.view
-        tabView.addTabViewItem(telegramTab)
+        let notificationsTab = NSTabViewItem(identifier: "notifications")
+        notificationsTab.label = NSL("tab.notifications", "Notifications")
+        notificationsTab.view = notificationsViewController.view
+        tabView.addTabViewItem(notificationsTab)
 
         let historyTab = NSTabViewItem(identifier: "history")
         historyTab.label = NSL("tab.history", "History")
         historyTab.view = historyViewController.view
         tabView.addTabViewItem(historyTab)
 
-        let tabItems = [generalTab, agentsTab, remoteTab, safetyTab, telegramTab, historyTab]
+        let tabItems = [generalTab, agentsTab, remoteTab, safetyTab, notificationsTab, historyTab]
         tabSelector.segmentCount = tabItems.count
         for (index, item) in tabItems.enumerated() {
             tabSelector.setLabel(item.label, forSegment: index)
@@ -162,7 +162,7 @@ final class SettingsWindowController: NSWindowController {
         agentsViewController = AgentsPaneViewController(store: store)
         remoteViewController = RemotePaneViewController(store: store)
         safetyViewController = SafetyPaneViewController(store: store)
-        telegramViewController = TelegramPaneViewController()
+        notificationsViewController = NotificationsPaneViewController()
         historyViewController = HistoryPaneViewController(store: store, history: history)
         generalViewController = GeneralPaneViewController(store: store, onLanguageChanged: onRelocalize)
 
@@ -171,7 +171,7 @@ final class SettingsWindowController: NSWindowController {
             (NSL("tab.agents", "Agents"), agentsViewController),
             (NSL("tab.remote", "Remote"), remoteViewController),
             (NSL("tab.safety", "Safety"), safetyViewController),
-            (NSL("tab.notifications", "Notifications"), telegramViewController),
+            (NSL("tab.notifications", "Notifications"), notificationsViewController),
             (NSL("tab.history", "History"), historyViewController),
         ]
         for (i, (label, vc)) in panes.enumerated() {

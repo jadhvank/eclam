@@ -2,6 +2,10 @@
 
 All notable changes to Electronic Clam are documented here.
 
+## [Unreleased]
+
+- **Slack notifications (off by default)** — the same status pings that Telegram gets can now go to a Slack channel through a Slack app you create and own. **Settings → Notifications** holds both backends side by side; enable either one or both, and each keeps its own token, channel, and event checkboxes. Setup needs the `chat:write` bot scope (plus `channels:read` if you want to look up a channel by name instead of pasting its ID), and the bot has to be invited to the channel. Slack's API has no silent delivery, so the periodic status message arrives like any other one — mute the channel if you want it quiet. Nothing is sent until you turn it on, and nothing ever goes to the developer or a third-party server.
+
 ## [0.6.3] — 2026-07-02
 
 - **Fix: attaching an external display no longer disturbs your saved arrangement** — with the clamshell lock guard turned on, the invisible anchor used to fight the topology change when you plugged in a real monitor, which could re-shuffle your saved built-in + external layout. It now steps aside immediately — no re-mirror — as soon as a real display appears, so macOS restores the arrangement you set, and the anchor returns automatically when you unplug the external. Headless clamshell lock protection is unchanged.
