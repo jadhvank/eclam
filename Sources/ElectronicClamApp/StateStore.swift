@@ -132,6 +132,13 @@ final class StateStore {
     /// 앵커를 띄워 화면 잠금을 막아 VPN 세션을 유지한다.
     private(set) var clamshellLockGuardEnabled: Bool
 
+    /// 디스플레이까지 깨어 있게 유지하는 opt-in(`caffeinate -d` 등가물). 기본 OFF.
+    /// 헬퍼의 `SleepDisabled` 는 시스템·클램쉘 잠자기만 막고 idle display sleep 은
+    /// 막지 않아서, keep-awake 중에도 화면은 `displaysleep` 타이머대로 꺼진다.
+    /// 이 값이 true 이고 keep 신호가 살아있을 때만 `DisplayAwakeHolder` 가
+    /// `PreventUserIdleDisplaySleep` assertion 을 잡는다.
+    private(set) var keepDisplayAwakeEnabled: Bool
+
     /// ADR-0037 §#8 — "blank displays"(메뉴 "Blank screen") 동작 모드. Default
     /// `.dim`(VPN-안전). `MenuBarController` 의 blank 액션이 이 값으로 dim(어둡게)/
     /// sleep(재우기)을 분기한다.
@@ -273,6 +280,7 @@ final class StateStore {
     private static let agentModeKey             = "AgentMode"
     private static let menuBarThemeKey          = "MenuBarTheme"
     private static let clamshellLockGuardKey    = "ClamshellLockGuardEnabled"
+    private static let keepDisplayAwakeKey      = "KeepDisplayAwakeEnabled"
     private static let blankDisplaysModeKey     = "BlankDisplaysMode"
     private static let vpnNotifyEnabledKey      = "VpnDisconnectNotifyEnabled"
     private static let vpnServiceNameKey        = "VpnServiceName"
@@ -332,6 +340,10 @@ final class StateStore {
         // key is absent, which is exactly the desired default.
         self.clamshellLockGuardEnabled =
             UserDefaults.standard.bool(forKey: Self.clamshellLockGuardKey)
+
+        // 디스플레이 keep-awake opt-in — 위와 같은 이유로 키 부재 = false = 기본 OFF.
+        self.keepDisplayAwakeEnabled =
+            UserDefaults.standard.bool(forKey: Self.keepDisplayAwakeKey)
 
         // ADR-0037 §#8 — blank displays 동작 모드. 기본 `.dim`(VPN-안전); 키가
         // 없거나 미지의 값이면 dim 으로 폴백(`MenuBarTheme` 와 동일 패턴).
@@ -475,6 +487,16 @@ final class StateStore {
         guard self.clamshellLockGuardEnabled != on else { return }
         self.clamshellLockGuardEnabled = on
         UserDefaults.standard.set(on, forKey: Self.clamshellLockGuardKey)
+        onChange?()
+    }
+
+    /// 디스플레이 keep-awake opt-in 토글. onChange → AppDelegate → convergeNow →
+    /// `DisplayAwakeHolder.apply(...)` 가 assertion 을 잡거나 놓는다. 클램쉘 잠금
+    /// 가드와 **독립**이다 — 이쪽은 화면을 켜 두는 것이고, 가드는 잠금을 막는 것이다.
+    func setKeepDisplayAwake(_ on: Bool) {
+        guard self.keepDisplayAwakeEnabled != on else { return }
+        self.keepDisplayAwakeEnabled = on
+        UserDefaults.standard.set(on, forKey: Self.keepDisplayAwakeKey)
         onChange?()
     }
 

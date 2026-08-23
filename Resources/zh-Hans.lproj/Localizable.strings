@@ -408,6 +408,10 @@
 "general.tip.vpnRefresh" = "重新扫描 VPN 服务 — 如果打开此处时 VPN 应用是关着的，会很有用。";
 "general.vpnServiceNote" = "选择要监视的 VPN，然后在上方开启通知。断开时会提醒你（若已配置也会发 Telegram）。不会自动重连。";
 "general.vpnService.none" = "（未找到 VPN 服务 — 请打开你的 VPN 应用）";
+"general.display" = "显示器";
+"general.keepDisplayAwake" = "同时保持屏幕常亮（等同 caffeinate -d）";
+"general.tip.keepDisplayAwake" = "让 Mac 不休眠并不等于让屏幕常亮 — macOS 仍会按自己的闲置计时器关闭显示器。开启后，Electronic Clam 在保持 Mac 唤醒的同时也会保持显示器唤醒，方式与 caffeinate -d 相同。这会消耗背光电量，除非你想盯着任务进行，否则建议保持关闭。默认关闭。";
+"general.keepDisplayAwakeNote" = "关闭时，Mac 保持唤醒但屏幕仍会按自己的计时器休眠。你离开时，下方的“关闭屏幕”始终优先。";
 "general.blankScreen" = "熄屏";
 "blankMode.dim" = "调暗（保持 VPN）";
 "blankMode.sleep" = "显示器睡眠";

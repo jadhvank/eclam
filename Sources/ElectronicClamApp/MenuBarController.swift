@@ -40,6 +40,12 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     /// assertion 을 잡고 사용자 복귀 시 자동 복원한다. dim 동안에만 타이머가 돈다.
     private let dimmer = BlankDisplayDimmer()
 
+    /// 디스플레이 keep-awake 홀더(소유자는 AppDelegate). "Blank screen → Sleep" 은
+    /// 이 홀더와 목적이 정면으로 충돌하므로 그 경로에서만 잠시 비켜세운다.
+    /// `.dim` 은 건드리지 않는다 — dim 은 밝기로 어둡게 하고 assertion 은 오히려
+    /// 필요하므로, 둘이 겹쳐도 무해하다.
+    weak var displayAwakeHolder: DisplayAwakeHolder?
+
     private func installMenu() {
         menu.delegate = self
         menu.autoenablesItems = false
@@ -645,6 +651,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         case .dim:
             dimmer.dim()
         case .sleep:
+            // 화면을 끄는 동안 디스플레이 assertion 을 놓는다. 안 놓으면
+            // `pmset displaysleepnow` 로 끈 화면이 곧바로 되살아나 사용자에겐
+            // "화면 끄기가 안 먹는다"로 보인다. 복귀 감지는 홀더가 스스로 한다.
+            displayAwakeHolder?.suspendUntilUserReturns()
             sleepDisplaysNow()
         }
     }

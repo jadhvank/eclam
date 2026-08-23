@@ -407,6 +407,10 @@
 "general.tip.vpnRefresh" = "VPN 서비스를 다시 검색합니다 — 이 화면을 열 때 VPN 앱이 꺼져 있었다면 유용합니다.";
 "general.vpnServiceNote" = "지켜볼 VPN을 고른 뒤 위에서 알림을 켜세요. 끊기면 알려줍니다(설정해 두었다면 Telegram도). 자동 재연결은 없습니다.";
 "general.vpnService.none" = "(VPN 서비스를 찾지 못함 — VPN 앱을 여세요)";
+"general.display" = "디스플레이";
+"general.keepDisplayAwake" = "화면도 계속 켜 두기 (caffeinate -d와 같음)";
+"general.tip.keepDisplayAwake" = "Mac을 깨워 두는 것과 화면을 켜 두는 것은 다릅니다 — macOS는 자체 대기 타이머에 따라 화면을 끕니다. 이 항목을 켜면 Electronic Clam이 Mac을 깨워 두는 동안 화면도 함께 켜 둡니다. caffeinate -d와 같은 방식입니다. 백라이트 전력을 쓰므로, 작업을 눈으로 지켜볼 때만 켜는 편이 좋습니다. 기본값은 꺼짐입니다.";
+"general.keepDisplayAwakeNote" = "꺼 두면 Mac은 깨어 있어도 화면은 자체 타이머대로 꺼집니다. 자리를 비운 동안에는 아래 \"화면 끄기\"가 항상 우선합니다.";
 "general.blankScreen" = "화면 끄기";
 "blankMode.dim" = "어둡게 (VPN 유지)";
 "blankMode.sleep" = "디스플레이 잠자기";
