@@ -190,12 +190,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// No persistence — while blocked it's fine to show each launch (fatal until fixed).
     private func presentInstallLocationAlertIfNeeded() -> Bool {
         guard let block = HelperRegistration.installBlock else { return false }
+        let path = Bundle.main.bundlePath
+        // 2026-08-05 — 이미 /Applications 에 있는데 다운로드 격리 속성만 남은 경우
+        // "옮기세요" 안내는 막다른 길이다(실측: 사용자가 옮겼는데도 매 실행 반복).
+        // 그 경우엔 진짜 원인인 quarantine 속성과 제거 명령을 그대로 알려준다.
+        // 속성 제거를 앱이 대신 하지는 않는다 — CLAUDE.md 보안 메모의
+        // "quarantine strip 꼼수 재도입 금지"(ADR-0028)를 지킨다.
+        let quarantinedInPlace = (block.kind == .quarantined) && InstallLocation.isInApplications(path)
         let alert = NSAlert()
+        alert.alertStyle = .warning
+        if quarantinedInPlace {
+            alert.messageText = NSL("installgate.title.quarantinedInPlace",
+                "Electronic Clam is quarantined by macOS")
+            alert.informativeText = String(
+                format: NSL("installgate.message.quarantinedInPlace",
+                    "Electronic Clam is already in your Applications folder, but it still carries the "
+                    + "download quarantine flag, so macOS refuses to start its background helper. "
+                    + "Run this in Terminal, then reopen Electronic Clam:\n\n"
+                    + "xattr -dr com.apple.quarantine \"%@\""),
+                path)
+            alert.addButton(withTitle: NSL("installgate.copyCommand", "Copy Command"))
+            alert.addButton(withTitle: NSL("installgate.later", "Later"))
+            NSApp.activate(ignoringOtherApps: true)
+            if alert.runModal() == .alertFirstButtonReturn {
+                let cmd = "xattr -dr com.apple.quarantine \"\(path)\""
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(cmd, forType: .string)
+            }
+            return true
+        }
         alert.messageText = NSL("installgate.title", "Move Electronic Clam to your Applications folder")
         alert.informativeText = (block.kind == .quarantined)
             ? NSL("installgate.message.quarantined", "Electronic Clam is running from a download location, so macOS won’t let its background helper start. Move it to the Applications folder and open it from there.")
             : NSL("installgate.message.translocated", "macOS is running Electronic Clam from a temporary read-only location. Move it to the Applications folder and reopen it so its helper can start.")
-        alert.alertStyle = .warning
         alert.addButton(withTitle: NSL("installgate.openApps", "Open Applications Folder"))
         alert.addButton(withTitle: NSL("installgate.later", "Later"))
         NSApp.activate(ignoringOtherApps: true)
@@ -234,6 +261,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // reclaim it on process exit anyway, but unmirror/unregister explicitly).
         virtualDisplayController?.apply(keepAwake: false, externalDisplayPresent: true)
         virtualDisplayController = nil
+        // ADR-0037 — brief bounded runloop window so the WindowServer handshake
+        // that reclaims the virtual display (partly serviced on the main runloop)
+        // completes before we exit; otherwise the mirror can outlive quit (#2).
+        // Kept ≤0.2s — applicationWillTerminate must not hang.
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.2))
         // ADR-0037 S3 — stop the VPN watcher's poll timer cleanly on quit.
         vpnWatcher?.apply(keepAwake: false)
         vpnWatcher = nil

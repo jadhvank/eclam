@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import OSLog
 
@@ -10,15 +11,30 @@ import OSLog
 /// 폴백은 **"끊김을 감지해 사용자에게 알린다"가 전부** — 자동 재연결은 시도하지
 /// 않는다(불가능하고 깨지기 쉬움).
 ///
-/// keep 신호가 살아있는 동안에만 `scutil --nc status <service>` 를 폴링한다(idle
-/// 엔 폴링 0 — 값싸다). 진짜 Connected→Disconnected 에지에서만, 에피소드당 1회
-/// (디바운스) Telegram(opt-in) + 로컬 알림을 쏜다. "한 번도 Connected 가 아니었던"
-/// 상태에서의 Disconnected 는 무시한다.
+/// opt-in 이 켜져 있는 **동안 내내** `scutil --nc status <service>` 를 폴링한다. 진짜
+/// Connected→Disconnected 에지에서만, 에피소드당 1회(디바운스) Telegram(opt-in) +
+/// 로컬 알림을 쏜다. "한 번도 Connected 가 아니었던" 상태에서의 Disconnected 는 무시한다.
 ///
-/// **게이트(실측 버그 수정)**: master 게이트는 **`store.vpnDisconnectNotifyEnabled`**
-/// 로, 잠금 가드(`clamshellLockGuardEnabled`, S1)와 **독립된 opt-in** 이다. 잠금
-/// 가드를 안 켜도 VPN 끊김만 알리고 싶을 수 있어 토글을 분리했다(이전엔 잠금 가드에
-/// 올라타 있어, 가드를 끈 채로는 끊김 알림이 아예 안 떴다).
+/// **게이트(실측 버그 수정 — RC1)**: master 게이트는 **`store.vpnDisconnectNotifyEnabled`**
+/// **단독** 이다. keep(깨어있기)·잠금 가드(`clamshellLockGuardEnabled`, S1)와 **완전히
+/// 독립** — opt-in 만 켜져 있으면 keep 여부와 무관하게 계속 폴링한다. 이전엔 keep 에
+/// 올라타 있어(`keepAwake && opt-in`), keep 이 떨어지는 바로 그 순간 VPN 도 같이 끊기는데
+/// `apply(keepAwake:false)` 가 `stop()` 으로 상태를 리셋 → 재시작 시 이미 Disconnected 로
+/// 기준선을 다시 잡아 정작 그 Connected→Disconnected 에지를 못 봤다(끊김이 감시자를
+/// 스스로 무장 해제). 그래서 keep 게이트를 떼고 opt-in 동안 상시 감시한다 — 안전 해제를
+/// 관통해 폴링하며 라이브 에지를 직접 목격한다. 15초 `scutil` 읽기는 사실상 공짜라
+/// "idle→폴링0" 비용 논리는 약하다(ADR-0037 S3 재평가).
+///
+/// **App Nap 방어(RC2)**: LSUIElement 백그라운드 앱이라 lid 를 닫으면 메인 런루프
+/// `Timer` 가 App Nap 에 스로틀/서스펜드된다. `start()` 에서 `ProcessInfo.beginActivity`
+/// 토큰을 잡아(`stop()` 에서 반납) 타이머 스로틀만 끈다 — **시스템 슬립은 건드리지 않는다**
+/// (`idleSystemSleepDisabled` 미포함). 폴 타이머는 그대로 `RunLoop.main` 에 둬 `StateStore`
+/// 읽기·알림 호출을 전부 메인에 가둔다(스레드 안전).
+///
+/// **슬립/웨이크 관통(RC4)**: 시스템 슬립을 걸쳐 끊긴 경우를 놓치지 않게
+/// `NSWorkspace` 의 wake/screensDidWake 알림에서 즉시 1회 `poll()` 한다. 슬립 전
+/// `lastWasConnected` 를 유지하므로 "슬립 전 Connected → 웨이크 후 Disconnected" 도
+/// (디바운스로) 한 번 알린다.
 ///
 /// **서비스명 자동 탐지(실측 버그 수정)**: 설정된 서비스명(`vpnServiceName`, 기본
 /// "VPN")으로 `scutil` 이 서비스를 못 찾으면(`No service`) Connected 를 한 번도 못
@@ -57,17 +73,26 @@ final class VpnWatcher {
     /// (15초마다 같은 경고를 도배하지 않도록). 해석 성공·재시작 시 리셋.
     private var unresolvedLogged = false
 
+    /// RC2 — App Nap 타이머 스로틀 방어용 activity 토큰. active 인 동안에만 잡는다
+    /// (`start()` 에서 begin, `stop()` 에서 end). `idleSystemSleepDisabled` 는 넣지
+    /// 않아 시스템 슬립은 그대로 둔다 — 우린 폴 타이머만 살아있으면 된다.
+    private var activityToken: NSObjectProtocol?
+
+    /// RC4 — 슬립/웨이크 관통용 NSWorkspace 옵저버 토큰들(반납용). active 동안만 산다.
+    private var wakeObservers: [NSObjectProtocol] = []
+
     init(store: StateStore) {
         self.store = store
     }
 
     /// converge 경로에서 매번 호출(멱등). S1 `VirtualDisplayController.apply(...)`
     /// 와 같은 자리에서 호출되지만 게이트는 **독립**이다 — VPN 끊김 알림 opt-in
-    /// (`vpnDisconnectNotifyEnabled`)으로 켜고 끈다(잠금 가드와 무관).
-    /// - Parameter keepAwake: 현재 keep(깨어있기) 신호 = `store.shouldKeepAwake`.
+    /// (`vpnDisconnectNotifyEnabled`) **단독** 으로 켜고 끈다(keep·잠금 가드와 무관).
+    /// - Parameter keepAwake: 현재 keep(깨어있기) 신호. **RC1**: 게이트에 쓰지 않는다
+    ///   (keep 이 떨어지는 순간의 라이브 끊김 에지를 놓치지 않으려면 상시 감시해야 한다).
+    ///   converge 는 매번 이 값을 넘기지만 여기선 무시하고 opt-in 만 본다.
     func apply(keepAwake: Bool) {
-        let wantActive = keepAwake && store.vpnDisconnectNotifyEnabled
-        if wantActive {
+        if store.vpnDisconnectNotifyEnabled {
             start()
         } else {
             stop()
@@ -79,6 +104,16 @@ final class VpnWatcher {
     private func start() {
         guard pollTimer == nil else { return }   // 멱등 — 이미 폴링 중이면 no-op.
         invalidateResolution()
+        // RC2 — App Nap 타이머 스로틀 방어. lid 를 닫은 백그라운드 상태에서도 폴
+        // 타이머가 15초 주기를 지키게 한다. `.idleSystemSleepDisabled` 는 넣지 않아
+        // 시스템 슬립엔 손대지 않는다(우린 타이머만 살리면 된다).
+        activityToken = ProcessInfo.processInfo.beginActivity(
+            options: [.background, .idleDisplaySleepDisabled],
+            reason: "eclam VPN disconnect watcher (poll survives App Nap)")
+        // RC4 — 슬립/웨이크를 걸친 끊김을 놓치지 않게 wake 알림에서 즉시 폴한다.
+        // `lastWasConnected` 는 인스턴스에 살아있어(감시자는 슬립 동안 stop 되지
+        // 않는다) "슬립 전 Connected → 웨이크 후 Disconnected" 도 한 번 잡힌다.
+        installWakeObservers()
         // 켤 때 현재 상태를 기준선으로 1회 읽는다 — 시작 직후의 첫 폴을 disconnect
         // 에지로 오인하지 않게 한다(예: 켤 때 이미 Disconnected 면 알리지 않음).
         let service = currentService()
@@ -97,11 +132,44 @@ final class VpnWatcher {
         guard pollTimer != nil else { return }
         pollTimer?.invalidate()
         pollTimer = nil
+        // RC2/RC4 — active 동안만 잡던 activity 토큰·wake 옵저버를 반납한다.
+        removeWakeObservers()
+        if let token = activityToken {
+            ProcessInfo.processInfo.endActivity(token)
+            activityToken = nil
+        }
         // 다음 start 가 기준선을 새로 잡으므로 에피소드·해석 상태도 리셋해 둔다.
         lastWasConnected = false
         notifiedThisEpisode = false
         invalidateResolution()
         log.info("vpn watcher stopped")
+    }
+
+    // MARK: - 슬립/웨이크 관통 (RC4)
+
+    /// `NSWorkspace` 의 wake/screensDidWake 알림을 구독해 깨어날 때 즉시 1회 폴한다.
+    /// 폴 타이머는 최대 15초 뒤에나 돌므로, 웨이크 직후 이미 끊긴 상태를 더 빨리
+    /// 잡으려는 것. 핸들러는 메인에서 불리게 `.main` 큐를 지정한다(StateStore·알림
+    /// 호출을 메인에 가둔다). 관측하는 이름은 `NSWorkspace.shared.notificationCenter`
+    /// 전용이라 반드시 그 센터에서 등록/해제한다.
+    private func installWakeObservers() {
+        guard wakeObservers.isEmpty else { return }
+        let nc = NSWorkspace.shared.notificationCenter
+        for name in [NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification] {
+            let token = nc.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                self?.log.info("vpn: wake notification → immediate poll")
+                self?.poll()
+            }
+            wakeObservers.append(token)
+        }
+    }
+
+    /// wake 옵저버 반납(stop 시). 등록했던 같은 센터에서 제거한다.
+    private func removeWakeObservers() {
+        guard !wakeObservers.isEmpty else { return }
+        let nc = NSWorkspace.shared.notificationCenter
+        for token in wakeObservers { nc.removeObserver(token) }
+        wakeObservers.removeAll()
     }
 
     // MARK: - Polling
@@ -241,30 +309,51 @@ final class VpnWatcher {
 
     /// `scutil --nc list` 에서 FortiClient/SSL VPN 서비스를 찾아 그 식별자를 반환한다
     /// (있으면 표시 이름, 없으면 UUID — 둘 다 `scutil --nc status` 가 받는다). 설정된
-    /// 서비스명이 실제와 달라 못 찾을 때(BUG2 핵심)의 폴백.
-    ///
-    /// `scutil --nc list` 한 줄 예:
-    ///   `* (Disconnected)  <UUID> VPN (com.fortinet.forticlient...) "FortiSSLVPN" [...]`
-    /// 매칭 점수: `forticlient`/`com.fortinet`(3) > `ipsec`/`ssl`(2) > `vpn`(1).
-    /// 가장 높은 점수의 줄을 고른다. 못 찾으면 nil.
+    /// 서비스명이 실제와 달라 못 찾을 때(BUG2 핵심)의 폴백. I/O(`Subprocess.capture`)는
+    /// 여기서만, 실제 파싱·점수 판정은 순수 함수 `pickVpnService(fromScutilList:)` 로
+    /// 분리해 단위 테스트가 가능하게 한다(RC3).
     static func autodetectVpnService() -> String? {
         guard let out = Subprocess.capture("/usr/sbin/scutil", ["--nc", "list"]) else {
             return nil
         }
+        return pickVpnService(fromScutilList: out)
+    }
+
+    /// FortiClient/SSL VPN 이 **아닌** 것으로 알려진 provider 식별자 조각들. 이들이
+    /// 줄에 있으면 제외한다 — 사내 SSL VPN(FortiClient) 을 노리는데 Tailscale·
+    /// WireGuard 등을 잘못 무는 것을 막는다(RC3 실측: bare "vpn" 이 Tailscale 을 물었다).
+    private static let nonSslVpnProviders = [
+        "tailscale", "wireguard", "zerotier", "unicorn", "t:mullvad", "mullvad",
+        "nordvpn", "expressvpn", "cloudflare", "warp", "netbird", "twingate",
+    ]
+
+    /// `scutil --nc list` stdout 을 파싱해 FortiClient/SSL VPN 서비스 1개의 식별자를
+    /// 고른다(순수 함수 — I/O 없음, 테스트 대상). 못 찾으면 nil.
+    ///
+    /// `scutil --nc list` 한 줄 예(실측):
+    ///   `* (Connected)     ... VPN (io.tailscale.ipn.macos) "Tailscale" [VPN:...]`
+    ///   `(Invalid)         ... VPN (com.unicorn-soft.unicornhttpsformac) "Unicorn HTTPS" [VPN:...]`
+    ///   `* (Disconnected)  ... VPN (com.fortinet.forticlient.macos.vpn) "FortiSSLVPN" [VPN:...]`
+    ///
+    /// **RC3 — 점수 체계**: 모든 VPN 줄이 "VPN" 을 포함하므로 bare `"vpn"` = 1 tier 는
+    /// 아무 줄에나 걸려 오탐한다 → **제거**. 대신 괄호 안 provider id 를 신호로 쓴다:
+    ///   `forticlient`/`com.fortinet`(3) > `ipsec`/`ssl`(2). 그 외(생 "vpn" 뿐)는 후보
+    /// 아님. `nonSslVpnProviders` 에 걸리는 줄은 점수와 무관하게 배제한다.
+    static func pickVpnService(fromScutilList out: String) -> String? {
         var bestIdentifier: String?
         var bestScore = 0
         for rawLine in out.split(separator: "\n", omittingEmptySubsequences: true) {
             let line = String(rawLine)
             let lower = line.lowercased()
+            // 알려진 비-SSL-VPN provider 는 먼저 배제(Tailscale·WireGuard 등).
+            if Self.nonSslVpnProviders.contains(where: { lower.contains($0) }) { continue }
             let score: Int
             if lower.contains("forticlient") || lower.contains("com.fortinet") {
                 score = 3
             } else if lower.contains("ipsec") || lower.contains("ssl") {
                 score = 2
-            } else if lower.contains("vpn") {
-                score = 1
             } else {
-                continue
+                continue   // bare "vpn" 만으론 후보로 삼지 않는다(RC3 — 오탐 방지).
             }
             guard score > bestScore else { continue }
             // 표시 이름("...")이 있으면 그것을, 없으면 UUID 를 식별자로(둘 다 status 가

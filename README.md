@@ -10,7 +10,7 @@ It detects *work*, not just a running process.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.3-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.5-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -80,10 +80,8 @@ Connect your own Telegram bot and you'll get a ping when an agent stops or your 
 - **CLI + named sessions** — drive it straight from the terminal (see [Usage](#usage)).
 - **Optional agent hooks** — installing injects an activity-signal hook into Claude / Codex / Hermes configs; uninstalling restores them.
 - **Guaranteed sleep restore on exit** — three layers: synchronous restore on quit, a SIGTERM handler, and a 20-second watchdog if the app crashes.
-- **Open at login (optional)** — start Electronic Clam automatically when you log in; off by default.
-- **Update notifications** — checks GitHub for new releases and points you to the download; it only notifies, never installs on its own.
-- **Clamshell VPN lock guard (opt-in).** With no external display on battery, closing the lid normally *locks* the screen — which drops a FortiClient SSL VPN (it needs a fresh sign-in to reconnect). An invisible virtual display anchors the session so the screen doesn't lock and the tunnel survives — no backlight, so essentially no power and no extra hardware. The **Blank screen** action also splits into **Dim** (dark but VPN-safe, default) vs **Sleep**, with an optional VPN-disconnect notification. Off by default, tucked deep in Settings.
-- **Resilient helper setup** — won't register the background helper from a quarantined download or a temporary (translocated) location where macOS blocks it; it guides you to move the app to Applications instead. Settings flags duplicate copies and version mismatches, and `eclam repair` recovers a wedged or unreachable helper.
+- **Clamshell VPN lock guard (opt-in).** With no external display on battery, closing the lid normally *locks* the screen — which drops a FortiClient SSL VPN (it needs a SAML re-login to reconnect). An invisible virtual display anchors the session so the screen doesn't lock and the tunnel survives. The **Blank screen** action also splits into **Dim** (dark but VPN-safe, default) vs **Sleep**, with an optional VPN-disconnect notification.
+- **Resilient helper setup** — won't register the background helper from a quarantined download or a temporary (translocated) location, where macOS blocks it; it guides you to move the app to Applications instead. Settings → General flags duplicate copies and version mismatches, and `eclam repair` / **Reinstall Helper** recover a wedged registration.
 
 ## Install
 
@@ -118,8 +116,8 @@ The Homebrew cask creates a `$HOMEBREW_PREFIX/bin/eclam` symlink.
 ```
 eclam on [--for <dur>] [--forever]   # keep awake; default 2h, then the helper auto-releases (no GUI needed, survives reboot)
 eclam off
-eclam status [--json]                # also flags a quarantined app, a failed helper, and duplicate copies
-eclam repair                         # recover a wedged/unreachable helper
+eclam status [--json]                 # also flags a quarantined/outside-Applications app, a failed helper, and duplicate copies
+eclam repair                          # recover a wedged/unreachable helper (relaunches the app; guides you to sfltool resetbtm as a last resort)
 eclam keep --while <pid>
 eclam watch <agent> [--grace s] [--check-interval s] [--max min] [--json]
 eclam session start <name> [--message <text>] / stop <name> / list [--json]
@@ -145,6 +143,7 @@ See [Security & privacy](docs/security.md) for details.
 
 - **Detection can lag a few seconds without a hook.** Agents without an installed hook are detected by polling their session logs (~5 s, ~30 s while locked). Claude / Codex / Hermes are instant once you install their hooks.
 - **No safety guards in CLI-only use.**
+- **Run it from Applications.** Launched from Downloads or a still-quarantined copy, macOS won't let the background helper start — move Electronic Clam to your Applications folder and reopen it.
 - **VS Code–embedded agents** (Cline / Roo Code) have no standalone process, so Lax-mode detection is limited.
 - **Apple Silicon only**, macOS 13+ (Ventura).
 
@@ -171,8 +170,10 @@ open build/ElectronicClam.app
 
 Recent releases — full history in [CHANGELOG.md](CHANGELOG.md):
 
+- **0.6.5** — Fix: with the clamshell lock guard enabled, connecting a TV via **screen mirroring** now works. Mirrored displays (a mirrored TV, AirPlay) were invisible to the guard — macOS drops a mirror-set member from the active display list and reports the whole mirror set as a single screen — so the invisible anchor kept re-mirroring and re-creating itself while macOS was negotiating the mirror session. Extended (side-by-side) displays were never affected. The guard also no longer creates its anchor while a mirror set is active, which used to leave an unreclaimable virtual display behind and disable the guard for the rest of the login session.
+- **0.6.4** — Fixes for the clamshell VPN lock guard: the VPN-disconnect notification now actually fires (it was stopped by the very event it reports, and by App Nap), the invisible anchor is released when you quit the app, the virtual display is named clearly, and brightness is restored when you reopen the lid after **Dim**. Also: the menu-bar item no longer shows a dead-end "move to Applications" prompt when only a quarantine attribute is left, and the thermal cutoff default moved from `fair` to `serious` (the old default could end a keep-awake session within minutes).
 - **0.6.3** — Fix: with the clamshell lock guard enabled, attaching a real external display no longer disturbs your saved built-in + external arrangement. The invisible anchor now steps aside immediately (no re-mirror) when a real display appears, letting macOS restore your saved layout; it returns automatically when the external is removed. Headless clamshell lock protection is unchanged.
-- **0.6.2** — Clamshell VPN lock guard (opt-in): with no external display on battery, closing the lid no longer locks the screen, so a FortiClient SSL VPN survives instead of dropping — an invisible virtual display anchors the session, the "Blank screen" action now lets you choose **Dim** (VPN-safe, default) or **Sleep**, and an optional notification warns you if the VPN drops. Plus a more resilient helper setup that refuses to register from a quarantined or translocated copy, flags duplicate copies and version mismatches, and recovers via `eclam repair`.
+- **0.6.2** — Clamshell VPN lock guard (opt-in): with no external display on battery, closing the lid no longer locks the screen, so a FortiClient SSL VPN survives instead of dropping — an invisible virtual display anchors the session. The "Blank screen" action now lets you choose **Dim** (VPN-safe, default) or **Sleep**, with an optional VPN-disconnect notification.
 - **0.6.1** — Honest helper status: a dead-but-registered helper no longer shows a false "enabled". `eclam status` reports it as `unreachable` (exit 2), the app self-repairs on relaunch, a new `eclam repair` command and a menu-bar warning surface it, and `eclam status` now also reports the Open-at-Login state.
 - **0.6.0** — Open at Login, in-app update notifications, awake history, internationalization (English · 한국어 · 中文 · 日本語 · Español), single-click toggle, menu-bar icon themes, remote idle policy, Telegram status notifications, Developer ID signing + notarization.
 

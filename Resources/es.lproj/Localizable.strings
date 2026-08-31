@@ -267,6 +267,13 @@
 "installgate.openApps" = "Abrir la carpeta Aplicaciones";
 "installgate.later" = "Más tarde";
 
+/* ADR-0040 — quarantine-in-place 안내 + 메뉴바 상태아이템 미배치 폴백 */
+"installgate.title.quarantinedInPlace" = "macOS tiene a Electronic Clam en cuarentena";
+"installgate.message.quarantinedInPlace" = "Electronic Clam ya está en tu carpeta Aplicaciones, pero conserva la marca de cuarentena de descarga, así que macOS se niega a arrancar su helper en segundo plano. Ejecuta esto en el Terminal y vuelve a abrir Electronic Clam:\n\nxattr -dr com.apple.quarantine \"%@\"";
+"installgate.copyCommand" = "Copiar comando";
+"menubar.missing.title" = "No se puede mostrar el icono de Electronic Clam en la barra de menús";
+"menubar.missing.body" = "macOS no está colocando el icono en la barra de menús. En macOS 26 esto suele deberse a la lista de permitidos de la barra de menús (Ajustes del Sistema → Barra de menús), que puede quedarse rota después de que un organizador de la barra (Bartender, Ice, Thaw…) reordene los iconos. Activar ahí la app no siempre lo arregla; reiniciar el Mac normalmente sí. Los ajustes están abiertos para que puedas seguir controlando Electronic Clam, y el comando `eclam` (`eclam off`, `eclam on`, `eclam status`) siempre funciona.";
+
 /* ADR-0039 — nota de estado de instalación en Ajustes → General (split-brain / ubicación / versión desfasada) */
 "installhealth.quarantined" = "Electronic Clam se está ejecutando desde una ubicación de descarga, así que macOS no deja que arranque su ayudante. Muévelo a la carpeta de Aplicaciones y vuelve a abrirlo.";
 "installhealth.translocated" = "macOS está ejecutando Electronic Clam desde una ubicación temporal de solo lectura. Muévelo a la carpeta de Aplicaciones y vuelve a abrirlo.";

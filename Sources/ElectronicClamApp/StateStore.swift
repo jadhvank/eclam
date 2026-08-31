@@ -51,7 +51,11 @@ final class StateStore {
 
         static let `default` = SafetySettings(
             batteryLow: 30,
-            thermalCutoff: "fair",
+            // `.serious` 가 기본. `"fair"` 였을 때는 정상 작업 부하만으로 keep-awake 가
+            // 계속 풀렸다(2026-08-05 실측). 클램쉘·비전원 같은 위험 상황은
+            // `SafetyMonitor.effectiveThermalCutoff` 의 컨텍스트 조건이 `.fair` 로
+            // 조여주므로 이 완화가 가방 속 과열 시나리오를 열어주지 않는다.
+            thermalCutoff: "serious",
             maxDurationMin: 0,
             enabled: true,
             notifyOnRelease: true)
@@ -285,6 +289,8 @@ final class StateStore {
     private static let defaultWatchedAgents: Set<String> = Set(AgentTrace.M1Defaults.map(\.id))
     /// One-shot marker for the `["claude"]`-stored-default migration below.
     private static let watchedAgentsMigratedKey = "WatchedAgentsDefaultV2Migrated"
+    /// One-shot marker for the `"fair"` thermal-cutoff migration (2026-08-05).
+    private static let thermalCutoffMigratedKey = "ThermalCutoffSeriousMigrated"
 
     var onChange: (() -> Void)?
 
@@ -365,11 +371,26 @@ final class StateStore {
         }
 
         if let data = UserDefaults.standard.data(forKey: Self.safetySettingsKey),
-           let decoded = try? JSONDecoder().decode(SafetySettings.self, from: data) {
+           var decoded = try? JSONDecoder().decode(SafetySettings.self, from: data) {
+            // Migration (2026-08-05): 기존 설치에 굳어버린 `"fair"` 열 컷오프를 한 번만
+            // `"serious"` 로 올린다. `"fair"` 는 4단계 중 두 번째로 낮은 단계라 에이전트를
+            // 돌리는 맥에서는 상시로 도달하고, 실측(회사 맥북)에서 8분에 두 번 keep-awake
+            // 를 자폭시켰다 — 앱의 존재 목적과 정면으로 충돌한다. 클램쉘·배터리 같은
+            // 진짜 위험 상황은 `effectiveThermalCutoff` 의 컨텍스트 조건이 여전히
+            // `.fair` 로 조여주므로(min 규칙) 안전성은 유지된다. 마커 덕분에 이후 사용자가
+            // 일부러 고른 `"fair"` 는 그대로 남는다.
+            if decoded.thermalCutoff == "fair",
+               !UserDefaults.standard.bool(forKey: Self.thermalCutoffMigratedKey) {
+                decoded.thermalCutoff = "serious"
+                if let out = try? JSONEncoder().encode(decoded) {
+                    UserDefaults.standard.set(out, forKey: Self.safetySettingsKey)
+                }
+            }
             self.safetySettings = decoded
         } else {
             self.safetySettings = .default
         }
+        UserDefaults.standard.set(true, forKey: Self.thermalCutoffMigratedKey)
     }
 
     /// Snapshot of trace pool — defaults + external declarations + user-added —

@@ -10,7 +10,7 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.3-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.5-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · **Español**
@@ -170,6 +170,8 @@ open build/ElectronicClam.app
 
 Lanzamientos recientes — historial completo en [CHANGELOG.md](CHANGELOG.md):
 
+- **0.6.5** — Corrección: con la protección de bloqueo en clamshell activada, conectar un televisor mediante **duplicado de pantalla** ya funciona. Las pantallas conectadas en modo espejo (un televisor duplicado, AirPlay) eran invisibles para la protección: macOS excluye a los miembros de un conjunto de espejo de la lista de pantallas activas y reporta todo el conjunto como una sola pantalla. Por eso el ancla invisible seguía volviendo a espejar y a recrearse justo mientras macOS negociaba la sesión de duplicado. Las pantallas extendidas (una al lado de otra) nunca se vieron afectadas. Además, el ancla ya no se crea mientras hay un conjunto de espejo activo: en ese caso quedaba una pantalla virtual imposible de recuperar y la protección dejaba de funcionar hasta cerrar la sesión.
+- **0.6.4** — Correcciones de la protección de la VPN frente al bloqueo en clamshell: la notificación de desconexión de la VPN ahora sí se dispara (la vigilancia se detenía por el propio evento que debía notificar y por App Nap), el ancla invisible se libera al salir de la app, la pantalla virtual tiene un nombre claro y el brillo se restaura al volver a abrir la tapa después de **Dim**. Además, la barra de menús ya no repite el callejón sin salida «muévela a Aplicaciones» cuando solo queda un atributo de cuarentena, y el corte térmico por defecto pasa de `fair` a `serious` (el valor anterior podía terminar un keep-awake en pocos minutos).
 - **0.6.3** — Corrección: con la protección de bloqueo en clamshell activada, conectar una pantalla externa real ya no altera tu disposición guardada de «interna + externa». El ancla invisible ahora se aparta de inmediato (sin volver a espejar) en cuanto aparece una pantalla real, dejando que macOS restaure la disposición que guardaste; vuelve automáticamente cuando quitas la externa. La protección de bloqueo en clamshell sin pantalla no cambia.
 - **0.6.2** — Protección de la VPN frente al bloqueo en clamshell (opcional): sin pantalla externa y con batería, cerrar la tapa ya no bloquea la pantalla, así que una VPN SSL de FortiClient sobrevive en vez de caerse — una pantalla virtual invisible ancla la sesión. La acción **Apagar pantalla** ahora te deja elegir **Dim** (segura para la VPN, por defecto) o **Sleep**, con una notificación opcional de desconexión de la VPN.
 - **0.6.1** — Estado honesto del helper: un helper muerto pero registrado ya no aparece como falso «activado». `eclam status` lo informa como `unreachable` (código de salida 2), la app se autorrepara al reiniciarse, un nuevo comando `eclam repair` y un aviso en la barra de menús lo muestran, y `eclam status` ahora también informa del estado de inicio al arrancar sesión.

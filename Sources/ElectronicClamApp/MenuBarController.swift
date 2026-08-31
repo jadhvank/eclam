@@ -26,6 +26,14 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         // and the convergence engine). We just install our menu here.
         installMenu()
         refresh()
+        // 배치 검증은 런루프가 한 번 돌아 AppKit 이 아이템을 메뉴바에 앉힌 뒤에야
+        // 의미가 있다. 실행 직후·화면 재구성 때마다 확인한다.
+        verifyPlacementSoon()
+    }
+
+    deinit {
+        if let m = rightClickMonitor { NSEvent.removeMonitor(m) }
+        if let o = screenObserver { NotificationCenter.default.removeObserver(o) }
     }
 
     /// ADR-0014 — left-click toggles the effective awake state (no double-click).
@@ -44,9 +52,16 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         menu.delegate = self
         menu.autoenablesItems = false
         // Left-click: button action.
-        statusItem.button?.target = self
-        statusItem.button?.action = #selector(buttonClicked)
-        statusItem.button?.sendAction(on: [.leftMouseUp])
+        wireStatusButton()
+
+        // 화면 재구성(모니터 연결·해제·정렬 변경·해상도 변경)마다 배치를 재검증한다.
+        // 이게 없으면 아이템이 한 번 메뉴바 밖에 앉는 순간 영영 못 돌아온다 —
+        // 2026-08-05 조사에서 실제로 3일간 조종 불가가 된 경로.
+        screenObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didChangeScreenParametersNotification,
+            object: nil, queue: .main) { [weak self] _ in
+                self?.verifyPlacementSoon()
+            }
 
         // Right-click: NSEvent local monitor scoped to our status button's
         // window. We must temporarily install `statusItem.menu` and call
@@ -60,6 +75,130 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             self.popMenu()
             return nil
         }
+    }
+
+    private func wireStatusButton() {
+        statusItem.button?.target = self
+        statusItem.button?.action = #selector(buttonClicked)
+        statusItem.button?.sendAction(on: [.leftMouseUp])
+    }
+
+    // MARK: - 배치 자가진단 (2026-08-05~09)
+    //
+    // 증상: 앱은 정상 동작하는데 메뉴바에 아이콘이 안 보여 토글도 설정도 못 연다.
+    // 실측: 아이템은 존재(isVisible=true, 37x22)하는데 좌표가 어떤 화면의 메뉴바
+    // 띠에도 걸리지 않았다 — 단일 화면에서도 `-1, 965`(좌하단 구석 = AppKit 이
+    // 미표시 아이템을 버려두는 자리). 정상 프로세스의 아이템은 메뉴바 높이(33)를
+    // 받는데 이쪽은 레거시 22 였다.
+    //
+    // 원인은 앱 밖이었다(폴백 주석 참고: Tahoe 메뉴바 허용 목록 원장 오염). 앱이
+    // 고칠 수 있는 것이 아니므로 여기서는 **검출과 조종 경로 확보만** 한다.
+    // 아이템 재생성 자가복구는 넣었다가 뺐다 — 효과가 없었고 사용자의 저장된
+    // 선호 위치를 지우는 부작용만 있었다.
+
+    private var screenObserver: Any?
+    private var placementCheck: DispatchWorkItem?
+    private var placementProbes = 0
+    private var placementFallbackShown = false
+    /// 이번 실행에서 한 번이라도 메뉴바에 제대로 앉은 적이 있는가.
+    ///
+    /// **오탐 방지의 핵심.** Bartender·Ice·Thaw 류 메뉴바 관리 앱은 아이템을 화면 밖으로
+    /// 옮겨서 숨긴다 — 그건 사용자가 의도한 정상 동작이지 결함이 아니다. 정상 배치를
+    /// 한 번이라도 관측했다면 이후의 이탈은 그런 앱의 소행으로 보고 개입하지 않는다.
+    /// 자가복구는 "처음부터 끝까지 메뉴바에 못 앉은" 경우에만 돈다.
+    private var everPlaced = false
+    /// 폴백 전까지의 관측 횟수. 느린 로그인/디스플레이 안정화를 미배치로 오판하지
+    /// 않도록 넉넉히 본다(약 2·5·8·11초).
+    private static let maxPlacementProbes = 4
+
+    /// 다음 런루프 + 여유를 두고 배치를 검증한다. 연속 호출은 합쳐진다
+    /// (모니터 hot-plug 는 알림을 여러 번 쏜다).
+    private func verifyPlacementSoon(delay: TimeInterval = 2.0) {
+        placementCheck?.cancel()
+        let work = DispatchWorkItem { [weak self] in self?.verifyPlacement() }
+        placementCheck = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+    }
+
+    /// 상태아이템이 실제로 어떤 화면의 메뉴바 띠 안에 있는가.
+    ///
+    /// `isVisible` 만으로는 부족하다 — AppKit 은 표시하지 못한 아이템도
+    /// `isVisible == true` 로 두고 창만 메뉴바 밖에 둘 수 있다(실측). 그래서
+    /// 버튼 창의 실제 프레임을 화면 상단 띠와 대조한다.
+    private func statusItemIsOnAMenuBar() -> Bool {
+        guard statusItem.isVisible, let win = statusItem.button?.window else { return false }
+        // 기하 판정은 순수 계층(MenuBarPlacement)에 위임 — scripts/test.sh 가 단독
+        // 컴파일해 회귀 검증한다. 여기서는 AppKit 상태만 모아 넘긴다.
+        return MenuBarPlacement.isOnAMenuBar(itemFrame: win.frame,
+                                             screens: NSScreen.screens.map(\.frame))
+    }
+
+    /// 실패 시 1회 남기는 화면 기하. 아이템 프레임과 **같은 좌표계(Cocoa)** 라
+    /// 바로 대조된다. 손쉬운 사용 권한이 없어도(실측: osascript AX 조회가 회수된
+    /// 환경이 있었다) 앱이 스스로 남기므로 원인 추적의 출발점이 된다.
+    private func screensDescription() -> String {
+        NSScreen.screens.enumerated().map { i, s in
+            "[\(i)]\(NSStringFromRect(s.frame))top=\(Int(s.frame.maxY))mb=\(Int(s.frame.maxY - s.visibleFrame.maxY))"
+        }.joined(separator: " ")
+    }
+
+    private func verifyPlacement() {
+        if statusItemIsOnAMenuBar() {
+            if !everPlaced {
+                log.info("status item placed on a menu bar")
+            }
+            everPlaced = true
+            placementProbes = 0
+            return
+        }
+        // 정상 배치를 본 적 있다면 메뉴바 관리 앱이 숨긴 것 — 정상이므로 개입 금지.
+        guard !everPlaced else { return }
+
+        // 로그인 직후·디스플레이 안정화 중일 수 있으니 몇 번 더 지켜본다.
+        placementProbes += 1
+        if placementProbes < Self.maxPlacementProbes {
+            verifyPlacementSoon(delay: 3.0)
+            return
+        }
+
+        // 미배치 확정 — 사용자가 앱을 되찾을 경로를 연다.
+        //
+        // 자가복구(아이템 재생성)는 시도했다가 뺐다. 2026-08-05~09 실측에서
+        // 재생성은 아이템을 옮기기만 하고 배치에 성공하지 못했으며, 저장된
+        // 선호 위치를 지우는 부작용만 있었다. 실제 원인은 앱 밖(아래 폴백 참고)
+        // 이라 앱이 고칠 수 있는 것이 아니다.
+        let frame = statusItem.button?.window?.frame ?? .zero
+        log.error("status item never reached a menu bar (frame=\(NSStringFromRect(frame), privacy: .public), visible=\(self.statusItem.isVisible, privacy: .public), screens=\(self.screensDescription(), privacy: .public))")
+        presentPlacementFallback()
+    }
+
+    /// 아이콘을 띄울 수 없을 때 사용자가 앱을 되찾는 경로 (1회).
+    ///
+    /// 실측 원인 (2026-08-09 확정): macOS 26 Tahoe 는 메뉴바 아이템의 소유·허용
+    /// 상태를 `group.com.apple.controlcenter` 의 `trackedApplications` 원장에
+    /// **번들 식별자로** 기록한다. 메뉴바 정리 앱(Bartender·Ice·Thaw 계열)이
+    /// 아이템을 옮기면 이 귀속이 교차 오염돼, 시스템 설정에서 "허용"으로 켜도
+    /// 아이콘이 영영 안 나온다 — 다른 앱 항목에 박힌 참조는 토글이 못 고치기
+    /// 때문이다. 앱을 재설치·재빌드해도 상태가 식별자에 묶여 있어 소용없다.
+    /// 참고: steipete/CodexBar#1440.
+    ///
+    /// 앱이 고칠 수 없는 문제이므로, 최소한 조종 경로를 남기는 것이 목적이다.
+    private func presentPlacementFallback() {
+        guard !placementFallbackShown else { return }
+        placementFallbackShown = true
+        log.error("opening Settings as fallback for the missing menu bar icon")
+        onOpenSettings()
+        let title = NSL("menubar.missing.title", "Electronic Clam’s menu bar icon can’t be shown")
+        // 문자열은 조각으로 나눠 잇는다 — 한 식으로 이으면 타입 체커가 시간 초과한다.
+        let cause = "macOS is not placing the icon in the menu bar. On macOS 26 this is usually "
+            + "the menu bar allow-list (System Settings → Menu Bar), which can stay broken "
+            + "after a menu bar organiser (Bartender, Ice, Thaw…) rearranges icons."
+        let remedy = " Turning the app “on” there does not always fix it; restarting your Mac "
+            + "often does. Settings is open so you can still control Electronic Clam, and the "
+            + "`eclam` command (`eclam off`, `eclam on`, `eclam status`) always works."
+        let body = NSL("menubar.missing.body", cause + remedy)
+        Task { await ReleaseNotifier.shared.notifyInfo(
+            identifier: "eclam.menubar.missing", title: title, body: body) }
     }
 
     private func popMenu() {

@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.3-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.5-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · **日本語** · [Español](README.es.md)
@@ -170,6 +170,8 @@ open build/ElectronicClam.app
 
 最近のリリース — 全履歴は [CHANGELOG.md](CHANGELOG.md) に:
 
+- **0.6.5** — 修正:クラムシェルロックガードを有効にしたまま **画面ミラーリング** で TV を接続しても正しく動くようになりました。ミラーリングで接続したディスプレイ(ミラーした TV、AirPlay)はガードから見えていませんでした — macOS はミラーセットのメンバーをアクティブディスプレイ一覧から外し、ミラーセット全体を 1 画面として報告するためです。その結果、macOS がミラーセッションを確立している最中に、目に見えないアンカーが再ミラー・再生成を繰り返して割り込んでいました。拡張(並べて表示)接続はもともと影響を受けません。またミラーセットが有効な間はアンカーを作らなくなりました — その状況で作ると回収できない仮想ディスプレイが残り、ログアウトするまでガードが機能しなくなっていました。
+- **0.6.4** — クラムシェル VPN ロックガードの修正:VPN 切断通知が実際に届くようになり(通知すべきイベント自身と App Nap によって監視が止まっていました)、App を終了すると目に見えないアンカーも解放され、仮想ディスプレイの名前が明確になり、**Dim** のあとフタを開け直すと明るさが戻ります。さらに、quarantine 属性だけが残っている場合にメニューバーが「Applications へ移動してください」を繰り返すだけの行き止まりを解消し、サーマルカットオフの既定値を `fair` から `serious` に引き上げました(以前の既定値では数分で keep-awake が終了することがありました)。
 - **0.6.3** — 修正:クラムシェルロックガードを有効にした状態で実機の外部ディスプレイを接続しても、保存済みの「内蔵 + 外部」の配置が崩れなくなりました。実機ディスプレイが現れると、目に見えないアンカーが即座に道を譲り(再ミラーしない)、macOS が保存した配置を復元します。外部ディスプレイを外すとアンカーは自動的に戻ります。クラムシェル(ヘッドレス)のロック防止そのものは変わりません。
 - **0.6.2** — クラムシェル VPN ロックガード(オプトイン):外部ディスプレイなしのバッテリー駆動で、フタを閉じても画面がロックされなくなり、FortiClient SSL VPN が切れずに維持されます — 目に見えない仮想ディスプレイがセッションをつなぎ留めます。**画面だけオフ**の動作は **Dim**(VPN に安全・デフォルト)と **Sleep** から選べ、VPN 切断の通知も任意です。
 - **0.6.1** — 正直な helper ステータス:死んでいるのに登録だけ残った helper が、もう誤って「有効」と表示されません。`eclam status` はそれを `unreachable`(終了コード 2)として報告し、App は再起動時に自己修復し、新しい `eclam repair` コマンドとメニューバーの警告がそれを可視化し、`eclam status` は起動時ログイン(Open at Login)の状態も報告するようになりました。

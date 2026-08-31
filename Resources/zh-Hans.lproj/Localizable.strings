@@ -267,6 +267,13 @@
 "installgate.openApps" = "打开「应用程序」文件夹";
 "installgate.later" = "稍后";
 
+/* ADR-0040 — quarantine-in-place 안내 + 메뉴바 상태아이템 미배치 폴백 */
+"installgate.title.quarantinedInPlace" = "Electronic Clam 被 macOS 隔离(quarantine)";
+"installgate.message.quarantinedInPlace" = "Electronic Clam 已经在「应用程序」文件夹中,但仍带着下载隔离标记,因此 macOS 拒绝启动它的后台 helper。请在终端中运行下面这行,然后重新打开 Electronic Clam:\n\nxattr -dr com.apple.quarantine \"%@\"";
+"installgate.copyCommand" = "拷贝命令";
+"menubar.missing.title" = "无法显示 Electronic Clam 的菜单栏图标";
+"menubar.missing.body" = "macOS 没有把图标放到菜单栏中。在 macOS 26 上,这通常是菜单栏允许列表(系统设置 → 菜单栏)的问题;菜单栏整理工具(Bartender、Ice、Thaw…)重排图标后,该状态可能一直是坏的。在那里把 App 打开为「允许」并不总能修好,重启 Mac 往往可以。设置窗口已经打开,你仍可控制 Electronic Clam,而 `eclam` 命令(`eclam off`、`eclam on`、`eclam status`)始终可用。";
+
 /* ADR-0039 — 设置 → 通用中的安装健康提示（脑裂 / 位置 / 版本不一致） */
 "installhealth.quarantined" = "Electronic Clam 正从下载位置运行，所以 macOS 不允许其帮助程序启动。请将它移到「应用程序」文件夹并重新打开。";
 "installhealth.translocated" = "macOS 正从临时的只读位置运行 Electronic Clam。请将它移到「应用程序」文件夹并重新打开。";

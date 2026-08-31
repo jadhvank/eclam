@@ -62,6 +62,13 @@ final class VirtualDisplayController {
 
         if wantActive {
             if anchor.active { return }
+            // ADR-0037 §미러링 — `externalDisplayPresent` 는 `SafetyMonitor` 가 채운
+            // 스냅샷(`store.extDisplayPresent`)이라 hot-plug 와 최대 한 틱 어긋난다.
+            // 앵커 생성은 그 한 틱을 견디지 못한다: 미러셋이 활성인 동안 만든 가상
+            // 디스플레이는 프로세스 종료 후에도 회수되지 않는 고아가 된다(2026-09-01
+            // 실측). 그래서 생성 직전에 라이브로 한 번 더 확인한다. `startFailed`
+            // 래치는 세우지 않는다 — 외장이 빠지면 다음 converge 에서 그냥 다시 시도.
+            if EClamVirtualDisplay.externalDisplayPresent() { return }
             if startFailed { return }
             if anchor.start() {
                 // 앵커가 떴으면 idle display-sleep 도 같이 막는다 — 안 그러면 ~2분

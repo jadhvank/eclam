@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.3-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.5-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · **中文** · [日本語](README.ja.md) · [Español](README.es.md)
@@ -170,6 +170,8 @@ open build/ElectronicClam.app
 
 近期版本 —— 完整历史见 [CHANGELOG.md](CHANGELOG.md):
 
+- **0.6.5** —— 修复:启用合盖锁屏防护后,通过**屏幕镜像**连接电视现在可以正常工作。以镜像方式接入的显示器(镜像的电视、AirPlay)对防护是不可见的 —— macOS 会把镜像组的成员从活动显示器列表中剔除,并把整个镜像组报告为一块屏幕。于是在 macOS 协商镜像会话期间,隐形锚点会不断重新镜像、重新创建而横插一脚。扩展(并排)连接从来不受影响。此外,镜像组处于活动状态时不再创建锚点 —— 那种情况下会残留一块无法回收的虚拟显示器,并使防护在注销前彻底失效。
+- **0.6.4** —— 合盖 VPN 锁屏防护的修复:VPN 断开通知现在真的会触发(此前监视会被它本应报告的那个事件以及 App Nap 停掉),退出 App 时隐形锚点会一并释放,虚拟显示器的名称更清晰,并且在 **Dim** 之后重新打开上盖会恢复亮度。另外,当仅残留 quarantine 属性时,菜单栏不再反复给出「请移到 Applications」这一死胡同提示;散热截止的默认值也从 `fair` 提高到 `serious`(旧默认值可能在几分钟内就结束 keep-awake)。
 - **0.6.3** —— 修复:启用合盖锁屏防护后,接入真实外接显示器不再打乱你保存的「内置 + 外接」排列。真实显示器一出现,隐形锚点便立即让位(不再重新镜像),让 macOS 恢复你保存的布局;移除外接显示器后锚点会自动回归。合盖无头锁屏防护保持不变。
 - **0.6.2** —— 合盖 VPN 锁屏防护(可选):在没有外接显示器的电池供电下,合盖不再锁屏,于是 FortiClient SSL VPN 得以保留而非掉线 —— 一块隐形的虚拟显示器锚定会话。**仅熄屏**动作现在可选 **Dim**(对 VPN 安全,默认)或 **Sleep**,并可选开启 VPN 断开通知。
 - **0.6.1** —— 诚实的 helper 状态:已死却仍注册的 helper 不再错误显示为「已启用」。`eclam status` 会将其报告为 `unreachable`(退出码 2),App 在重新启动时自我修复,新增的 `eclam repair` 命令与菜单栏警告会加以呈现,`eclam status` 现在也会报告开机自启状态。

@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.3-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.6.5-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · **한국어** · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -80,10 +80,8 @@ AC가 빠지고 덮개까지 닫혀 가방에 들어간 상태라면 더 깐깐�
 - **CLI + 이름 붙인 세션** — 터미널에서 바로 다룰 수 있습니다 ([Usage](#usage)).
 - **에이전트 hook 설치 (선택)** — 설치하면 Claude / Codex / Hermes 설정에 hook이 삽입되고, 삭제 시 복원됩니다.
 - **종료할 때 sleep 복원 보장** — 3중 안전장치로 막습니다: 정상 종료, 강제 종료(SIGTERM), 그리고 크래시까지 대비한 20초 watchdog.
-- **로그인 시 자동 실행 (선택)** — 로그인할 때 Electronic Clam을 자동으로 시작합니다. 기본은 꺼져 있습니다.
-- **업데이트 알림** — GitHub에서 새 릴리스를 확인해 다운로드로 안내합니다. 알림만 보낼 뿐, 알아서 설치하지는 않습니다.
-- **클램쉘 VPN 잠금 방지 (선택, 기본 꺼짐).** 외장 화면 없이 배터리로 덮개를 닫으면 화면이 *잠기는데*, 이 잠금 때문에 FortiClient SSL VPN이 끊겨 다시 로그인해야 연결됩니다. 보이지 않는 가상 디스플레이로 세션을 붙잡아 두면 화면이 잠기지 않아 터널이 그대로 유지됩니다 — 백라이트가 없어 전력도 거의 안 들고 추가 하드웨어나 전원도 필요 없습니다. **화면만 끄기** 동작도 **어둡게(Dim)**(깜깜하지만 안 잠김 · VPN 안전 · 기본)와 **재우기(Sleep)**로 나뉘며, VPN이 끊기면 알림을 받도록 켤 수 있습니다.
-- **더 단단해진 helper 설정** — 검역(quarantine)된 다운로드본이나 macOS가 등록을 막는 임시(translocation) 위치에서는 백그라운드 helper를 등록하지 않고, 앱을 Applications로 옮기라고 먼저 안내합니다. 설정에서 중복 복사본과 버전 불일치를 짚어 주며, `eclam repair`로 멈추거나 응답 없는 helper를 되살립니다.
+- **클램쉘 VPN 잠금 방지 (선택).** 외장 화면 없이 배터리로 쓸 때 덮개를 닫으면 보통 화면이 *잠기는데*, 이때 FortiClient SSL VPN이 끊깁니다(다시 연결하려면 SAML 재로그인이 필요합니다). 보이지 않는 가상 디스플레이가 세션을 붙잡아 둬서 화면이 잠기지 않고 터널도 살아있습니다. **화면만 끄기** 동작도 **Dim**(어둡지만 VPN은 안전, 기본)과 **Sleep**으로 나뉘고, VPN이 끊기면 알림을 받을 수도 있습니다.
+- **견고한 도우미 등록** — 검역된 다운로드본이나 임시(translocated) 위치에서는 macOS가 백그라운드 도우미 실행을 막으므로, 그런 곳에선 등록하지 않고 Applications로 옮기라고 안내합니다. 설정 → 일반에서 중복 복사본·버전 불일치를 표시하며, `eclam repair` / **Reinstall Helper**로 꼬인 등록을 복구합니다.
 
 ## 설치
 
@@ -118,8 +116,8 @@ Homebrew cask가 `$HOMEBREW_PREFIX/bin/eclam` 심볼릭 링크를 만듭니다.
 ```
 eclam on [--for <dur>] [--forever]   # keep awake; default 2h, then the helper auto-releases (no GUI needed, survives reboot)
 eclam off
-eclam status [--json]                # also flags a quarantined app, a failed helper, and duplicate copies
-eclam repair                         # recover a wedged/unreachable helper
+eclam status [--json]                 # 검역됨/Applications 밖 앱, 도우미 시작 실패, 중복 복사본도 함께 표시
+eclam repair                          # 꼬이거나 응답 없는 도우미 복구 (앱 재기동; 최후수단으로 sfltool resetbtm 안내)
 eclam keep --while <pid>
 eclam watch <agent> [--grace s] [--check-interval s] [--max min] [--json]
 eclam session start <name> [--message <text>] / stop <name> / list [--json]
@@ -145,6 +143,7 @@ eclam help
 
 - **hook 없으면 감지에 몇 초 지연이 있을 수 있습니다.** hook을 설치하지 않은 에이전트는 세션 로그 폴링으로 잡습니다(~5초, 잠금 시 ~30초). Claude · Codex · Hermes는 hook을 설치하면 즉시 잡힙니다.
 - **CLI만 쓰면 안전 가드가 없습니다.**
+- **Applications에서 실행하세요.** Downloads나 아직 검역된 복사본에서 열면 macOS가 백그라운드 도우미를 실행하지 못합니다 — Electronic Clam을 Applications 폴더로 옮긴 뒤 다시 열어 주세요.
 - **VS Code 안에서 도는 에이전트**(Cline · Roo Code)는 독립 프로세스가 없어 Lax 모드 감지가 제한적입니다.
 - **Apple Silicon 전용**, macOS 13+ (Ventura).
 
@@ -171,8 +170,10 @@ open build/ElectronicClam.app
 
 최근 릴리스 — 전체 내역은 [CHANGELOG.md](CHANGELOG.md):
 
+- **0.6.5** — 수정. 클램쉘 잠금 방지를 켠 상태에서 **화면 미러링**으로 TV 를 연결해도 정상 동작합니다. 미러링으로 붙인 화면(미러링한 TV, AirPlay)은 잠금 가드에 보이지 않았습니다 — macOS 는 미러셋 멤버를 활성 디스플레이 목록에서 빼고 미러셋 전체를 화면 하나로 보고하기 때문입니다. 그래서 macOS 가 미러 세션을 맺는 동안 보이지 않는 앵커가 계속 재미러·재생성되며 끼어들었습니다. 확장(나란히 놓기) 연결은 원래부터 영향이 없었습니다. 또한 미러셋이 켜져 있는 동안에는 앵커를 만들지 않습니다 — 그 경우 회수되지 않는 가상 디스플레이가 남아 로그아웃 전까지 잠금 방지가 아예 동작하지 않았습니다.
+- **0.6.4** — 클램쉘 VPN 잠금 방지 수정. VPN 끊김 알림이 실제로 뜨고(자기가 알려야 할 바로 그 사건과 App Nap 에 감시가 멈추던 문제), 앱을 종료하면 보이지 않는 앵커가 함께 사라지며, 가상 디스플레이 이름이 명확해지고, **Dim** 후 덮개를 다시 열면 밝기가 복원됩니다. 그리고 quarantine 속성만 남은 경우 메뉴바가 "Applications 로 옮기세요" 안내만 반복하던 막다른 길을 없앴고, 열 컷오프 기본값을 `fair` 에서 `serious` 로 올렸습니다(기존 기본값은 몇 분 만에 keep-awake 를 끝낼 수 있었습니다).
 - **0.6.3** — 수정. 클램쉘 잠금 방지를 켠 상태에서 실물 외장 모니터를 연결해도 더 이상 저장해 둔 내장+외장 화면 배치가 흐트러지지 않습니다. 보이지 않는 앵커가 실물 화면이 나타나면 재미러 없이 즉시 비켜서, macOS가 저장된 배치를 그대로 복원합니다(외장을 빼면 앵커가 자동 복귀). 덮개 닫은 클램쉘 잠금 방지 동작 자체는 그대로입니다.
-- **0.6.2** — 클램쉘 VPN 잠금 방지(선택): 외장 화면 없이 배터리로 덮개를 닫아도 화면이 잠기지 않아, 끊기던 FortiClient SSL VPN이 그대로 유지됩니다 — 보이지 않는 가상 디스플레이가 세션을 붙잡아 둡니다. **화면만 끄기**는 이제 **어둡게(Dim, VPN 안전·기본)**와 **재우기(Sleep)** 중에서 고를 수 있고, VPN이 끊기면 알림을 받을 수 있습니다. 여기에 검역·translocation 복사본에서는 등록을 막고, 중복 복사본·버전 불일치를 짚어 주며, `eclam repair`로 복구하는 더 단단한 helper 설정도 더해졌습니다.
+- **0.6.2** — 클램쉘 VPN 잠금 방지 (선택). 외장 화면 없이 배터리로 쓸 때 덮개를 닫아도 더 이상 화면이 잠기지 않아, FortiClient SSL VPN이 끊기지 않고 유지됩니다 — 보이지 않는 가상 디스플레이가 세션을 붙잡아 둡니다. "화면만 끄기" 동작은 이제 **Dim**(VPN 안전, 기본)과 **Sleep** 중에서 고를 수 있고, VPN 끊김 알림도 선택할 수 있습니다.
 - **0.6.1** — 정직한 helper 상태. 죽었는데 등록만 살아있는 helper가 더 이상 거짓 "enabled"로 보고되지 않습니다. `eclam status`가 `unreachable`(exit 2)로 보고하고, 앱이 재실행 시 자가복구하며, 새 `eclam repair` 명령과 메뉴바 경고가 이를 드러냅니다. `eclam status`는 "로그인 시 실행" 상태도 함께 보고합니다.
 - **0.6.0** — 로그인 시 실행, 알림형 인앱 업데이트, awake 히스토리, 다국어(English · 한국어 · 中文 · 日本語 · Español), 단일 클릭 토글, 메뉴바 아이콘 테마, 원격 유휴 정책, Telegram 상태 알림, Developer ID 서명 + 노터라이즈.
 

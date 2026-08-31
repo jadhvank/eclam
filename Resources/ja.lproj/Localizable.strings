@@ -267,6 +267,13 @@
 "installgate.openApps" = "「アプリケーション」フォルダを開く";
 "installgate.later" = "後で";
 
+/* ADR-0040 — quarantine-in-place 안내 + 메뉴바 상태아이템 미배치 폴백 */
+"installgate.title.quarantinedInPlace" = "Electronic Clam が macOS に検疫(quarantine)されています";
+"installgate.message.quarantinedInPlace" = "Electronic Clam はすでにアプリケーションフォルダにありますが、ダウンロード時の検疫フラグが残っているため、macOS がバックグラウンドヘルパーの起動を拒否しています。ターミナルで次を実行してから、Electronic Clam を開き直してください:\n\nxattr -dr com.apple.quarantine \"%@\"";
+"installgate.copyCommand" = "コマンドをコピー";
+"menubar.missing.title" = "Electronic Clam のメニューバーアイコンを表示できません";
+"menubar.missing.body" = "macOS がアイコンをメニューバーに配置していません。macOS 26 ではたいていメニューバーの許可リスト(システム設定 → メニューバー)が原因で、メニューバー整理アプリ(Bartender、Ice、Thaw…)がアイコンを並べ替えたあと壊れたままになることがあります。そこでアプリを「オン」にしても直らないことがあり、Mac を再起動すると直る場合が多いです。設定を開いてあるので Electronic Clam の操作は続けられますし、`eclam` コマンド(`eclam off`、`eclam on`、`eclam status`)はいつでも使えます。";
+
 /* ADR-0039 — 設定 → 一般のインストール状態ノート（split-brain / 場所 / バージョン不整合） */
 "installhealth.quarantined" = "Electronic Clam がダウンロード先から実行されているため、macOS がヘルパーの起動を許可しません。「アプリケーション」フォルダに移動して開き直してください。";
 "installhealth.translocated" = "macOS が Electronic Clam を一時的な読み取り専用の場所から実行しています。「アプリケーション」フォルダに移動して開き直してください。";

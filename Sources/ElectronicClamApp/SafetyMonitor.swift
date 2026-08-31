@@ -389,15 +389,16 @@ final class SafetyMonitor {
         }
     }
 
+    /// ADR-0037 §미러링 — 판정은 `EClamVirtualDisplay.externalDisplayPresent()`
+    /// (온라인 디스플레이 목록 기반, 앱 전체 단일 구현)에 위임한다.
+    ///
+    /// 이전 구현은 `NSScreen.screens.count > 1` + main 이름 검사였는데, macOS 는
+    /// **미러셋 전체를 NSScreen 하나로 보고**한다 — 즉 TV·AirPlay 를 *미러링*으로
+    /// 붙이면 화면 수가 1로 유지돼 "외장 없음"으로 오판했다. 그러면 클램쉘 잠금
+    /// 가드가 앵커를 계속 살려 둬(또는 teardown 직후 다시 만들어) macOS 의 미러
+    /// 협상과 싸웠다. 확장(extended) 연결만 잘 되고 미러링만 깨지던 이유.
     private func computeExternalDisplayPresent() -> Bool {
-        let screens = NSScreen.screens
-        if screens.count > 1 { return true }
-        // Single screen + that screen is not "Built-in" ⇒ clamshell with one
-        // external (rare M2 air case where lid closed and one external).
-        if let main = NSScreen.main, !main.localizedName.lowercased().contains("built-in") {
-            return true
-        }
-        return false
+        EClamVirtualDisplay.externalDisplayPresent()
     }
 
     /// ADR-0021 — two-track lid detection. Track A is the authoritative

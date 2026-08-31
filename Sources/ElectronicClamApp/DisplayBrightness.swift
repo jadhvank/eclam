@@ -78,3 +78,26 @@ enum DisplayBrightness {
         return ids.prefix(Int(count)).first { CGDisplayIsBuiltin($0) != 0 }
     }
 }
+
+/// dim 복원의 밝기 백엔드 추상화(테스트 주입점). 기본 구현은 `DisplayBrightness`.
+///
+/// 복원 로직(복원 대상 결정 + 실패 시 재시도)은 순수-ish 하지만 실제 백엔드
+/// (`DisplayServices`)는 실기기·GUI 가 있어야 동작한다. 이 프로토콜을 통해
+/// `BlankDisplayDimmer` 에 가짜 백엔드를 주입해 "복원 시점에 built-in id 를 다시
+/// resolve 하는가 / 실패 시 재시도하는가"를 단위 테스트한다(Tests/DimRestoreTests.swift).
+protocol BrightnessBackend {
+    /// 복원 시점의 내장 디스플레이 id(재해석). 없으면 nil.
+    func builtinID() -> CGDirectDisplayID?
+    /// 밝기 읽기 (0.0…1.0). 실패 시 nil.
+    func get(_ display: CGDirectDisplayID) -> Float?
+    /// 밝기 쓰기. 성공 시 true(실패면 호출부가 재시도).
+    @discardableResult func set(_ display: CGDirectDisplayID, _ value: Float) -> Bool
+}
+
+/// 기본 백엔드 — `DisplayBrightness` enum 정적 API 로 위임(프로덕션 경로).
+struct DisplayServicesBrightnessBackend: BrightnessBackend {
+    func builtinID() -> CGDirectDisplayID? { DisplayBrightness.builtinDisplayID() }
+    func get(_ display: CGDirectDisplayID) -> Float? { DisplayBrightness.get(display) }
+    @discardableResult
+    func set(_ display: CGDirectDisplayID, _ value: Float) -> Bool { DisplayBrightness.set(display, value) }
+}
