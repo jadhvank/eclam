@@ -417,6 +417,10 @@
 "general.tip.vpnRefresh" = "Re-scan for VPN services — handy if your VPN app was closed when this opened.";
 "general.vpnServiceNote" = "Pick the VPN to watch, then turn on notifications above. You'll be alerted if it drops (Telegram too, if configured). No auto-reconnect.";
 "general.vpnService.none" = "(no VPN services found — open your VPN app)";
+"general.display" = "Display";
+"general.keepDisplayAwake" = "Keep the display on too (like caffeinate -d)";
+"general.tip.keepDisplayAwake" = "Keeping your Mac awake does not keep the screen on — macOS still turns the display off on its own idle timer. Turn this on and Electronic Clam also holds the display awake for as long as it keeps the Mac awake, the same way caffeinate -d does. It costs backlight power, so leave it off unless you want to watch the work. Off by default.";
+"general.keepDisplayAwakeNote" = "Off, the Mac stays awake but the screen still sleeps on its own timer. \"Blank screen\" below always wins while you're away.";
 "general.blankScreen" = "Blank screen";
 "blankMode.dim" = "Dim (keep VPN)";
 "blankMode.sleep" = "Sleep displays";

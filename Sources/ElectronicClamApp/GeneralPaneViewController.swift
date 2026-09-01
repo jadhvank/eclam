@@ -44,6 +44,13 @@ final class GeneralPaneViewController: NSViewController {
     private let vpnRefreshButton = NSButton(title: "", target: nil, action: nil)
     /// VPN 안전망 동작 설명(잠금 가드 + Telegram opt-in 에 올라타며, 끊김 시 알림만 함).
     private let vpnServiceNote = NSTextField(wrappingLabelWithString: "")
+    /// 디스플레이 keep-awake opt-in 체크박스(`caffeinate -d` 등가물). State 는
+    /// `store.keepDisplayAwakeEnabled` 미러; `keepDisplayAwakeToggled()` 가 StateStore
+    /// 세터로 영속(→ converge → DisplayAwakeHolder). clamshellGuardCheckbox 와 같은
+    /// form-row 문법.
+    private let keepDisplayAwakeCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+    /// 체크박스 아래 상시 설명 — "왜 화면이 꺼지나"가 이 기능의 존재 이유라 한 줄로 적는다.
+    private let keepDisplayAwakeNote = NSTextField(wrappingLabelWithString: "")
     /// ADR-0037 §#8 — "Blank screen" 동작 모드 선택 (dim/sleep). State 는
     /// `store.blankDisplaysMode` 미러; `blankModeChanged()` 가 StateStore 세터로 영속.
     /// themePopup 과 동일한 popup form-row 패턴.
@@ -240,6 +247,33 @@ final class GeneralPaneViewController: NSViewController {
             "Pick the VPN to watch, then turn on notifications above. You'll be alerted if "
             + "it drops (Telegram too, if configured). No auto-reconnect.")
 
+        // 디스플레이 keep-awake — 헬퍼의 SleepDisabled 는 시스템·클램쉘 잠자기만 막고
+        // idle display sleep 은 막지 않는다. 화면까지 켜 두고 싶은 사용자를 위한 opt-in
+        // 으로, `caffeinate -d` 와 같은 assertion 을 keep 신호 동안에만 잡는다.
+        // "Blank screen" 과 같은 디스플레이 축이라 바로 위에 둔다.
+        keepDisplayAwakeCheckbox.translatesAutoresizingMaskIntoConstraints = false
+        keepDisplayAwakeCheckbox.title = NSL("general.keepDisplayAwake",
+            "Keep the display on too (like caffeinate -d)")
+        keepDisplayAwakeCheckbox.target = self
+        keepDisplayAwakeCheckbox.action = #selector(keepDisplayAwakeToggled)
+        keepDisplayAwakeCheckbox.state = store.keepDisplayAwakeEnabled ? .on : .off
+        keepDisplayAwakeCheckbox.toolTip = NSL("general.tip.keepDisplayAwake",
+            "Keeping your Mac awake does not keep the screen on — macOS still turns the "
+            + "display off on its own idle timer. Turn this on and Electronic Clam also "
+            + "holds the display awake for as long as it keeps the Mac awake, the same "
+            + "way caffeinate -d does. It costs backlight power, so leave it off unless "
+            + "you want to watch the work. Off by default.")
+        let displayAwakeRow = Self.formRow(NSL("general.display", "Display"),
+                                           control: keepDisplayAwakeCheckbox)
+
+        keepDisplayAwakeNote.translatesAutoresizingMaskIntoConstraints = false
+        keepDisplayAwakeNote.font = NSFont.systemFont(ofSize: 11)
+        keepDisplayAwakeNote.textColor = .secondaryLabelColor
+        keepDisplayAwakeNote.isSelectable = false
+        keepDisplayAwakeNote.stringValue = NSL("general.keepDisplayAwakeNote",
+            "Off, the Mac stays awake but the screen still sleeps on its own timer. "
+            + "\"Blank screen\" below always wins while you're away.")
+
         // ADR-0037 §#8 — "Blank screen" 동작 모드: Dim(기본·VPN-안전) vs Sleep.
         // themePopup 과 동일한 popup form-row 문법. Sleep 선택 시 아래 경고 노트가
         // 화면 잠금→VPN 끊김 위험을 알린다(ADR-0037 §#8 — 잠금은 Sleep 경로에서만).
@@ -386,6 +420,7 @@ final class GeneralPaneViewController: NSViewController {
         let settingsStack = NSStackView(views: [
             languageRow, themeRow, startupRow, loginItemNote, clamshellGuardRow,
             vpnServiceRow, vpnServiceNote,
+            displayAwakeRow, keepDisplayAwakeNote,
             blankModeRow, blankModeNote, updatesRow,
             formSeparator,
             permissionHeader,
@@ -551,6 +586,7 @@ final class GeneralPaneViewController: NSViewController {
         themePopup.selectItem(at: themeOrder.firstIndex(of: store.menuBarTheme) ?? 0)
         clamshellGuardCheckbox.state = store.clamshellLockGuardEnabled ? .on : .off
         vpnNotifyCheckbox.state = store.vpnDisconnectNotifyEnabled ? .on : .off
+        keepDisplayAwakeCheckbox.state = store.keepDisplayAwakeEnabled ? .on : .off
         // ADR-0037 S3 — pane 표시·앱 재활성마다 VPN 서비스 목록을 다시 스캔한다(VPN
         // 앱이 그새 켜졌을 수 있다). 저장값은 reloadVpnServices 가 항상 보존한다.
         reloadVpnServices()
@@ -881,6 +917,12 @@ final class GeneralPaneViewController: NSViewController {
     /// ADR-0037 S3 — persist the opt-in VPN-disconnect notification (independent of
     /// the clamshell guard). The StateStore setter fires onChange → convergeNow →
     /// VpnWatcher.apply, which arms or stops the scutil poll to match.
+    /// 디스플레이 keep-awake opt-in 영속. StateStore 세터가 onChange → convergeNow →
+    /// `DisplayAwakeHolder.apply` 로 이어져 assertion 을 즉시 잡거나 놓는다.
+    @objc private func keepDisplayAwakeToggled() {
+        store.setKeepDisplayAwake(keepDisplayAwakeCheckbox.state == .on)
+    }
+
     @objc private func vpnNotifyToggled() {
         store.setVpnDisconnectNotify(vpnNotifyCheckbox.state == .on)
     }

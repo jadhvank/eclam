@@ -18,6 +18,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// ADR-0037 S3 §폴백 — VPN disconnect 안전망 감시자. S1 과 같은 opt-in 게이트로
     /// keep 동안에만 `scutil` 폴링, Connected→Disconnected 에지에서 알림(자동 재연결 X).
     private var vpnWatcher: VpnWatcher?
+    /// 디스플레이 keep-awake(`caffeinate -d` 등가) 홀더. opt-in 이고, converge 마다
+    /// keep 신호에 맞춰 `PreventUserIdleDisplaySleep` assertion 을 잡고 놓는다.
+    /// 헬퍼의 `SleepDisabled` 와 무관 — 앱 프로세스가 직접 잡는다(per-pid 자동 해제).
+    private var displayAwakeHolder: DisplayAwakeHolder?
 
     /// 10s heartbeat fired while `shouldKeepAwake` is true (ADR-0004 §5).
     ///
@@ -100,6 +104,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // ADR-0037 S3 — own the VPN disconnect safety-net watcher. Cheap to hold
         // (no polling until `apply(...)` arms it); convergeNow drives it beside S1.
         self.vpnWatcher = VpnWatcher(store: store)
+        // 디스플레이 keep-awake 홀더. 위 둘과 같은 성질로 붙잡기만 해도 비용이 없다
+        // (`apply(...)` 가 결정하기 전까지 assertion 을 만들지 않는다). MenuBarController
+        // 는 "Blank screen → Sleep" 경로에서만 이 홀더를 잠시 비켜세운다.
+        let displayAwakeHolder = DisplayAwakeHolder(store: store)
+        self.displayAwakeHolder = displayAwakeHolder
+        menuBar.displayAwakeHolder = displayAwakeHolder
 
         // Wire store → convergence engine (debounced XPC).
         store.onChange = { [weak self] in
@@ -269,6 +279,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // ADR-0037 S3 — stop the VPN watcher's poll timer cleanly on quit.
         vpnWatcher?.apply(keepAwake: false)
         vpnWatcher = nil
+        // assertion 은 프로세스 종료 시 커널이 풀지만, 종료 경로에서도 명시적으로 놓는다.
+        displayAwakeHolder?.apply(keepAwake: false)
+        displayAwakeHolder = nil
         pendingConverge?.cancel()
         pendingConverge = nil
         pendingActiveAgentsPush?.cancel()
@@ -449,6 +462,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // keep 동안에만 `scutil` 폴링을 켜고, release 되면 끈다. no-op early-return 위에
         // 둬 keep 토글뿐 아니라 opt-in 변경도 반영한다. 알림만, 자동 재연결 안 함.
         vpnWatcher?.apply(keepAwake: target)
+
+        // 디스플레이 keep-awake(opt-in). 헬퍼의 `SleepDisabled` 는 idle display sleep 을
+        // 막지 못하므로, 화면까지 켜 두려면 별도 assertion 이 필요하다. 위 둘과 같은
+        // 이유로 no-op early-return **위**에 둔다 — keep 이 그대로여도 설정만 바뀐 수렴을
+        // 반영해야 한다.
+        displayAwakeHolder?.apply(keepAwake: target)
 
         if let last = lastWrittenSleepDisabled, last == target { return }
 
