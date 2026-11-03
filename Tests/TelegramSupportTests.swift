@@ -37,59 +37,59 @@ func cfg(enabled: Bool = true, token: String = "12345:AAAAAAAAAAAAAAAAAAAAAAAAAA
 enum TelegramSupportTestMain {
     static func main() {
         print("── endChannel 분류")
-        assert(TelegramSupport.endChannel(for: .batteryLow) == .safety, "batteryLow → safety")
-        assert(TelegramSupport.endChannel(for: .thermalSerious) == .safety, "thermalSerious → safety")
-        assert(TelegramSupport.endChannel(for: .thermalCritical) == .safety, "thermalCritical → safety")
-        assert(TelegramSupport.endChannel(for: .timer) == .safety, "timer → safety")
-        assert(TelegramSupport.endChannel(for: .watchdog) == .safety, "watchdog → safety")
-        assert(TelegramSupport.endChannel(for: .agentCeased) == .awakeEnd, "agentCeased → awakeEnd")
-        assert(TelegramSupport.endChannel(for: .remoteEnded) == .awakeEnd, "remoteEnded → awakeEnd")
-        assert(TelegramSupport.endChannel(for: .remoteNetworkLost) == .awakeEnd, "remoteNetworkLost → awakeEnd")
-        assert(TelegramSupport.endChannel(for: .manualOff) == .never, "manualOff → never (사용자가 Mac 앞)")
-        assert(TelegramSupport.endChannel(for: .forceSleep) == .never, "forceSleep → never")
-        assert(TelegramSupport.endChannel(for: .appQuit) == .never, "appQuit → never (전송 보장 불가)")
+        assert(ChatNotify.endChannel(for: .batteryLow) == .safety, "batteryLow → safety")
+        assert(ChatNotify.endChannel(for: .thermalSerious) == .safety, "thermalSerious → safety")
+        assert(ChatNotify.endChannel(for: .thermalCritical) == .safety, "thermalCritical → safety")
+        assert(ChatNotify.endChannel(for: .timer) == .safety, "timer → safety")
+        assert(ChatNotify.endChannel(for: .watchdog) == .safety, "watchdog → safety")
+        assert(ChatNotify.endChannel(for: .agentCeased) == .awakeEnd, "agentCeased → awakeEnd")
+        assert(ChatNotify.endChannel(for: .remoteEnded) == .awakeEnd, "remoteEnded → awakeEnd")
+        assert(ChatNotify.endChannel(for: .remoteNetworkLost) == .awakeEnd, "remoteNetworkLost → awakeEnd")
+        assert(ChatNotify.endChannel(for: .manualOff) == .never, "manualOff → never (사용자가 Mac 앞)")
+        assert(ChatNotify.endChannel(for: .forceSleep) == .never, "forceSleep → never")
+        assert(ChatNotify.endChannel(for: .appQuit) == .never, "appQuit → never (전송 보장 불가)")
 
         print("── shouldNotifyEnd 게이팅")
-        assert(!TelegramSupport.shouldNotifyEnd(settings: cfg(enabled: false), reason: .batteryLow, durationSeconds: 3600),
+        assert(!ChatNotify.shouldNotifyEnd(settings: cfg(enabled: false), reason: .batteryLow, durationSeconds: 3600),
                "마스터 OFF ⇒ 안전 해제도 전송 안 함")
-        assert(!TelegramSupport.shouldNotifyEnd(settings: cfg(token: ""), reason: .batteryLow, durationSeconds: 3600),
+        assert(!ChatNotify.shouldNotifyEnd(settings: cfg(token: ""), reason: .batteryLow, durationSeconds: 3600),
                "토큰 없음 ⇒ 전송 안 함")
-        assert(!TelegramSupport.shouldNotifyEnd(settings: cfg(chat: ""), reason: .batteryLow, durationSeconds: 3600),
+        assert(!ChatNotify.shouldNotifyEnd(settings: cfg(chat: ""), reason: .batteryLow, durationSeconds: 3600),
                "chat id 없음 ⇒ 전송 안 함")
-        assert(TelegramSupport.shouldNotifyEnd(settings: cfg(), reason: .batteryLow, durationSeconds: 5),
+        assert(ChatNotify.shouldNotifyEnd(settings: cfg(), reason: .batteryLow, durationSeconds: 5),
                "안전 해제는 최소 길이 미적용 (5초 에피소드도 전송)")
-        assert(!TelegramSupport.shouldNotifyEnd(settings: cfg(safety: false), reason: .batteryLow, durationSeconds: 3600),
+        assert(!ChatNotify.shouldNotifyEnd(settings: cfg(safety: false), reason: .batteryLow, durationSeconds: 3600),
                "notifySafety OFF ⇒ 안전 해제 미전송")
-        assert(TelegramSupport.shouldNotifyEnd(settings: cfg(safety: false), reason: .agentCeased, durationSeconds: 3600),
+        assert(ChatNotify.shouldNotifyEnd(settings: cfg(safety: false), reason: .agentCeased, durationSeconds: 3600),
                "notifySafety OFF 여도 agentCeased 는 awakeEnd 채널로 전송")
-        assert(!TelegramSupport.shouldNotifyEnd(settings: cfg(), reason: .agentCeased, durationSeconds: 59),
+        assert(!ChatNotify.shouldNotifyEnd(settings: cfg(), reason: .agentCeased, durationSeconds: 59),
                "agentCeased 59초 ⇒ 깜빡임 억제")
-        assert(TelegramSupport.shouldNotifyEnd(settings: cfg(), reason: .agentCeased, durationSeconds: 60),
+        assert(ChatNotify.shouldNotifyEnd(settings: cfg(), reason: .agentCeased, durationSeconds: 60),
                "agentCeased 60초 ⇒ 전송")
-        assert(!TelegramSupport.shouldNotifyEnd(settings: cfg(end: false), reason: .agentCeased, durationSeconds: 3600),
+        assert(!ChatNotify.shouldNotifyEnd(settings: cfg(end: false), reason: .agentCeased, durationSeconds: 3600),
                "notifyAwakeEnd OFF ⇒ agentCeased 미전송")
-        assert(!TelegramSupport.shouldNotifyEnd(settings: cfg(), reason: .manualOff, durationSeconds: 3600),
+        assert(!ChatNotify.shouldNotifyEnd(settings: cfg(), reason: .manualOff, durationSeconds: 3600),
                "manualOff 는 어떤 설정에서도 미전송")
-        assert(!TelegramSupport.shouldNotifyEnd(settings: cfg(), reason: .appQuit, durationSeconds: 3600),
+        assert(!ChatNotify.shouldNotifyEnd(settings: cfg(), reason: .appQuit, durationSeconds: 3600),
                "appQuit 미전송")
 
         print("── shouldNotifyStart 스로틀")
         let now = Date(timeIntervalSinceReferenceDate: 1000)
-        assert(!TelegramSupport.shouldNotifyStart(settings: cfg(start: false), cause: .agent, lastStartAt: nil, now: now),
+        assert(!ChatNotify.shouldNotifyStart(settings: cfg(start: false), cause: .agent, lastStartAt: nil, now: now),
                "notifyAwakeStart OFF(기본값) ⇒ 미전송")
-        assert(TelegramSupport.shouldNotifyStart(settings: cfg(), cause: .agent, lastStartAt: nil, now: now),
+        assert(ChatNotify.shouldNotifyStart(settings: cfg(), cause: .agent, lastStartAt: nil, now: now),
                "첫 시작 ⇒ 전송")
-        assert(!TelegramSupport.shouldNotifyStart(settings: cfg(), cause: .manual, lastStartAt: nil, now: now),
+        assert(!ChatNotify.shouldNotifyStart(settings: cfg(), cause: .manual, lastStartAt: nil, now: now),
                "manual 시작 ⇒ 미전송 (사용자가 Mac 앞)")
-        assert(TelegramSupport.shouldNotifyStart(settings: cfg(), cause: .remote, lastStartAt: nil, now: now),
+        assert(ChatNotify.shouldNotifyStart(settings: cfg(), cause: .remote, lastStartAt: nil, now: now),
                "remote 시작 ⇒ 전송")
-        assert(!TelegramSupport.shouldNotifyStart(settings: cfg(), cause: .agent,
+        assert(!ChatNotify.shouldNotifyStart(settings: cfg(), cause: .agent,
                lastStartAt: now.addingTimeInterval(-100), now: now),
                "100초 전 시작 알림 있음 ⇒ 스로틀")
-        assert(TelegramSupport.shouldNotifyStart(settings: cfg(), cause: .agent,
+        assert(ChatNotify.shouldNotifyStart(settings: cfg(), cause: .agent,
                lastStartAt: now.addingTimeInterval(-301), now: now),
                "301초 경과 ⇒ 전송")
-        assert(!TelegramSupport.shouldNotifyStart(settings: cfg(enabled: false), cause: .agent, lastStartAt: nil, now: now),
+        assert(!ChatNotify.shouldNotifyStart(settings: cfg(enabled: false), cause: .agent, lastStartAt: nil, now: now),
                "마스터 OFF ⇒ 미전송")
 
         print("── looksLikeBotToken")
@@ -137,37 +137,37 @@ enum TelegramSupportTestMain {
         assert(!TelegramSupport.parseSendResult(Data("x".utf8)).ok, "비 JSON ⇒ 실패")
 
         print("── formatDuration")
-        assert(TelegramSupport.formatDuration(30) == "<1m", "30s → <1m")
-        assert(TelegramSupport.formatDuration(60) == "1m", "60s → 1m")
-        assert(TelegramSupport.formatDuration(3600) == "1h", "3600s → 1h")
-        assert(TelegramSupport.formatDuration(2 * 3600 + 14 * 60) == "2h 14m", "8040s → 2h 14m")
-        assert(TelegramSupport.formatDuration(86400) == "1d", "86400s → 1d")
-        assert(TelegramSupport.formatDuration(86400 + 3 * 3600) == "1d 3h", "→ 1d 3h")
-        assert(TelegramSupport.formatDuration(-5) == "<1m", "음수 방어")
+        assert(ChatNotify.formatDuration(30) == "<1m", "30s → <1m")
+        assert(ChatNotify.formatDuration(60) == "1m", "60s → 1m")
+        assert(ChatNotify.formatDuration(3600) == "1h", "3600s → 1h")
+        assert(ChatNotify.formatDuration(2 * 3600 + 14 * 60) == "2h 14m", "8040s → 2h 14m")
+        assert(ChatNotify.formatDuration(86400) == "1d", "86400s → 1d")
+        assert(ChatNotify.formatDuration(86400 + 3 * 3600) == "1d 3h", "→ 1d 3h")
+        assert(ChatNotify.formatDuration(-5) == "<1m", "음수 방어")
 
         print("── statusLine")
-        assert(TelegramSupport.statusLine(batteryPercent: 78, charging: false,
+        assert(ChatNotify.statusLine(batteryPercent: 78, charging: false,
                                           socTempCelsius: 62.4, activeAgents: ["codex", "claude"])
                == "🔋 78% · 🌡 62°C · 🤖 claude, codex",
                "전체 조합 + 에이전트 정렬")
-        assert(TelegramSupport.statusLine(batteryPercent: 95, charging: true,
+        assert(ChatNotify.statusLine(batteryPercent: 95, charging: true,
                                           socTempCelsius: nil, activeAgents: [])
                == "🔋 95% ⚡️", "충전 표시 + 부분 입력")
-        assert(TelegramSupport.statusLine(batteryPercent: nil, charging: false,
+        assert(ChatNotify.statusLine(batteryPercent: nil, charging: false,
                                           socTempCelsius: nil, activeAgents: []) == nil,
                "전부 없음 ⇒ nil")
-        assert(TelegramSupport.statusLine(batteryPercent: 50, charging: false,
+        assert(ChatNotify.statusLine(batteryPercent: 50, charging: false,
                                           socTempCelsius: nil, activeAgents: [], host: "Mini")
                == "🔋 50% · 💻 Mini", "호스트명 꼬리 표기")
 
         print("── digest (ADR-0028 §7)")
-        assert(TelegramSupport.shouldSendDigest(settings: cfg(digest: 30), episodeOngoing: true),
+        assert(ChatNotify.shouldSendDigest(settings: cfg(digest: 30), episodeOngoing: true),
                "에피소드 중 + 간격 30 ⇒ 전송")
-        assert(!TelegramSupport.shouldSendDigest(settings: cfg(digest: 0), episodeOngoing: true),
+        assert(!ChatNotify.shouldSendDigest(settings: cfg(digest: 0), episodeOngoing: true),
                "간격 0(off, 기본) ⇒ 미전송")
-        assert(!TelegramSupport.shouldSendDigest(settings: cfg(digest: 30), episodeOngoing: false),
+        assert(!ChatNotify.shouldSendDigest(settings: cfg(digest: 30), episodeOngoing: false),
                "에피소드 없음(유휴) ⇒ 미전송")
-        assert(!TelegramSupport.shouldSendDigest(settings: cfg(enabled: false, digest: 30), episodeOngoing: true),
+        assert(!ChatNotify.shouldSendDigest(settings: cfg(enabled: false, digest: 30), episodeOngoing: true),
                "마스터 OFF ⇒ 미전송")
         // back-compat: digestIntervalMin 없는 기존 telegram.json → 0 (off)
         let legacyJSON = #"{"enabled":true,"botToken":"1:x","chatId":"7","notifyAwakeStart":false,"notifyAwakeEnd":true,"notifySafety":true}"#

@@ -26,7 +26,7 @@ final class TelegramNotifier {
 
     private(set) var settings: TelegramSettings = .default
 
-    /// 직전 시작-알림 시각 (TelegramSupport.minStartGapSeconds 스로틀).
+    /// 직전 시작-알림 시각 (ChatNotify.minStartGapSeconds 스로틀).
     private var lastStartNotifiedAt: Date?
 
     /// 주기 다이제스트(무음) 상태 — 에피소드 진행 중에만 타이머가 산다.
@@ -111,7 +111,7 @@ final class TelegramNotifier {
     private func reconfigureDigestTimer() {
         digestTimer?.invalidate()
         digestTimer = nil
-        guard TelegramSupport.shouldSendDigest(settings: settings,
+        guard ChatNotify.shouldSendDigest(settings: settings,
                                                episodeOngoing: episodeOngoing) else { return }
         let interval = TimeInterval(settings.digestIntervalMin * 60)
         let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
@@ -123,9 +123,9 @@ final class TelegramNotifier {
 
     private func digestTick() {
         // 설정·에피소드가 tick 사이에 바뀌었을 수 있다 — 전송 직전 재가드.
-        guard TelegramSupport.shouldSendDigest(settings: settings,
+        guard ChatNotify.shouldSendDigest(settings: settings,
                                                episodeOngoing: episodeOngoing) else { return }
-        let dur = TelegramSupport.formatDuration(
+        let dur = ChatNotify.formatDuration(
             Date().timeIntervalSince(episodeStartedAt ?? Date()))
         let head = NSLf("telegram.digest", "📊 Still awake — %@", dur)
         // 무음(silent): 채팅에 쌓이되 알림음·배너 없음. 소리 나는 건 이벤트뿐.
@@ -138,7 +138,7 @@ final class TelegramNotifier {
         episodeOngoing = true
         episodeStartedAt = ep.startedAt
         reconfigureDigestTimer()
-        guard TelegramSupport.shouldNotifyStart(settings: settings,
+        guard ChatNotify.shouldNotifyStart(settings: settings,
                                                 cause: ep.startCause,
                                                 lastStartAt: lastStartNotifiedAt) else { return }
         lastStartNotifiedAt = Date()
@@ -158,10 +158,10 @@ final class TelegramNotifier {
         episodeOngoing = false
         episodeStartedAt = nil
         reconfigureDigestTimer()
-        guard TelegramSupport.shouldNotifyEnd(settings: settings,
+        guard ChatNotify.shouldNotifyEnd(settings: settings,
                                               reason: ep.endReason ?? .unknown,
                                               durationSeconds: ep.duration) else { return }
-        let dur = TelegramSupport.formatDuration(ep.duration)
+        let dur = ChatNotify.formatDuration(ep.duration)
         let head: String
         switch ep.endReason ?? .unknown {
         case .agentCeased:
@@ -264,7 +264,7 @@ final class TelegramNotifier {
         // 없으면(Intel/미지원) 배터리 온도로 폴백 (AwakeHistory.thermalDetail 패턴).
         let soc = [store.cpuTempCelsius, store.gpuTempCelsius].compactMap { $0 }.max()
             ?? store.batteryTempCelsius
-        let status = TelegramSupport.statusLine(
+        let status = ChatNotify.statusLine(
             batteryPercent: store.batteryPercent,
             charging: store.isCharging,
             socTempCelsius: soc,

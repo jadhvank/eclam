@@ -127,7 +127,7 @@ final class TelegramPaneViewController: NSViewController, NSTextFieldDelegate {
         digestPopup.target = self
         digestPopup.action = #selector(controlChanged)
         digestPopup.removeAllItems()
-        digestPopup.addItems(withTitles: TelegramSupport.digestIntervalChoices.map {
+        digestPopup.addItems(withTitles: ChatNotify.digestIntervalChoices.map {
             NSLf("duration.minutes", "%d min", $0)
         })
         digestPopup.toolTip = digestTip
@@ -223,7 +223,7 @@ final class TelegramPaneViewController: NSViewController, NSTextFieldDelegate {
         digestCheckbox.state = s.digestIntervalMin > 0 ? .on : .off
         // off 여도 팝업은 복원될 값을 보여준다 (RemotePane 패턴).
         let shown = s.digestIntervalMin > 0 ? s.digestIntervalMin : lastDigestChoice()
-        if let idx = TelegramSupport.digestIntervalChoices.firstIndex(of: shown),
+        if let idx = ChatNotify.digestIntervalChoices.firstIndex(of: shown),
            digestPopup.indexOfSelectedItem != idx {
             digestPopup.selectItem(at: idx)
         }
@@ -243,7 +243,7 @@ final class TelegramPaneViewController: NSViewController, NSTextFieldDelegate {
     /// 마지막 비-off 다이제스트 간격. 기본 30분.
     private func lastDigestChoice() -> Int {
         let v = UserDefaults.standard.integer(forKey: Self.lastDigestChoiceKey)
-        return TelegramSupport.digestIntervalChoices.contains(v) ? v : 30
+        return ChatNotify.digestIntervalChoices.contains(v) ? v : 30
     }
 
     /// 컨트롤 → 설정 저장. 모든 변경 경로(체크박스·필드 편집 종료·버튼)가
@@ -251,8 +251,8 @@ final class TelegramPaneViewController: NSViewController, NSTextFieldDelegate {
     private func commit() {
         let digestOn = digestCheckbox.state == .on
         let idx = digestPopup.indexOfSelectedItem
-        let chosen = TelegramSupport.digestIntervalChoices.indices.contains(idx)
-            ? TelegramSupport.digestIntervalChoices[idx] : lastDigestChoice()
+        let chosen = ChatNotify.digestIntervalChoices.indices.contains(idx)
+            ? ChatNotify.digestIntervalChoices[idx] : lastDigestChoice()
         if digestOn {
             UserDefaults.standard.set(chosen, forKey: Self.lastDigestChoiceKey)
         }

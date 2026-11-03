@@ -2,6 +2,10 @@
 
 All notable changes to Electronic Clam are documented here.
 
+## [Unreleased]
+
+- **Slack notifications (off by default)** — the same status pings that Telegram gets can now go to a Slack channel through a Slack app you create and own. **Settings → Notifications** holds both backends side by side; enable either one or both, and each keeps its own token, channel, and event checkboxes. Setup needs the `chat:write` bot scope (plus `channels:read` if you want to look up a channel by name instead of pasting its ID), and the bot has to be invited to the channel. Slack's API has no silent delivery, so the periodic status message arrives like any other one — mute the channel if you want it quiet. Nothing is sent until you turn it on, and nothing ever goes to the developer or a third-party server.
+
 ## [0.6.5] — 2026-09-01
 
 - **Fix: mirroring a TV works again with the clamshell lock guard on** — connecting a display in *mirror* mode (a mirrored TV, AirPlay) would often fail to connect, while connecting a monitor as an *extended* display worked fine. The guard simply could not see mirrored displays: macOS drops the members of a hardware mirror set from the active-display list and reports the whole mirror set as a single screen, and both of the guard's checks relied on exactly those two signals. So while macOS was negotiating the mirror session, the invisible anchor kept re-mirroring itself and kept getting re-created after each teardown, fighting the very handover it should have stepped aside for. Both checks now share one implementation based on the *online* display list, which sees mirror-set members.
