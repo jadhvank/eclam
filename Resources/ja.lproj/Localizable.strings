@@ -417,8 +417,8 @@
 "general.vpnService.none" = "（VPN サービスが見つかりません — VPN アプリを開いてください）";
 "general.display" = "ディスプレイ";
 "general.keepDisplayAwake" = "画面も点けたままにする（caffeinate -d と同じ）";
-"general.tip.keepDisplayAwake" = "作業中にMacが起きている間、画面も維持します。自動ロックが遅れ、画面の電力を使います。初期設定はオフです。オフでもロック防止や暗くする機能が画面を維持することがあります。";
-"general.keepDisplayAwakeNote" = "ロック防止や暗くする機能も画面を維持できます。暗くする機能はロックせずに明るさを下げ、戻ると復元します。";
+"general.tip.keepDisplayAwake" = "作業中にMacが起きている間、画面も維持します。自動ロックが遅れ、画面の電力を使います。初期設定はオフです。オンにすると自動で暗くした画面を復元します。手動で暗くする機能は引き続き使えます。";
+"general.keepDisplayAwakeNote" = "オフでもロック防止が画面を維持することがあります。その場合、作業中はシステムの画面オフ時間が経過すると内蔵画面を自動で暗くし、戻ると復元します。「しない」の設定では自動で暗くしません。";
 "general.blankScreen" = "画面オフ";
 "blankMode.dim" = "暗くする（VPN 維持）";
 "blankMode.sleep" = "ディスプレイをスリープ";

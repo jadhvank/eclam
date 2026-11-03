@@ -417,8 +417,8 @@
 "general.vpnService.none" = "(no se encontraron servicios VPN — abre tu app de VPN)";
 "general.display" = "Pantalla";
 "general.keepDisplayAwake" = "Mantener también la pantalla encendida (como caffeinate -d)";
-"general.tip.keepDisplayAwake" = "Mantiene la pantalla activa mientras el trabajo mantiene activo el Mac. Puede retrasar el bloqueo automático y consume energía. Desactivado por defecto; la protección de bloqueo y Atenuar pueden mantenerla activa aun así.";
-"general.keepDisplayAwakeNote" = "La protección de bloqueo y Atenuar también pueden mantener la pantalla activa. Atenuar reduce el brillo sin bloquear y lo restaura cuando vuelves.";
+"general.tip.keepDisplayAwake" = "Mantiene la pantalla activa mientras el trabajo mantiene activo el Mac. Puede retrasar el bloqueo automático y consume energía. Desactivado por defecto. Al activarlo se restaura la atenuación automática; la manual sigue disponible.";
+"general.keepDisplayAwakeNote" = "Aunque esté desactivado, la protección de bloqueo puede mantener la pantalla activa. En ese caso, la pantalla integrada se atenúa tras el tiempo de apagado del sistema y se restaura cuando vuelves. «Nunca» desactiva la atenuación automática.";
 "general.blankScreen" = "Apagar pantalla";
 "blankMode.dim" = "Atenuar (mantener VPN)";
 "blankMode.sleep" = "Suspender pantallas";

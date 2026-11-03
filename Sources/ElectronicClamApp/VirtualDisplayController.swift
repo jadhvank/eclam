@@ -38,6 +38,8 @@ final class VirtualDisplayController {
     /// 백라이트가 없어 비용 ~0. S2 `BlankDisplayDimmer` 의 같은 타입 assertion 과는
     /// 독립이며(IOPM 이 ref-count 로 관리) 충돌하지 않는다.
     private var idleSleepAssertionID: IOPMAssertionID = 0
+    /// Actual successful ownership, not the requested keep/guard setting.
+    var isHoldingDisplay: Bool { anchor.active && idleSleepAssertionID != 0 }
 
     init(store: StateStore) {
         self.store = store

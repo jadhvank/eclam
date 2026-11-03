@@ -73,6 +73,18 @@ private final class FakeResources: DimmerResources {
     func release() { if held { held = false; releases += 1 } }
 }
 
+private final class FakeObservationActivity {
+    var options: [ProcessInfo.ActivityOptions] = []
+    var started = 0
+    var ended = 0
+    func begin(_ options: ProcessInfo.ActivityOptions) -> NSObjectProtocol {
+        self.options.append(options)
+        started += 1
+        return NSObject()
+    }
+    func end(_ token: NSObjectProtocol) { ended += 1 }
+}
+
 private final class FakeJob: DimmerCancellation {
     let action: () -> Void
     var cancelled = false
@@ -83,12 +95,13 @@ private final class FakeScheduler: DimmerScheduling {
     var jobs: [FakeJob] = []
     var polls: [FakeJob] = []
     var waits: [TimeInterval] = []
+    var repeatingInterval: TimeInterval = 0.5
     func after(_ interval: TimeInterval, _ action: @escaping () -> Void) -> DimmerCancellation {
         check(interval == 0.2, "restore retries stay at 0.2 seconds")
         let job = FakeJob(action); jobs.append(job); return job
     }
     func repeating(_ interval: TimeInterval, _ action: @escaping () -> Void) -> DimmerCancellation {
-        check(interval == 0.5, "input/lid polling stays at 0.5 seconds")
+        check(interval == repeatingInterval, "each poll uses its expected interval")
         let job = FakeJob(action); polls.append(job); return job
     }
     func wait(_ interval: TimeInterval) { waits.append(interval) }
@@ -108,18 +121,41 @@ private final class Fixture {
     let store = FakeStore()
     let resources = FakeResources()
     let scheduler = FakeScheduler()
+    let autoScheduler = FakeScheduler()
+    let autoActivity = FakeObservationActivity()
     let notifications = NotificationCenter()
     let workspaceNotifications = NotificationCenter()
     var time: TimeInterval = 100
     var idle: TimeInterval = 0.02
     var date = capturedAt
     var lid: LidState = .open
+    var autoConditions = AutoDimCoordinator.Conditions(keep: true, displayHeld: true, keepDisplayOption: false)
+    var autoThreshold: TimeInterval? = 60
+    var thresholdReads = 0
     lazy var dimmer = BlankDisplayDimmer(
         backend: backend, sessionStore: store, resources: resources, scheduler: scheduler,
         uptime: { [unowned self] in self.time }, idleSeconds: { [unowned self] in self.idle },
         now: { [unowned self] in self.date }, lidState: { [unowned self] in self.lid },
         observeSystemEvents: true, notificationCenter: notifications,
         workspaceNotificationCenter: workspaceNotifications)
+    lazy var automatic = AutoDimCoordinator(dimmer: dimmer,
+        conditions: { [unowned self] in self.autoConditions },
+        threshold: { [unowned self] in self.thresholdReads += 1; return self.autoThreshold },
+        scheduler: autoScheduler, uptime: { [unowned self] in self.time },
+        idleSeconds: { [unowned self] in self.idle }, lidState: { [unowned self] in self.lid },
+        beginActivity: { [activity = autoActivity] in activity.begin($0) },
+        endActivity: { [activity = autoActivity] in activity.end($0) })
+    func startAutomatic() {
+        autoScheduler.repeatingInterval = 1
+        dimmer.recoverInterruptedSession()
+        automatic.update()
+    }
+    func advance(_ seconds: TimeInterval) {
+        time += seconds
+        idle += seconds
+        scheduler.tick()
+        autoScheduler.tick()
+    }
     func snapshot(age: TimeInterval = 0, uuid: String = testPanelUUID) -> BrightnessSnapshot {
         BrightnessSnapshot(displayUUID: uuid, original: 0.7, lastApplied: 0,
                            capturedAt: date.addingTimeInterval(-age))
@@ -322,6 +358,245 @@ enum DimRestoreTests {
         do {
             let f = Fixture(); f.store.loadError = FakeStore.Failure.io; f.dimmer.dim()
             check(f.backend.writes.isEmpty && !f.resources.held, "unreadable journal cannot be overwritten by a new Dim")
+        }
+        // Automatic policy integration: all inputs and resources are still fake.
+        do {
+            let f = Fixture(); f.startAutomatic(); f.automatic.update(); f.advance(1)
+            check(f.autoActivity.started == 1 && f.autoActivity.ended == 0,
+                  "pre-dim automatic observation acquires App Nap protection only once")
+            let options = f.autoActivity.options[0]
+            check(options == .userInitiatedAllowingIdleSystemSleep
+                  && !options.contains(.idleSystemSleepDisabled) && !options.contains(.idleDisplaySleepDisabled),
+                  "automatic observation activity has no display/system sleep-prevention bits")
+            f.autoConditions.displayHeld = false; f.advance(1)
+            check(f.autoActivity.started == 1 && f.autoActivity.ended == 0,
+                  "late-holder observation remains protected without creating another activity")
+            let stale = f.autoScheduler.polls[0]
+            f.autoConditions.keepDisplayOption = true; f.automatic.update(); stale.action()
+            check(f.autoActivity.started == 1 && f.autoActivity.ended == 1,
+                  "caffeine ON ends observation once and stale callback cannot reacquire")
+            f.autoConditions.keepDisplayOption = false; f.automatic.update()
+            check(f.autoActivity.started == 2 && f.autoActivity.ended == 1,
+                  "new observation lifetime acquires a fresh activity")
+            f.autoConditions.keep = false; f.automatic.update(); f.automatic.update()
+            check(f.autoActivity.started == 2 && f.autoActivity.ended == 2,
+                  "keep/safety release ends observation exactly once")
+            f.autoConditions.keep = true; f.automatic.update()
+            let lastStale = f.autoScheduler.polls.last!
+            f.automatic.stop(); f.automatic.stop(); lastStale.action()
+            f.workspaceNotifications.post(name: NSWorkspace.didWakeNotification, object: nil)
+            check(f.autoActivity.started == 3 && f.autoActivity.ended == 3,
+                  "stop releases activity once and late callbacks cannot restart it")
+        }
+        do {
+            var f: Fixture? = Fixture()
+            weak var observedCoordinator: AutoDimCoordinator?
+            let activity = f!.autoActivity
+            let scheduler = f!.autoScheduler
+            f!.startAutomatic(); observedCoordinator = f!.automatic
+            check(activity.started == 1, "deinit fixture starts an observation activity")
+            f = nil
+            check(observedCoordinator == nil && activity.ended == 1 && scheduler.polls.allSatisfy { $0.cancelled },
+                  "coordinator deinit releases observation activity and cancels timer")
+            scheduler.polls.forEach { $0.action() }
+            check(activity.started == 1 && activity.ended == 1,
+                  "deallocated observation cannot be revived by stale timer callbacks")
+        }
+        for notification in [NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification] {
+            let f = Fixture(); f.idle = 900; f.startAutomatic(); f.advance(59)
+            check(f.dimmer.state == .idle, "pre-dim wake fixture is still idle")
+            f.workspaceNotifications.post(name: notification, object: nil)
+            f.advance(1)
+            check(!f.dimmer.isDimmed && f.backend.writes.isEmpty,
+                  "wake while already idle must reset near-expired automatic grace")
+            f.advance(58)
+            check(!f.dimmer.isDimmed, "idle wake grants the complete threshold without OS input reset")
+            f.advance(1)
+            check(f.dimmer.isDimmed, "idle wake does not prevent a later full idle period")
+        }
+        do {
+            let f = Fixture(); f.idle = 900; f.startAutomatic(); f.advance(59)
+            // A close/open between policy ticks is not visible in the sampled lid
+            // state. The topology event still gives the return a full grace.
+            f.notifications.post(name: NSApplication.didChangeScreenParametersNotification, object: nil)
+            f.advance(1)
+            check(!f.dimmer.isDimmed, "idle display reconfiguration resets near-expired grace")
+            f.advance(58)
+            check(!f.dimmer.isDimmed, "fast lid return via topology event gets full grace")
+            f.advance(1)
+            check(f.dimmer.isDimmed, "topology return permits dim after a new full idle period")
+            f.notifications.post(name: NSApplication.didChangeScreenParametersNotification, object: nil)
+            check(f.dimmer.isDimmed && f.backend.writes.count == 1 && f.resources.held,
+                  "own-anchor reconfiguration only updates grace and does not restore active automatic dim")
+        }
+        for intermediateUnknown in [false, true] {
+            let f = Fixture(); f.idle = 900; f.lid = .closed; f.startAutomatic(); f.advance(59)
+            if intermediateUnknown { f.lid = .unavailable; f.automatic.update() }
+            f.lid = .open; f.advance(1)
+            check(!f.dimmer.isDimmed && f.backend.writes.isEmpty,
+                  "idle closed-to-open lid sample resets grace before automatic start")
+            f.advance(59)
+            check(!f.dimmer.isDimmed, "idle lid return gets full grace even across unknown lid samples")
+            f.advance(1)
+            check(f.dimmer.isDimmed, "idle lid return permits dim after new grace")
+        }
+        do {
+            let f = Fixture(); f.autoConditions.displayHeld = false; f.startAutomatic(); f.advance(600)
+            check(!f.dimmer.isDimmed && f.store.saves == 0, "missing holder never starts automatic dim")
+            f.autoConditions.displayHeld = true; f.advance(1); f.advance(59)
+            check(!f.dimmer.isDimmed, "late holder appearance is observed without convergence and grants grace")
+            f.advance(1)
+            check(f.dimmer.isDimmed, "late holder can start automatic dim after its grace")
+            f.autoConditions.displayHeld = false; f.advance(1)
+            check(!f.dimmer.isDimmed && !f.resources.held, "holder loss is observed without convergence")
+            f.autoConditions.displayHeld = true; f.advance(1); f.advance(60)
+            check(f.dimmer.isDimmed, "holder reappearance after topology change is still observed")
+        }
+        do {
+            let f = Fixture(); f.idle = 900; f.startAutomatic()
+            f.advance(59)
+            check(!f.dimmer.isDimmed, "eligibility grants a full grace despite old OS idle")
+            f.advance(1)
+            check(f.dimmer.origin == .automatic && f.dimmer.isDimmed && f.backend.brightness == 0,
+                  "idle threshold starts automatic dim through the same brightness owner")
+            check(f.resources.acquisitions == 1 && f.store.saves == 1, "automatic dim acquires/captures once")
+            let before = f.thresholdReads; f.advance(1)
+            check(f.thresholdReads > before, "active poll rereads current power policy")
+            f.workspaceNotifications.post(name: NSWorkspace.didWakeNotification, object: nil)
+            check(f.backend.brightness == 0.7 && f.dimmer.state == .idle, "wake restores automatic dim")
+            f.advance(59)
+            check(!f.dimmer.isDimmed, "wake without input must not immediately dim again")
+            f.advance(1)
+            check(f.dimmer.isDimmed, "wake grace eventually permits new idle dim")
+            f.newInput(); f.automatic.update()
+            check(!f.dimmer.isDimmed && f.backend.brightness == 0.7, "new input restores automatic dim immediately")
+            f.advance(59)
+            check(!f.dimmer.isDimmed, "fresh input gets its own complete idle period")
+            f.advance(1)
+            check(f.dimmer.isDimmed, "new input period can later dim again")
+        }
+        do {
+            let f = Fixture(); f.idle = 900; f.lid = .closed; f.startAutomatic(); f.advance(60)
+            f.lid = .open; f.scheduler.tick(); f.automatic.update()
+            check(f.dimmer.state == .idle && f.backend.brightness == 0.7, "lid-only return restores automatic dim")
+            f.advance(59)
+            check(!f.dimmer.isDimmed, "lid-only return grants grace without OS input reset")
+            f.advance(1)
+            check(f.dimmer.isDimmed, "lid-open does not disable subsequent eligible dim")
+        }
+        do {
+            let f = Fixture(); f.startAutomatic(); f.advance(60)
+            f.autoConditions.keepDisplayOption = true; f.automatic.update()
+            check(f.dimmer.state == .idle && f.backend.brightness == 0.7 && !f.resources.held,
+                  "caffeine ON restores automatic dim and releases its resources")
+            f.advance(600)
+            check(!f.dimmer.isDimmed, "caffeine ON blocks automatic reentry")
+            f.autoConditions.keepDisplayOption = false; f.automatic.update(); f.advance(59)
+            check(!f.dimmer.isDimmed, "caffeine OFF starts fresh grace")
+            f.advance(1)
+            check(f.dimmer.isDimmed, "caffeine OFF permits automatic dim after grace")
+        }
+        do {
+            let f = Fixture(); f.startAutomatic(); f.advance(60)
+            let saved = f.store.snapshot
+            f.dimmer.dim()
+            check(f.dimmer.origin == .manual && f.store.snapshot == saved && f.store.saves == 1,
+                  "manual takeover retains automatic episode's original snapshot")
+            f.autoConditions.keepDisplayOption = true; f.automatic.update()
+            check(f.dimmer.isDimmed && f.resources.held, "caffeine toggle does not cancel manual takeover")
+            f.dimmer.restore()
+            check(f.backend.brightness == 0.7, "manual takeover restores the true original brightness")
+        }
+        do {
+            let f = Fixture(); f.dimmer.dim(); f.startAutomatic(); f.advance(600)
+            check(f.dimmer.origin == .manual && f.store.saves == 1, "automatic dim never recaptures an active manual dim")
+            f.dimmer.restore(); f.automatic.update(); f.advance(59)
+            check(!f.dimmer.isDimmed, "manual episode completion also grants automatic grace")
+        }
+        for lostKeep in [false, true] {
+            let f = Fixture(); f.startAutomatic(); f.advance(60)
+            f.backend.failingWrites = 100
+            if lostKeep { f.autoConditions.keep = false }
+            else { f.autoConditions.displayHeld = false }
+            f.automatic.update()
+            check(!f.resources.held && !f.dimmer.isDimmed && f.store.snapshot != nil,
+                  "keep/holder loss releases dim power even when restoration is pending")
+            check(f.scheduler.waits.isEmpty, "safety/condition release does not wait for brightness restoration")
+            f.advance(600); f.scheduler.drain()
+            check(f.store.saves == 1 && !f.resources.held, "dim's own assertion cannot keep automatic policy alive")
+            f.backend.failingWrites = 0; f.dimmer.requestRestore(reason: .systemWake)
+            f.autoConditions.keep = true; f.autoConditions.displayHeld = true; f.automatic.update()
+            f.advance(59)
+            check(!f.dimmer.isDimmed, "returning keep/holder requires fresh grace")
+            f.advance(1)
+            check(f.dimmer.isDimmed && f.store.saves == 2, "recovered conditions permit a new episode after grace")
+        }
+        do {
+            let f = Fixture(); f.startAutomatic(); f.advance(60)
+            f.backend.brightness = 0.4; f.scheduler.tick(); f.automatic.update()
+            check(f.dimmer.state == .idle && f.backend.brightness == 0.4 && f.backend.writes.count == 1,
+                  "external brightness change without input ends automatic ownership without overwriting it")
+            f.advance(59)
+            check(f.backend.brightness == 0.4 && f.backend.writes.count == 1,
+                  "old OS idle cannot immediately overwrite external brightness")
+            f.advance(1); f.dimmer.restore()
+            check(f.backend.brightness == 0.4, "later automatic episode preserves the new user's brightness")
+        }
+        do {
+            let f = Fixture(); f.startAutomatic(); f.advance(60)
+            f.backend.id = nil; f.automatic.update(); f.scheduler.drain(); f.advance(600)
+            check(f.store.saves == 1 && !f.resources.held && f.dimmer.state.snapshot != nil,
+                  "absent built-in keeps recovery pending and cannot start an assertion-only automatic dim")
+            f.backend.id = 42
+            f.notifications.post(name: NSApplication.didChangeScreenParametersNotification, object: nil)
+            f.automatic.update(); f.advance(59)
+            check(!f.dimmer.isDimmed && f.backend.brightness == 0.7, "panel reappearance gets grace after successful pending restore")
+        }
+        for unavailable in 0..<4 {
+            let f = Fixture()
+            if unavailable == 0 { f.backend.id = nil }
+            if unavailable == 1 { f.backend.uuid = nil }
+            if unavailable == 2 { f.backend.brightness = nil }
+            if unavailable == 3 { f.backend.uuid = "not-a-physical-panel-uuid" }
+            f.startAutomatic(); f.advance(600)
+            check(f.store.saves == 0 && f.backend.writes.isEmpty && !f.resources.held,
+                  "absent or unknown physical built-in never starts automatic dim")
+        }
+        for limit: TimeInterval? in [nil, AutoDimPolicy.thresholdSeconds(minutes: 0), .nan, .infinity] {
+            let f = Fixture(); f.autoThreshold = limit; f.startAutomatic(); f.advance(600)
+            check(!f.dimmer.isDimmed && f.store.saves == 0, "Never/failed/invalid power policy does not dim")
+        }
+        do {
+            let f = Fixture(); f.startAutomatic(); f.advance(60)
+            f.autoThreshold = nil; f.automatic.update()
+            check(!f.dimmer.isDimmed && f.backend.brightness == 0.7, "power-policy read failure restores automatic dim")
+            f.autoThreshold = 120; f.automatic.update(); f.advance(119)
+            check(!f.dimmer.isDimmed, "new power-source threshold replaces old value with full grace")
+            f.advance(1)
+            check(f.dimmer.isDimmed, "updated threshold controls subsequent automatic dim")
+        }
+        do {
+            let f = Fixture(); f.store.snapshot = f.snapshot(); f.backend.brightness = nil
+            f.startAutomatic(); f.advance(600); f.scheduler.drain()
+            check(f.store.saves == 0 && !f.resources.held, "launch recovery must finish before automatic dim")
+            f.backend.brightness = 0
+            f.workspaceNotifications.post(name: NSWorkspace.didWakeNotification, object: nil)
+            f.automatic.update(); f.advance(59)
+            check(!f.dimmer.isDimmed && f.backend.brightness == 0.7, "recovery completion grants a new grace")
+        }
+        do {
+            let f = Fixture(); f.startAutomatic()
+            let stale = f.autoScheduler.polls[0]
+            f.automatic.stop(); f.dimmer.prepareForTermination(); f.time += 600; f.idle += 600
+            f.workspaceNotifications.post(name: NSWorkspace.didWakeNotification, object: nil)
+            f.workspaceNotifications.post(name: NSWorkspace.screensDidWakeNotification, object: nil)
+            f.notifications.post(name: NSApplication.didChangeScreenParametersNotification, object: nil)
+            f.lid = .closed; stale.action(); f.lid = .open
+            stale.action(); f.automatic.update(); f.dimmer.dim(origin: .automatic)
+            check(f.backend.writes.isEmpty && f.store.saves == 0 && !f.resources.held,
+                  "stale policy/lid/notification callbacks cannot dim after termination")
+            check(f.dimmer.onEpisodeFinished == nil && f.dimmer.onReturnGraceRequested == nil,
+                  "stopping automatic policy detaches both dimmer hooks")
         }
         print("DimRestore tests: \(passed) passed, \(failed) failed")
         exit(failed == 0 ? 0 : 1)

@@ -107,7 +107,7 @@ The icon is a clam shell with three states: an outline shell (asleep), a filled 
 | Status header | Current state at a glance (e.g., "Asleep when idle", "Awake — until I quit", "Awake — remote session") |
 | **Keep Mac Awake** (⌘K) | Toggle keep-awake |
 | **Watch Agents** ▸ | Enable/disable the agents to detect (shows " • active" when one is); **Customize…** at the bottom |
-| **Blank screen — keep working** | Sleep the displays but keep the Mac and agents running |
+| **Blank screen — keep working** | Dim the built-in screen without locking (default), or sleep the displays; keep work running |
 | **Settings…** (⌘,) | Open settings |
 | **Quit** (⌘Q) | Quit (restores sleep first) |
 

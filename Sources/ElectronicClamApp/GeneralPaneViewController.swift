@@ -254,7 +254,7 @@ final class GeneralPaneViewController: NSViewController {
         keepDisplayAwakeCheckbox.action = #selector(keepDisplayAwakeToggled)
         keepDisplayAwakeCheckbox.state = store.keepDisplayAwakeEnabled ? .on : .off
         keepDisplayAwakeCheckbox.toolTip = NSL("general.tip.keepDisplayAwake",
-            "Keep the display awake while work keeps the Mac awake. This may delay automatic locking and uses display power. Off by default; lock guard and Dim may still hold the display when this option is off.")
+            "Keep the display awake while work keeps the Mac awake. This may delay automatic locking and uses display power. Off by default. Turning this on restores automatic Dim; manual Dim remains available.")
         let displayAwakeRow = Self.formRow(NSL("general.display", "Display"),
                                            control: keepDisplayAwakeCheckbox)
 
@@ -263,7 +263,7 @@ final class GeneralPaneViewController: NSViewController {
         keepDisplayAwakeNote.textColor = .secondaryLabelColor
         keepDisplayAwakeNote.isSelectable = false
         keepDisplayAwakeNote.stringValue = NSL("general.keepDisplayAwakeNote",
-            "Lock guard and Dim can also keep the display awake. Dim lowers brightness without locking; it restores brightness when you return.")
+            "With this off, lock guard can still keep the display awake. The built-in screen then dims after the system display-off interval and restores when you return. “Never” disables automatic Dim.")
 
         // ADR-0037 §#8 — "Blank screen" 동작 모드: Dim(기본·VPN-안전) vs Sleep.
         // themePopup 과 동일한 popup form-row 문법. Sleep 선택 시 아래 경고 노트가

@@ -417,8 +417,8 @@
 "general.vpnService.none" = "（未找到 VPN 服务 — 请打开你的 VPN 应用）";
 "general.display" = "显示器";
 "general.keepDisplayAwake" = "同时保持屏幕常亮（等同 caffeinate -d）";
-"general.tip.keepDisplayAwake" = "工作使 Mac 保持唤醒时，也让屏幕保持唤醒。这可能推迟自动锁定并消耗屏幕电量。默认关闭；关闭后，锁定防护和调暗功能仍可能保持屏幕唤醒。";
-"general.keepDisplayAwakeNote" = "锁定防护和调暗功能也可保持屏幕唤醒。调暗只降低亮度而不锁定，返回时会恢复亮度。";
+"general.tip.keepDisplayAwake" = "工作使 Mac 保持唤醒时，也让屏幕保持唤醒。这可能推迟自动锁定并消耗屏幕电量。默认关闭。开启后会恢复自动调暗的屏幕；仍可手动调暗。";
+"general.keepDisplayAwakeNote" = "关闭后，锁定防护仍可能保持屏幕唤醒。此时，工作期间内置屏幕会在系统设置的关闭屏幕时间后自动调暗，并在返回时恢复。设为“永不”时不会自动调暗。";
 "general.blankScreen" = "熄屏";
 "blankMode.dim" = "调暗（保持 VPN）";
 "blankMode.sleep" = "显示器睡眠";
