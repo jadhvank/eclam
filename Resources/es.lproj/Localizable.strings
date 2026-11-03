@@ -415,6 +415,10 @@
 "general.tip.vpnRefresh" = "Vuelve a buscar servicios VPN — útil si tu app de VPN estaba cerrada cuando abriste esto.";
 "general.vpnServiceNote" = "Elige la VPN que vigilar y luego activa las notificaciones arriba. Te avisará si se cae (también por Telegram, si lo has configurado). Sin reconexión automática.";
 "general.vpnService.none" = "(no se encontraron servicios VPN — abre tu app de VPN)";
+"general.display" = "Pantalla";
+"general.keepDisplayAwake" = "Mantener también la pantalla encendida (como caffeinate -d)";
+"general.tip.keepDisplayAwake" = "Mantener el Mac despierto no mantiene la pantalla encendida — macOS sigue apagando la pantalla con su propio temporizador de inactividad. Si activas esto, Electronic Clam también mantiene la pantalla despierta mientras mantiene despierto el Mac, igual que caffeinate -d. Consume energía de retroiluminación, así que déjalo desactivado salvo que quieras ver el trabajo. Desactivado por omisión.";
+"general.keepDisplayAwakeNote" = "Desactivado, el Mac sigue despierto pero la pantalla se apaga con su propio temporizador. «Apagar pantalla», abajo, siempre gana mientras estás ausente.";
 "general.blankScreen" = "Apagar pantalla";
 "blankMode.dim" = "Atenuar (mantener VPN)";
 "blankMode.sleep" = "Suspender pantallas";

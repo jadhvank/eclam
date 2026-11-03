@@ -415,6 +415,10 @@
 "general.tip.vpnRefresh" = "VPN サービスを再スキャンします — これを開いたときに VPN アプリが閉じていた場合に便利です。";
 "general.vpnServiceNote" = "監視する VPN を選び、上で通知をオンにしてください。切断されると知らせます（設定していれば Telegram にも）。自動再接続はありません。";
 "general.vpnService.none" = "（VPN サービスが見つかりません — VPN アプリを開いてください）";
+"general.display" = "ディスプレイ";
+"general.keepDisplayAwake" = "画面も点けたままにする（caffeinate -d と同じ）";
+"general.tip.keepDisplayAwake" = "Mac をスリープさせないことと画面を点けたままにすることは別です — macOS は独自のアイドルタイマーで画面を消します。これをオンにすると、Electronic Clam は Mac を起こしている間ディスプレイも起こしたままにします。caffeinate -d と同じ方式です。バックライトの電力を使うため、作業を見ていたいとき以外はオフのままをおすすめします。デフォルトはオフです。";
+"general.keepDisplayAwakeNote" = "オフの場合、Mac は起きたままでも画面は独自のタイマーで消えます。離席中は下の「画面を消す」が常に優先されます。";
 "general.blankScreen" = "画面オフ";
 "blankMode.dim" = "暗くする（VPN 維持）";
 "blankMode.sleep" = "ディスプレイをスリープ";
