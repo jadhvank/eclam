@@ -2,6 +2,16 @@
 
 All notable changes to Electronic Clam are documented here.
 
+## [Unreleased]
+
+- **Slack notifications (off by default)** — bot tokens or incoming webhooks, alongside Telegram in Settings → Notifications. Pending requests and retries are cancelled when settings change, notifications are disabled, or the app quits. Credentials are saved atomically with user-only permissions; redirects and raw transport-error logging are disabled. Messages go to the selected service and chat/channel; see [security and privacy](docs/security.md). Thanks to [Sejong Yang](https://github.com/kingsj0405) for [#2](https://github.com/jadhvank/eclam/pull/2).
+- **Optional display keep-awake** — keep the display on while existing work and safety conditions permit. Off by default, independent of the clamshell lock guard and manual Dim. Menu and CLI diagnostics report the actual display assertions. Thanks to Sejong Yang for [#3](https://github.com/jadhvank/eclam/pull/3).
+- **VPN observation and brightness restoration** — the VPN notification watcher no longer prevents display or system sleep by itself. Existing system keep-awake and preemptive virtual-display lock protection remain. Dim saves the built-in panel's brightness before changing it and restores it on new keyboard/mouse input, lid opening, wake, keep/safety release or normal shutdown. A small recovery journal retains failed restores; external brightness changes are respected.
+- **Local development installer** — bounded graceful quit, copy-failure rollback and three recent recovery backups. Ad-hoc builds explicitly warn that helper caller-signature verification is disabled. See [local development](docs/local-development.md). Thanks to Sejong Yang for [#4](https://github.com/jadhvank/eclam/pull/4).
+- **Homebrew cleanup** — replace the deprecated uninstall callback with structured steps that preserve unrelated hooks, malformed configurations and permissions ([#5](https://github.com/jadhvank/eclam/issues/5)).
+
+Source integration does not publish a new app release. FortiClient, physical lid/display transitions, automatic brightness and long-running App Nap still require hardware validation before release.
+
 ## [0.6.5] — 2026-09-01
 
 - **Fix: mirroring a TV works again with the clamshell lock guard on** — connecting a display in *mirror* mode (a mirrored TV, AirPlay) would often fail to connect, while connecting a monitor as an *extended* display worked fine. The guard simply could not see mirrored displays: macOS drops the members of a hardware mirror set from the active-display list and reports the whole mirror set as a single screen, and both of the guard's checks relied on exactly those two signals. So while macOS was negotiating the mirror session, the invisible anchor kept re-mirroring itself and kept getting re-created after each teardown, fighting the very handover it should have stepped aside for. Both checks now share one implementation based on the *online* display list, which sees mirror-set members.

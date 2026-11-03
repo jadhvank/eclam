@@ -75,7 +75,7 @@ echo "==> Compiling app"
 # header, and pin -framework CoreGraphics (the shim's mirror/reconfig calls).
 swiftc -O -target "$TARGET" \
     -framework AppKit -framework Foundation -framework ServiceManagement -framework IOKit \
-    -framework CoreGraphics \
+    -framework CoreGraphics -framework ColorSync \
     -import-objc-header "$ROOT/Sources/ElectronicClamApp/VirtualDisplayShim.h" \
     -o "$MACOS_DIR/ElectronicClam" \
     "${APP_SRC[@]}" "${SHARED_SRC[@]}" \

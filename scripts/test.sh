@@ -165,7 +165,8 @@ else
 fi
 
 # ── TelegramSupport 게이팅·파싱 테스트 (ADR-0028) ──────────────────────────
-# 순수 계층(TelegramSupport.swift)만 컴파일 — TelegramNotifier 는 URLSession·NSL 결합.
+# 순수 계층(TelegramSupport.swift + 공통 게이팅 ChatNotifySupport.swift)만
+# 컴파일 — TelegramNotifier 는 URLSession·NSL 결합.
 if [ -f "$ROOT/Tests/TelegramSupportTests.swift" ]; then
     echo "==> Compiling telegram support tests"
     swiftc -target "$TARGET" \
@@ -173,12 +174,32 @@ if [ -f "$ROOT/Tests/TelegramSupportTests.swift" ]; then
         -o "$TMP/eclam_telegramtests" \
         "$ROOT/Sources/ElectronicClamApp/SafetyPolicy.swift" \
         "$ROOT/Sources/ElectronicClamApp/AwakeEpisode.swift" \
+        "$ROOT/Sources/ElectronicClamApp/ChatNotifySupport.swift" \
         "$ROOT/Sources/ElectronicClamApp/TelegramSupport.swift" \
         "$ROOT/Tests/TelegramSupportTests.swift"
     echo "==> Running telegram support tests"
     "$TMP/eclam_telegramtests"
 else
     echo "==> Skipping telegram support tests (Tests/TelegramSupportTests.swift absent)"
+fi
+
+# ── SlackSupport 게이팅·파싱 테스트 ────────────────────────────────────────
+# Telegram 쪽과 같은 구성 — 순수 계층만 컴파일하고 SlackNotifier(URLSession·
+# NSL 결합)는 끌고 오지 않는다.
+if [ -f "$ROOT/Tests/SlackSupportTests.swift" ]; then
+    echo "==> Compiling slack support tests"
+    swiftc -target "$TARGET" \
+        -framework Foundation \
+        -o "$TMP/eclam_slacktests" \
+        "$ROOT/Sources/ElectronicClamApp/SafetyPolicy.swift" \
+        "$ROOT/Sources/ElectronicClamApp/AwakeEpisode.swift" \
+        "$ROOT/Sources/ElectronicClamApp/ChatNotifySupport.swift" \
+        "$ROOT/Sources/ElectronicClamApp/SlackSupport.swift" \
+        "$ROOT/Tests/SlackSupportTests.swift"
+    echo "==> Running slack support tests"
+    "$TMP/eclam_slacktests"
+else
+    echo "==> Skipping slack support tests (Tests/SlackSupportTests.swift absent)"
 fi
 
 # ── HoldState 직렬화/파싱 테스트 (P3, ADR-0025) ────────────────────────────
@@ -272,6 +293,7 @@ if [ -f "$ROOT/Tests/VpnServiceDetectTests.swift" ]; then
         -o "$TMP/eclam_vpnservicetests" \
         "$ROOT/Sources/ElectronicClamApp/VpnWatcher.swift" \
         "$ROOT/Sources/ElectronicClamApp/Subprocess.swift" \
+        "$ROOT/Tests/VpnTestStubs.swift" \
         "$ROOT/Tests/VpnServiceDetectTests.swift"
     echo "==> Running vpn service detect tests"
     "$TMP/eclam_vpnservicetests"
@@ -285,8 +307,11 @@ fi
 if [ -f "$ROOT/Tests/DimRestoreTests.swift" ]; then
     echo "==> Compiling dim restore tests"
     swiftc -target "$TARGET" \
-        -framework AppKit -framework Foundation -framework IOKit -framework CoreGraphics \
+        -framework AppKit -framework Foundation -framework IOKit -framework CoreGraphics -framework ColorSync \
         -o "$TMP/eclam_dimrestoretests" \
+        "$ROOT/Sources/ElectronicClamApp/BrightnessSession.swift" \
+        "$ROOT/Sources/ElectronicClamApp/BrightnessSessionStore.swift" \
+        "$ROOT/Sources/ElectronicClamApp/LidStateReader.swift" \
         "$ROOT/Sources/ElectronicClamApp/DisplayBrightness.swift" \
         "$ROOT/Sources/ElectronicClamApp/BlankDisplayDimmer.swift" \
         "$ROOT/Tests/DimRestoreTests.swift"
@@ -318,5 +343,56 @@ if [ -f "$ROOT/Tests/DisplayTopologyTests.swift" ]; then
 else
     echo "==> Skipping display topology tests (Tests/DisplayTopologyTests.swift absent)"
 fi
+
+
+# Local installer tests use a disposable checkout; no app installation.
+python3 "$ROOT/Tests/InstallLocalTests.py"
+
+swiftc -target "$TARGET" -framework AppKit -framework Foundation \
+    "$ROOT/Sources/ElectronicClamApp/VpnWatcher.swift" \
+    "$ROOT/Sources/ElectronicClamApp/Subprocess.swift" \
+    "$ROOT/Tests/VpnTestStubs.swift" "$ROOT/Tests/VpnWatcherLifecycleTests.swift" \
+    -o "$TMP/vpn-lifecycle"
+"$TMP/vpn-lifecycle"
+swiftc -target "$TARGET" -framework Foundation -framework IOKit \
+    "$ROOT/Sources/ElectronicClamApp/DisplayAwakeHolder.swift" \
+    "$ROOT/Tests/DisplayAwakeHolderTests.swift" -o "$TMP/display-holder"
+"$TMP/display-holder"
+
+swiftc -target "$TARGET" -framework Foundation -framework IOKit \
+    "$ROOT/Sources/ElectronicClamApp/DisplayAssertionStatus.swift" \
+    "$ROOT/Tests/DisplayAssertionStatusTests.swift" -o "$TMP/display-status"
+"$TMP/display-status"
+
+swiftc -target "$TARGET" -framework Foundation \
+    "$ROOT/Sources/ElectronicClamApp/BrightnessSession.swift" \
+    "$ROOT/Tests/DimReturnTriggerTests.swift" -o "$TMP/dim-triggers"
+"$TMP/dim-triggers"
+swiftc -target "$TARGET" -framework Foundation \
+    "$ROOT/Sources/ElectronicClamApp/BrightnessSession.swift" \
+    "$ROOT/Sources/ElectronicClamApp/BrightnessSessionStore.swift" \
+    "$ROOT/Tests/BrightnessSessionStoreTests.swift" -o "$TMP/brightness-store"
+"$TMP/brightness-store"
+
+python3 "$ROOT/Tests/CaskCleanupTests.py"
+
+swiftc -target "$TARGET" -framework Foundation -framework UserNotifications \
+    "$ROOT/Sources/ElectronicClamApp/SafetyPolicy.swift" \
+    "$ROOT/Sources/ElectronicClamApp/NotificationCenter.swift" \
+    "$ROOT/Tests/LocalNotificationCancellationTests.swift" -o "$TMP/local-notification"
+"$TMP/local-notification"
+
+swiftc -target "$TARGET" -framework Foundation \
+    "$ROOT/Sources/ElectronicClamApp/SafetyPolicy.swift" \
+    "$ROOT/Sources/ElectronicClamApp/AwakeEpisode.swift" \
+    "$ROOT/Sources/ElectronicClamApp/ChatNotifySupport.swift" \
+    "$ROOT/Sources/ElectronicClamApp/SlackSupport.swift" \
+    "$ROOT/Sources/ElectronicClamApp/TelegramSupport.swift" \
+    "$ROOT/Sources/ElectronicClamApp/NotificationDelivery.swift" \
+    "$ROOT/Sources/ElectronicClamApp/SecureNotificationSettings.swift" \
+    "$ROOT/Sources/ElectronicClamApp/SlackNotifier.swift" \
+    "$ROOT/Sources/ElectronicClamApp/TelegramNotifier.swift" \
+    "$ROOT/Tests/NotificationDeliveryTests.swift" -o "$TMP/notification-delivery"
+"$TMP/notification-delivery"
 
 echo "==> All tests passed"

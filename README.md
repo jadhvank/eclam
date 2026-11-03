@@ -71,9 +71,11 @@ With AC unplugged and the lid closed in a bag it judges more conservatively, the
 
 Electronic Clam won't sleep while you're using the Mac remotely. It detects SSH, screen sharing, Tailscale, and known remote-control apps. The default is simple: stay awake as long as you're connected.
 
-### Telegram notifications (off by default)
+### Chat notifications — Telegram and Slack (off by default)
 
-Connect your own Telegram bot and you'll get a ping when an agent stops or your Mac goes to sleep — with battery %, temperature, and host name attached.
+Connect your own Telegram bot or your own Slack app and you'll get a ping when an agent stops or your Mac goes to sleep — with battery %, temperature, and host name attached.
+
+Both backends live in **Settings → Notifications** and are independent: enable either one, or both. Messages go only to the service you configured, using a token you create and own; the token stays on this Mac in a user-only file. For Slack you need an app with the `chat:write` bot scope (add `channels:read` to look up a channel by name), installed to your workspace and invited to the channel. Slack has no silent delivery, so the periodic status message arrives like any other — mute the channel if you want it quiet.
 
 ### Other
 
@@ -131,10 +133,10 @@ eclam help
 
 - Reads file clocks, not file contents.
 - No telemetry, no tracking, no analytics.
-- XPC caller verification is enforced.
+- Developer ID releases enforce XPC caller verification; ad-hoc development builds disable it.
 - Developer ID signed + Apple notarized.
-- Tokens stay local.
-- Sleep is always restored on exit or crash.
+- Tokens are stored locally with user-only permissions and sent only to their configured service.
+- Normal quit releases power holds; the helper watchdog provides crash recovery.
 - One permission path (`SMAppService`).
 
 See [Security & privacy](docs/security.md) for details.

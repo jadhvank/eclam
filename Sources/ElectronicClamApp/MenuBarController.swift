@@ -15,10 +15,12 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     init(store: StateStore,
          bridge: HelperBridge,
+         dimmer: BlankDisplayDimmer,
          onOpenSettings: @escaping () -> Void,
          onOpenAgentsPane: @escaping () -> Void) {
         self.store = store
         self.bridge = bridge
+        self.dimmer = dimmer
         self.onOpenSettings = onOpenSettings
         self.onOpenAgentsPane = onOpenAgentsPane
         super.init()
@@ -46,7 +48,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     /// ADR-0037 §#8 — "어둡게(dim)" 모드 컨트롤러. 밝기 floor + display-sleep 방지
     /// assertion 을 잡고 사용자 복귀 시 자동 복원한다. dim 동안에만 타이머가 돈다.
-    private let dimmer = BlankDisplayDimmer()
+    private let dimmer: BlankDisplayDimmer
 
     private func installMenu() {
         menu.delegate = self
@@ -393,6 +395,15 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         blank.target = self
         blank.isEnabled = canToggle
         menu.addItem(blank)
+
+        let displayStatus = DisplayAssertionStatus.read(processID: ProcessInfo.processInfo.processIdentifier)
+        let holders = displayStatus.entries.map { entries in
+            entries.isEmpty ? NSL("display.holders.none", "None") : entries.map(\.name).joined(separator: ", ")
+        } ?? NSL("display.holders.unknown", "Unavailable")
+        let held = NSMenuItem(title: NSLf("display.holders", "Display held by: %@", holders), action: nil, keyEquivalent: "")
+        held.isEnabled = false
+        menu.addItem(held)
+
 
         menu.addItem(.separator())
 
@@ -784,6 +795,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         case .dim:
             dimmer.dim()
         case .sleep:
+            dimmer.requestRestore(reason: .off)
             sleepDisplaysNow()
         }
     }

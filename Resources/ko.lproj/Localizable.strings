@@ -406,14 +406,18 @@
 "general.sessions" = "세션";
 "general.clamshellGuard" = "클램쉘에서 잠금 방지 (VPN 유지)";
 "general.tip.clamshellGuard" = "덮개를 닫고 외부 디스플레이도 없이 Mac이 깨어있을 때, Electronic Clam이 보이지 않는 가상 디스플레이를 띄워 macOS가 화면을 잠그지 않게 합니다 — 화면이 잠기면 FortiClient 같은 VPN 세션이 끊깁니다. 창은 뜨지 않고 전력도 거의 쓰지 않습니다. 기본값은 꺼짐.";
-"general.vpnNotify" = "VPN이 끊기면 알림 (Telegram + 로컬)";
-"general.tip.vpnNotify" = "Mac을 깨워두는 동안 Electronic Clam이 scutil로 VPN을 지켜보다가 끊기면 알려줍니다 — 로컬 알림과, 설정해 두었다면 Telegram도 함께. 자동으로 재연결하지는 않습니다(FortiClient는 SAML 로그인이 필요합니다). 클램쉘 가드와는 별개입니다. 기본값은 꺼짐.";
+"general.vpnNotify" = "VPN이 끊기면 알림";
+"general.tip.vpnNotify" = "깨어 있기와 별개로 VPN 끊김을 감시합니다. 깨어 있을 때 로컬 알림과 설정된 Telegram/Slack으로 알립니다. 잠자기 중에는 감시가 쉬고, 깨어나면 다시 확인합니다. 자동 재연결은 하지 않습니다.";
 "general.vpnService" = "VPN 서비스";
 "general.tip.vpnService" = "VPN 서비스를 고르세요(macOS가 시스템 설정 → 네트워크에서 보는 이름 그대로). FortiClient는 보통 \"VPN\"입니다. Electronic Clam이 scutil로 지켜보다가 끊기면 재인증하라고 알려줍니다 — 자동으로 재연결하지는 않습니다(SAML 로그인 필요). VPN이 아직 목록에 없으면 새로고침을 누르세요.";
 "general.vpnRefresh" = "새로고침";
 "general.tip.vpnRefresh" = "VPN 서비스를 다시 검색합니다 — 이 화면을 열 때 VPN 앱이 꺼져 있었다면 유용합니다.";
-"general.vpnServiceNote" = "지켜볼 VPN을 고른 뒤 위에서 알림을 켜세요. 끊기면 알려줍니다(설정해 두었다면 Telegram도). 자동 재연결은 없습니다.";
+"general.vpnServiceNote" = "감시할 VPN을 고르고 알림을 켜세요. 채팅 알림은 네트워크 연결이 필요하며, FortiClient는 다시 로그인해야 할 수 있습니다.";
 "general.vpnService.none" = "(VPN 서비스를 찾지 못함 — VPN 앱을 여세요)";
+"general.display" = "디스플레이";
+"general.keepDisplayAwake" = "화면도 계속 켜 두기 (caffeinate -d와 같음)";
+"general.tip.keepDisplayAwake" = "작업 중 Mac이 깨어 있는 동안 화면도 유지합니다. 자동 잠금이 지연되고 화면 전력을 사용합니다. 기본값은 꺼짐이며, 이 옵션이 꺼져도 잠금 방지나 어둡게 기능이 화면을 유지할 수 있습니다.";
+"general.keepDisplayAwakeNote" = "잠금 방지와 어둡게 기능도 화면을 유지할 수 있습니다. 어둡게는 잠그지 않고 밝기만 낮추며, 돌아오면 밝기를 복원합니다.";
 "general.blankScreen" = "화면 끄기";
 "blankMode.dim" = "어둡게 (VPN 유지)";
 "blankMode.sleep" = "디스플레이 잠자기";
@@ -424,3 +428,79 @@
 "notify.vpnDropped.title" = "VPN 끊김";
 "notify.vpnDropped.body" = "%@ 재인증이 필요합니다(SAML/SSO). Electronic Clam은 자동 재연결하지 않습니다 — FortiClient를 열어 다시 로그인하세요.";
 "telegram.vpn.dropped" = "🔌 VPN 끊김 (%@) — FortiClient 재인증 필요(SAML). 자동 재연결 없음.";
+
+/* Slack 알림 — Telegram 백엔드의 형제 (같은 이벤트, Slack Web API) */
+"notifications.backend.telegram" = "Telegram";
+"notifications.backend.slack" = "Slack";
+"slack.privacy" = "기본값은 꺼짐입니다. 켜면 상태 메시지가 사용자가 직접 만들고 소유한 Slack 앱의 봇 토큰이나 incoming webhook을 통해 Slack으로만 전송됩니다 — 개발자나 다른 어떤 서버로도 데이터가 가지 않습니다. 자격 정보는 이 Mac에만, 사용자 전용 파일 권한으로 저장됩니다.";
+"slack.master" = "내 Slack 봇으로 상태 보내기";
+"slack.tip.master" = "마스터 스위치입니다. 끄면 Electronic Clam은 Slack으로 아무것도 보내지 않습니다. 아래 설정 필드와 테스트 버튼은 꺼진 상태에서도 동작해 먼저 연결을 확인할 수 있습니다.";
+"slack.setup.help" = "설정(둘 중 하나): ① api.slack.com/apps에서 앱을 만드세요. ② 봇 토큰을 쓰려면 chat:write 스코프를 추가하고(채널 이름 조회에는 channels:read), 워크스페이스에 설치해 Bot User OAuth Token을 복사한 뒤 /invite @봇이름으로 초대하세요. incoming webhook을 쓰려면 Incoming Webhooks를 켜고 채널 하나에 webhook을 추가한 뒤 URL을 복사하세요. ③ 아래에 붙여넣으세요 — webhook은 채널이 필요 없고, 봇 토큰은 필요합니다.";
+"slack.tokenLabel" = "토큰 또는 webhook";
+"slack.tip.token" = "Slack 앱의 Bot User OAuth Token(xoxb-로 시작) 또는 incoming webhook URL(https://hooks.slack.com/services/…)입니다. webhook은 스코프도 봇 초대도 필요 없지만, 만들 때 정한 채널 한 곳으로만 전송됩니다. 어느 쪽이든 당신의 앱을 인증하는 비밀값이니 외부에 노출하지 마세요. 이 Mac에만 저장되며(사용자 전용 파일), 로그에 남지 않습니다.";
+"slack.channelLabel" = "채널";
+"slack.lookup" = "ID 찾기";
+"slack.tip.lookup" = "채널 이름을 Slack이 선호하는 채널 ID로 바꿔 줍니다. 봇이 이미 그 채널에 들어가 있어야 합니다 — /invite @봇이름으로 초대하세요. 채널 ID(C…)를 직접 붙여넣어도 됩니다.";
+"slack.tip.channelWebhook" = "webhook에서는 쓰이지 않습니다 — 이미 고정된 채널 한 곳으로 전송됩니다.";
+"slack.eventsHeader" = "메시지를 보낼 때:";
+"slack.evtSafety" = "안전 가드가 잠을 허용했을 때 (배터리 · 발열 · 타이머)";
+"slack.tip.evtSafety" = "자리를 비웠을 때 가장 필요한 메시지: 가드가 방금 잠금을 풀어 Mac이 곧 잠들 수 있습니다 — 배터리 부족, 과열, 최대 깨어있기 시간 초과.";
+"slack.evtEnd" = "작업이 끝났을 때 — 에이전트 유휴 진입·원격 세션 종료";
+"slack.tip.evtEnd" = "마지막으로 작업 중이던 에이전트가 유휴 상태가 되거나 원격 세션이 끝나면 발송됩니다. 1분 미만의 짧은 에피소드는 소음 방지를 위해 건너뜁니다.";
+"slack.evtStart" = "작업이 시작됐을 때 — 에이전트·원격 세션 시작";
+"slack.tip.evtStart" = "에이전트나 원격 세션이 Mac을 깨어있게 잡기 시작하면 발송됩니다. 잦을 수 있어 기본 꺼짐. 5분당 1회로 제한됩니다.";
+"slack.evtDigest" = "작업 중 주기 상태, 간격";
+"slack.tip.evtDigest" = "Mac이 깨어있는 동안의 하트비트: 이 간격으로 상태 메시지를 보냅니다. 오던 하트비트가 끊기면 Mac이나 네트워크가 죽었다는 신호입니다. Slack에는 무음 전송이 없으니, 조용히 받고 싶으면 채널을 음소거하세요. 작업이 끝나면 즉시 멈춥니다.";
+"slack.sendTest" = "테스트 메시지 보내기";
+"slack.tip.sendTest" = "현재 상태 한 줄을 포함한 테스트 메시지를 1통 보냅니다. 마스터 스위치가 꺼져 있어도 동작해 연결을 먼저 확인할 수 있습니다.";
+"slack.result.looking" = "채널을 찾는 중…";
+"slack.result.found" = "✓ 채널 ID 찾음";
+"slack.result.sending" = "보내는 중…";
+"slack.result.sent" = "✓ 전송됨 — Slack 채널을 확인하세요";
+"slack.error.notConfigured" = "봇 토큰과 채널을 입력하거나, incoming webhook URL을 먼저 입력하세요.";
+"slack.error.badTokenFormat" = "Slack 토큰(xoxb-…)이나 incoming webhook URL 형식이 아닌 것 같습니다.";
+"slack.error.noChannelTyped" = "채널 이름(예: #general)을 먼저 입력한 뒤 찾으세요.";
+"slack.error.noMatch" = "그 이름의 채널을 봇이 볼 수 없습니다. 봇을 채널에 초대하거나, 채널 ID(C…)를 직접 입력하세요.";
+"slack.error.webhookHasChannel" = "incoming webhook은 이미 고정된 채널로 전송됩니다 — 따로 조회할 것이 없습니다.";
+"slack.error.badToken" = "Slack이 토큰을 거부했습니다. Slack 앱의 OAuth 페이지에서 봇 토큰을 다시 복사하세요.";
+"slack.error.missingScope" = "토큰에 스코프가 부족합니다. chat:write를 추가하고(채널 이름 조회에는 channels:read도 필요), 워크스페이스에 앱을 다시 설치하세요.";
+"slack.error.notInChannel" = "봇이 그 채널에 글을 쓸 수 없습니다. /invite @봇이름으로 초대한 뒤 다시 시도하세요.";
+"slack.error.rateLimited" = "Slack이 요청 빈도를 제한하고 있습니다. 1분 뒤에 다시 시도하세요.";
+"slack.test" = "🐚 Electronic Clam — 테스트 메시지. 알림 연결이 완료됐습니다.";
+"slack.digest" = "📊 아직 깨어있음 — %@";
+"slack.start.agent" = "🟢 깨어있음 — %@ 작업 중";
+"slack.start.remote" = "🟢 깨어있음 — 원격 세션 (%@)";
+"slack.start.generic" = "🟢 깨어있음 — Mac을 깨워 둡니다";
+"slack.end.agentIdle" = "⚪️ %1$@ 유휴 진입 — %2$@ 동안 깨어있다 종료";
+"slack.end.battery" = "🛑 배터리 가드가 잠을 허용 (%1$@) — Mac이 곧 잠들 수 있습니다. 깨어있던 시간 %2$@";
+"slack.end.thermal" = "🛑 발열 가드가 잠을 허용 (%1$@) — Mac이 곧 잠들 수 있습니다. 깨어있던 시간 %2$@";
+"slack.end.timer" = "⏱ 최대 깨어있기 시간 도달 (%1$@) — 잠 허용. 깨어있던 시간 %2$@";
+"slack.end.watchdog" = "⚠️ 헬퍼 워치독 발동 — 잠 복원됨";
+"slack.end.remoteEnded" = "⚪️ 원격 세션 종료 (%1$@) — %2$@ 동안 깨어있다 종료";
+"slack.end.remoteLost" = "⚪️ 원격 세션 끊김 (네트워크 유실) — %@ 동안 깨어있다 종료";
+"slack.end.generic" = "⚪️ 깨어있기 종료 — %@";
+"slack.vpn.dropped" = "🔌 VPN 끊김 (%@) — FortiClient 재인증 필요(SAML). 자동 재연결 없음.";
+
+"display.enable.title" = "화면도 계속 켜둘까요?";
+
+"display.enable.body" = "작업 중 Mac이 깨어 있는 동안 화면 잠자기와 자동 잠금이 지연됩니다. 수동 잠금은 계속 사용할 수 있습니다. 어둡게 기능으로 잠그지 않고 밝기를 낮출 수 있습니다.";
+
+"display.enable.confirm" = "켜기";
+
+"display.enable.cancel" = "취소";
+
+"display.holders" = "화면 유지: %@";
+
+"display.holders.none" = "없음";
+
+"display.holders.unknown" = "확인 불가";
+
+"notification.error.cancelled" = "알림 설정이 바뀌었거나 앱이 종료되어 요청이 취소됐습니다.";
+
+"notification.error.transport" = "알림 서비스에 연결할 수 없습니다. 네트워크 연결을 확인하고 다시 시도하세요.";
+
+"notification.error.response" = "알림 서비스가 요청을 거부했거나 올바르지 않은 응답을 반환했습니다.";
+
+"slack.error.rejected" = "Slack이 요청을 거부했습니다. 봇 권한과 전송 대상을 확인하세요.";
+
+"notification.error.saveSettings" = "설정을 저장하지 못했습니다. 변경은 현재 세션에만 적용되며, 재시작하면 이전 설정으로 돌아갈 수 있습니다. 다시 저장해 주세요.";

@@ -13,10 +13,13 @@ import UserNotifications
 /// `eclam.release.<reason>` replaces (rather than stacks) the earlier
 /// banner, which is what we want during the 5-min cooldown window where the
 /// same reason may re-trip.
+@MainActor
 final class ReleaseNotifier {
     static let shared = ReleaseNotifier()
     private let log = Logger(subsystem: "com.jadhvank.eclam", category: "notify")
-    private let center = UNUserNotificationCenter.current()
+    private lazy var center = UNUserNotificationCenter.current()
+    private var authorizeOverride: (() async -> Bool)?
+    private var postOverride: ((UNNotificationRequest) async throws -> Void)?
 
     /// `true` once we've attempted a permission request this process lifetime.
     /// Prevents us from re-prompting the user on every release after denial.
@@ -27,10 +30,18 @@ final class ReleaseNotifier {
 
     private init() {}
 
+    // Isolated notification boundary for tests; never initializes the real center.
+    init(authorize: @escaping () async -> Bool,
+         post: @escaping (UNNotificationRequest) async throws -> Void) {
+        authorizeOverride = authorize
+        postOverride = post
+    }
+
     /// Post (or coalesce) a release notification.
     /// No-op on permission denial — we log once and give up for the session.
     /// 공통 권한 흐름 — notify/notifyInfo 가 공유.
     private func ensureAuthorized() async -> Bool {
+        if let authorizeOverride { return await authorizeOverride() }
         let status = await currentAuthorizationStatus()
         let authorized: Bool
         switch status {
@@ -52,13 +63,15 @@ final class ReleaseNotifier {
 
     /// proposal §5 — 일반 정보 알림 (1회성 온보딩 안내 등).
     func notifyInfo(identifier: String, title: String, body: String) async {
-        guard await ensureAuthorized() else { return }
+        guard !Task.isCancelled, await ensureAuthorized(), !Task.isCancelled else { return }
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
         do {
-            try await center.add(request)
+            guard !Task.isCancelled else { return }
+            if let postOverride { try await postOverride(request) }
+            else { try await center.add(request) }
             log.info("posted info notification \(identifier, privacy: .public)")
         } catch {
             log.error("UNUserNotificationCenter.add failed: \(error.localizedDescription, privacy: .public)")
@@ -66,7 +79,7 @@ final class ReleaseNotifier {
     }
 
     func notify(reason: SafetyReason, detail: String?) async {
-        guard await ensureAuthorized() else { return }
+        guard !Task.isCancelled, await ensureAuthorized(), !Task.isCancelled else { return }
 
         let content = UNMutableNotificationContent()
         content.title = NSL("notify.release.title", "Electronic Clam auto-released sleep")
@@ -80,7 +93,9 @@ final class ReleaseNotifier {
             content: content,
             trigger: nil)
         do {
-            try await center.add(request)
+            guard !Task.isCancelled else { return }
+            if let postOverride { try await postOverride(request) }
+            else { try await center.add(request) }
             log.info("posted release notification \(identifier, privacy: .public)")
         } catch {
             log.error("UNUserNotificationCenter.add failed: \(error.localizedDescription, privacy: .public)")

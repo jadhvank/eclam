@@ -409,14 +409,18 @@
 "general.sessions" = "Sessions";
 "general.clamshellGuard" = "Prevent lock in clamshell (keep VPN alive)";
 "general.tip.clamshellGuard" = "When your Mac stays awake with the lid closed and no external display, Electronic Clam keeps an invisible virtual display alive so macOS doesn't lock the screen — a lock would drop VPN sessions like FortiClient. No window appears and it draws essentially no power. Off by default.";
-"general.vpnNotify" = "Notify when VPN disconnects (Telegram + local)";
-"general.tip.vpnNotify" = "While the Mac is kept awake, Electronic Clam watches your VPN with scutil and notifies you if it disconnects — a local alert plus Telegram if you've configured it. It never reconnects automatically (FortiClient needs SAML sign-in). Independent of the clamshell guard. Off by default.";
+"general.vpnNotify" = "Notify when VPN disconnects";
+"general.tip.vpnNotify" = "Watch for VPN disconnects independently of keep-awake. Local alerts and configured Telegram/Slack notifications are available while awake; sleep pauses checks and wake rechecks. No automatic reconnection.";
 "general.vpnService" = "VPN service";
 "general.tip.vpnService" = "Pick your VPN service (as macOS sees it in Settings → Network). FortiClient's is usually \"VPN\". Electronic Clam watches it with scutil and, if it drops, notifies you to re-auth — it never reconnects automatically (SAML sign-in required). Use Refresh if your VPN isn't listed yet.";
 "general.vpnRefresh" = "Refresh";
 "general.tip.vpnRefresh" = "Re-scan for VPN services — handy if your VPN app was closed when this opened.";
-"general.vpnServiceNote" = "Pick the VPN to watch, then turn on notifications above. You'll be alerted if it drops (Telegram too, if configured). No auto-reconnect.";
+"general.vpnServiceNote" = "Pick a VPN and enable notifications. Configured chat notifications need a working network; FortiClient may require sign-in again.";
 "general.vpnService.none" = "(no VPN services found — open your VPN app)";
+"general.display" = "Display";
+"general.keepDisplayAwake" = "Keep the display on too (like caffeinate -d)";
+"general.tip.keepDisplayAwake" = "Keep the display awake while work keeps the Mac awake. This may delay automatic locking and uses display power. Off by default; lock guard and Dim may still hold the display when this option is off.";
+"general.keepDisplayAwakeNote" = "Lock guard and Dim can also keep the display awake. Dim lowers brightness without locking; it restores brightness when you return.";
 "general.blankScreen" = "Blank screen";
 "blankMode.dim" = "Dim (keep VPN)";
 "blankMode.sleep" = "Sleep displays";
@@ -427,3 +431,79 @@
 "notify.vpnDropped.title" = "VPN disconnected";
 "notify.vpnDropped.body" = "%@ needs re-auth (SAML/SSO). Electronic Clam won't auto-reconnect — open FortiClient and sign in again.";
 "telegram.vpn.dropped" = "🔌 VPN disconnected (%@) — FortiClient needs re-auth (SAML). No auto-reconnect.";
+
+/* Slack notifications — sibling of the Telegram backend (same events, Slack Web API) */
+"notifications.backend.telegram" = "Telegram";
+"notifications.backend.slack" = "Slack";
+"slack.privacy" = "Off by default. When enabled, status messages go only to Slack, using a bot token or an incoming webhook from a Slack app you create and own — nothing is ever sent to the developer or any other server. The credential is stored locally with user-only file permissions.";
+"slack.master" = "Send status to my Slack bot";
+"slack.tip.master" = "The master switch. Off means Electronic Clam sends nothing to Slack at all. Setup fields and the test button below stay usable so you can wire things up first.";
+"slack.setup.help" = "Setup, either way: ① At api.slack.com/apps, create an app. ② For a bot token, add the chat:write scope (channels:read to look up channel names), install to your workspace, copy the Bot User OAuth Token, and invite the bot with /invite @your-bot. For an incoming webhook, turn on Incoming Webhooks, add one for a channel, and copy its URL. ③ Paste it below — a webhook needs no channel, a bot token does.";
+"slack.tokenLabel" = "Token or webhook";
+"slack.tip.token" = "Either the Bot User OAuth Token from your Slack app (starts with xoxb-), or an incoming webhook URL (https://hooks.slack.com/services/…). A webhook needs no scopes and no invite, but posts to the one channel it was created for. Either way it authenticates *your* app — keep it private. Stored on this Mac only (user-readable file), never logged.";
+"slack.channelLabel" = "Channel";
+"slack.lookup" = "Look up ID";
+"slack.tip.lookup" = "Turns the channel name into the channel ID Slack prefers. The bot must already be in the channel — invite it with /invite @your-bot. You can also paste a channel ID (C…) directly.";
+"slack.tip.channelWebhook" = "Not used with a webhook — it already posts to one fixed channel.";
+"slack.eventsHeader" = "Send a message when:";
+"slack.evtSafety" = "A safety guard releases sleep (battery · heat · timer)";
+"slack.tip.evtSafety" = "The message you most want when away: a guard just released sleep, so the Mac may go to sleep soon — battery low, overheating, or the max-awake timer.";
+"slack.evtEnd" = "Work ends — agents go idle or the remote session ends";
+"slack.tip.evtEnd" = "Fires when the last working agent goes idle or a remote session ends. Episodes shorter than a minute are skipped to avoid noise.";
+"slack.evtStart" = "Work starts — an agent or remote session begins";
+"slack.tip.evtStart" = "Fires when an agent or remote session starts holding the Mac awake. Off by default — it can get chatty. Throttled to one message per 5 minutes.";
+"slack.evtDigest" = "Periodic status while working, every";
+"slack.tip.evtDigest" = "A heartbeat while something is keeping the Mac awake: a status message at this interval, so a missing heartbeat tells you the Mac or network died. Slack has no silent delivery, so mute the channel if you want it quiet. Stops the moment work ends.";
+"slack.sendTest" = "Send Test Message";
+"slack.tip.sendTest" = "Sends one test message with the current status line. Works even while the master switch is off, so you can verify the wiring first.";
+"slack.result.looking" = "Looking for that channel…";
+"slack.result.found" = "✓ Channel ID found";
+"slack.result.sending" = "Sending…";
+"slack.result.sent" = "✓ Sent — check your Slack channel";
+"slack.error.notConfigured" = "Enter a bot token and a channel, or an incoming webhook URL, first.";
+"slack.error.badTokenFormat" = "That doesn't look like a Slack token (expected xoxb-…) or an incoming webhook URL.";
+"slack.error.noChannelTyped" = "Type a channel name (like #general) first, then look it up.";
+"slack.error.noMatch" = "No channel with that name is visible to the bot. Invite the bot to the channel, or paste the channel ID (C…) instead.";
+"slack.error.webhookHasChannel" = "An incoming webhook already posts to one fixed channel — no lookup needed.";
+"slack.error.badToken" = "Slack rejected the token. Re-copy the bot token from your Slack app's OAuth page.";
+"slack.error.missingScope" = "The token is missing a scope. Add chat:write (and channels:read to look up channel names), then reinstall the app to your workspace.";
+"slack.error.notInChannel" = "The bot can't post there. Invite it to the channel with /invite @your-bot, then try again.";
+"slack.error.rateLimited" = "Slack is rate-limiting us. Try again in a minute.";
+"slack.test" = "🐚 Electronic Clam — test message. Notifications are wired up.";
+"slack.digest" = "📊 Still awake — %@";
+"slack.start.agent" = "🟢 Awake — %@ is working";
+"slack.start.remote" = "🟢 Awake — remote session (%@)";
+"slack.start.generic" = "🟢 Awake — keeping the Mac up";
+"slack.end.agentIdle" = "⚪️ %1$@ went idle — awake ended after %2$@";
+"slack.end.battery" = "🛑 Battery guard released sleep (%1$@) — your Mac may sleep soon. Awake %2$@";
+"slack.end.thermal" = "🛑 Thermal guard released sleep (%1$@) — your Mac may sleep soon. Awake %2$@";
+"slack.end.timer" = "⏱ Max awake duration reached (%1$@) — sleep allowed. Awake %2$@";
+"slack.end.watchdog" = "⚠️ Helper watchdog tripped — sleep restored";
+"slack.end.remoteEnded" = "⚪️ Remote session ended (%1$@) — awake ended after %2$@";
+"slack.end.remoteLost" = "⚪️ Remote session dropped (network lost) — awake ended after %@";
+"slack.end.generic" = "⚪️ Awake ended after %@";
+"slack.vpn.dropped" = "🔌 VPN disconnected (%@) — FortiClient needs re-auth (SAML). No auto-reconnect.";
+
+"display.enable.title" = "Keep the display awake?";
+
+"display.enable.body" = "While work keeps your Mac awake, this also delays display sleep and automatic locking. You can still lock your Mac manually. Dim can lower brightness without locking.";
+
+"display.enable.confirm" = "Enable";
+
+"display.enable.cancel" = "Cancel";
+
+"display.holders" = "Display held by: %@";
+
+"display.holders.none" = "None";
+
+"display.holders.unknown" = "Unavailable";
+
+"notification.error.cancelled" = "Request cancelled because notification settings changed or the app stopped.";
+
+"notification.error.transport" = "Could not reach the notification service. Check your connection and try again.";
+
+"notification.error.response" = "The notification service returned an unsuccessful or invalid response.";
+
+"slack.error.rejected" = "Slack rejected the request. Check the bot permissions and destination.";
+
+"notification.error.saveSettings" = "Settings could not be saved. Changes apply for this session; restart may restore previous settings. Try saving again.";

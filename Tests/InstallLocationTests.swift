@@ -87,7 +87,7 @@ func testRegistrationBlock() {
 
     // plain /Applications path (non-existent ⇒ not quarantined) ⇒ nil
     expectEqual(InstallLocation.registrationBlock(
-        bundlePath: "/Applications/ElectronicClam.app"),
+        bundlePath: "/Applications/EClam-InstallLocation-test-\(UUID().uuidString).app"),
         nil, "/Applications, no quarantine ⇒ nil (safe)")
 
     print("OK: registrationBlock")

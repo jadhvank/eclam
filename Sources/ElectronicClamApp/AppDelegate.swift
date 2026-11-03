@@ -18,6 +18,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// ADR-0037 S3 §폴백 — VPN disconnect 안전망 감시자. S1 과 같은 opt-in 게이트로
     /// keep 동안에만 `scutil` 폴링, Connected→Disconnected 에지에서 알림(자동 재연결 X).
     private var vpnWatcher: VpnWatcher?
+    /// 디스플레이 keep-awake(`caffeinate -d` 등가) 홀더. opt-in 이고, converge 마다
+    /// keep 신호에 맞춰 `PreventUserIdleDisplaySleep` assertion 을 잡고 놓는다.
+    /// 헬퍼의 `SleepDisabled` 와 무관 — 앱 프로세스가 직접 잡는다(per-pid 자동 해제).
+    private var displayAwakeHolder: DisplayAwakeHolder?
+    private let dimmer = BlankDisplayDimmer()
+    private var isTerminating = false
 
     /// 10s heartbeat fired while `shouldKeepAwake` is true (ADR-0004 §5).
     ///
@@ -73,16 +79,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let menuBar = MenuBarController(
             store: store,
             bridge: bridge,
+            dimmer: dimmer,
             onOpenSettings: { [weak self] in self?.openSettings(pane: .general) },
             onOpenAgentsPane: { [weak self] in self?.openSettings(pane: .agents) })
         self.menuBar = menuBar
 
-        // ADR-0028 — Telegram 상태 푸시. History 의 에피소드 탭이 유일한
-        // 이벤트 소스: 귀속(원인·사유·디테일)이 끝난 전환만 흘러온다.
-        // 기본 OFF — 설정에서 opt-in 전까지 어떤 네트워크 송신도 없다.
+        // ADR-0028 — 채팅 상태 푸시(Telegram · Slack). History 의 에피소드 탭이
+        // 유일한 이벤트 소스: 귀속(원인·사유·디테일)이 끝난 전환만 흘러온다.
+        // 둘 다 기본 OFF — 설정에서 opt-in 전까지 어떤 네트워크 송신도 없다.
+        // 두 백엔드는 서로를 모른다: 각자 자기 설정만 보고 게이팅한다.
         TelegramNotifier.shared.configure(store: store)
-        history.onEpisodeStart = { TelegramNotifier.shared.episodeStarted($0) }
-        history.onEpisodeEnd = { TelegramNotifier.shared.episodeEnded($0) }
+        SlackNotifier.shared.configure(store: store)
+        history.onEpisodeStart = {
+            TelegramNotifier.shared.episodeStarted($0)
+            SlackNotifier.shared.episodeStarted($0)
+        }
+        history.onEpisodeEnd = {
+            TelegramNotifier.shared.episodeEnded($0)
+            SlackNotifier.shared.episodeEnded($0)
+        }
 
         // Wire detector → store.
         let detector = AgentDetector()
@@ -100,6 +115,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // ADR-0037 S3 — own the VPN disconnect safety-net watcher. Cheap to hold
         // (no polling until `apply(...)` arms it); convergeNow drives it beside S1.
         self.vpnWatcher = VpnWatcher(store: store)
+        // 디스플레이 keep-awake 홀더. 위 둘과 같은 성질로 붙잡기만 해도 비용이 없다
+        // (`apply(...)` 가 결정하기 전까지 assertion 을 만들지 않는다). MenuBarController
+        // 는 "Blank screen → Sleep" 경로에서만 이 홀더를 잠시 비켜세운다.
+        let displayAwakeHolder = DisplayAwakeHolder()
+        self.displayAwakeHolder = displayAwakeHolder
+        dimmer.recoverInterruptedSession()
 
         // Wire store → convergence engine (debounced XPC).
         store.onChange = { [weak self] in
@@ -248,6 +269,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ note: Notification) {
+        guard !isTerminating else { return }
+        isTerminating = true
+        pendingConverge?.cancel()
+        pendingConverge = nil
+        vpnWatcher?.stop()
+        TelegramNotifier.shared.stop()
+        SlackNotifier.shared.stop()
+        dimmer.prepareForTermination()
         heartbeatTimer?.cancel()
         heartbeatTimer = nil
         heartbeatArmed.value = false
@@ -267,8 +296,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Kept ≤0.2s — applicationWillTerminate must not hang.
         RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.2))
         // ADR-0037 S3 — stop the VPN watcher's poll timer cleanly on quit.
-        vpnWatcher?.apply(keepAwake: false)
+        vpnWatcher?.stop()
         vpnWatcher = nil
+        // assertion 은 프로세스 종료 시 커널이 풀지만, 종료 경로에서도 명시적으로 놓는다.
+        displayAwakeHolder?.apply(keepAwake: false)
+        displayAwakeHolder = nil
         pendingConverge?.cancel()
         pendingConverge = nil
         pendingActiveAgentsPush?.cancel()
@@ -302,19 +334,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         t.schedule(deadline: .now() + .seconds(10), repeating: .seconds(10), leeway: .seconds(1))
         t.setEventHandler { [weak self] in
             guard let self = self else { return }
-            // Only beat while we're actively holding sleep off; otherwise the
-            // watchdog is disarmed inside the helper anyway. `heartbeatArmed` is
-            // converge 가 메인에서 갱신한 `shouldKeepAwake` 미러 — 타이머 큐에서
-            // 락·메인 hop 없이 읽으므로 메인이 블록돼도 heartbeat 가 계속 나간다.
-            guard self.heartbeatArmed.value else { return }
-            self.bridge?.heartbeat()
-            // CLI↔GUI reconciliation — poll the helper's actual value while we
-            // believe we're holding sleep off, so an out-of-band `eclam off` is
-            // detected (and policy re-asserted) within one beat instead of
-            // leaving the Mac silently able to sleep. The reverse direction
-            // (CLI `on` while we're idle) needs no poll: without heartbeats the
-            // helper watchdog restores it anyway.
+            // Read-only liveness checks must continue after an unreachable
+            // helper releases local holds, so recovery can converge on its own.
             self.bridge?.refreshCurrentState()
+            // Only write a heartbeat while keep is active; otherwise the
+            // helper watchdog stays disarmed and safety release remains effective.
+            if self.heartbeatArmed.value { self.bridge?.heartbeat() }
         }
         t.resume()
         heartbeatTimer = t
@@ -400,6 +425,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // updates fired in that window.
 
     private func scheduleConverge() {
+        guard !isTerminating else { return }
         pendingConverge?.cancel()
         let work = DispatchWorkItem { [weak self] in self?.convergeNow() }
         pendingConverge = work
@@ -407,8 +433,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func convergeNow() {
-        // Only act if the helper is reachable.
-        guard case .enabled = store.registration else { return }
+        guard !isTerminating else { return }
+        // Observation/cleanup are local and must still run after helper loss.
+        vpnWatcher?.apply(enabled: store.vpnDisconnectNotifyEnabled)
+        guard case .enabled = store.registration, !store.helperUnreachable else {
+            heartbeatArmed.value = false
+            lastWrittenSleepDisabled = nil
+            displayAwakeHolder?.apply(keepAwake: false)
+            dimmer.requestRestore(reason: .helperUnavailable)
+            virtualDisplayController?.apply(keepAwake: false, externalDisplayPresent: store.extDisplayPresent)
+            return
+        }
 
         // Keep the watched-traces set in sync — cheap.
         detector?.setTraces(store.tracesToWatch())
@@ -424,6 +459,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let target = store.shouldKeepAwake
+        if !target { dimmer.requestRestore(reason: store.safetyRelease == nil ? .keep : .safety) }
         // heartbeat 게이트 미러를 매 수렴마다 갱신 — helper watchdog 무장 조건
         // (keep-awake 명령 중)과 정확히 일치한다. 타이머 큐가 이 값을 읽어
         // 메인 블록 중에도 heartbeat 를 계속 보낸다.
@@ -445,10 +481,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         virtualDisplayController?.apply(keepAwake: target,
                                         externalDisplayPresent: store.extDisplayPresent)
 
-        // ADR-0037 S3 §폴백 — VPN disconnect 안전망. S1 과 같은 게이트(keep + opt-in)로
-        // keep 동안에만 `scutil` 폴링을 켜고, release 되면 끈다. no-op early-return 위에
-        // 둬 keep 토글뿐 아니라 opt-in 변경도 반영한다. 알림만, 자동 재연결 안 함.
-        vpnWatcher?.apply(keepAwake: target)
+        // 디스플레이 keep-awake(opt-in). 헬퍼의 `SleepDisabled` 는 idle display sleep 을
+        // 막지 못하므로, 화면까지 켜 두려면 별도 assertion 이 필요하다. 위 둘과 같은
+        // 이유로 no-op early-return **위**에 둔다 — keep 이 그대로여도 설정만 바뀐 수렴을
+        // 반영해야 한다.
+        displayAwakeHolder?.apply(keepAwake: target && store.keepDisplayAwakeEnabled)
 
         if let last = lastWrittenSleepDisabled, last == target { return }
 

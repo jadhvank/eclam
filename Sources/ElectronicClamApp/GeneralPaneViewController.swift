@@ -44,6 +44,13 @@ final class GeneralPaneViewController: NSViewController {
     private let vpnRefreshButton = NSButton(title: "", target: nil, action: nil)
     /// VPN 안전망 동작 설명(잠금 가드 + Telegram opt-in 에 올라타며, 끊김 시 알림만 함).
     private let vpnServiceNote = NSTextField(wrappingLabelWithString: "")
+    /// 디스플레이 keep-awake opt-in 체크박스(`caffeinate -d` 등가물). State 는
+    /// `store.keepDisplayAwakeEnabled` 미러; `keepDisplayAwakeToggled()` 가 StateStore
+    /// 세터로 영속(→ converge → DisplayAwakeHolder). clamshellGuardCheckbox 와 같은
+    /// form-row 문법.
+    private let keepDisplayAwakeCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+    /// 체크박스 아래 상시 설명 — "왜 화면이 꺼지나"가 이 기능의 존재 이유라 한 줄로 적는다.
+    private let keepDisplayAwakeNote = NSTextField(wrappingLabelWithString: "")
     /// ADR-0037 §#8 — "Blank screen" 동작 모드 선택 (dim/sleep). State 는
     /// `store.blankDisplaysMode` 미러; `blankModeChanged()` 가 StateStore 세터로 영속.
     /// themePopup 과 동일한 popup form-row 패턴.
@@ -181,15 +188,12 @@ final class GeneralPaneViewController: NSViewController {
         // 체크박스로 둔다. updatesRow 가 한 라벨 아래 컨트롤 둘을 묶는 패턴과 동일.
         vpnNotifyCheckbox.translatesAutoresizingMaskIntoConstraints = false
         vpnNotifyCheckbox.title = NSL("general.vpnNotify",
-            "Notify when VPN disconnects (Telegram + local)")
+            "Notify when VPN disconnects")
         vpnNotifyCheckbox.target = self
         vpnNotifyCheckbox.action = #selector(vpnNotifyToggled)
         vpnNotifyCheckbox.state = store.vpnDisconnectNotifyEnabled ? .on : .off
         vpnNotifyCheckbox.toolTip = NSL("general.tip.vpnNotify",
-            "While the Mac is kept awake, Electronic Clam watches your VPN with scutil "
-            + "and notifies you if it disconnects — a local alert plus Telegram if you've "
-            + "configured it. It never reconnects automatically (FortiClient needs SAML "
-            + "sign-in). Independent of the clamshell guard. Off by default.")
+            "Watch for VPN disconnects independently of keep-awake. Local alerts and configured Telegram/Slack notifications are available while awake; sleep pauses checks and wake rechecks. No automatic reconnection.")
         let sessionsControls = NSStackView(views: [clamshellGuardCheckbox, vpnNotifyCheckbox])
         sessionsControls.orientation = .vertical
         sessionsControls.alignment = .leading
@@ -237,8 +241,29 @@ final class GeneralPaneViewController: NSViewController {
         vpnServiceNote.textColor = .secondaryLabelColor
         vpnServiceNote.isSelectable = false
         vpnServiceNote.stringValue = NSL("general.vpnServiceNote",
-            "Pick the VPN to watch, then turn on notifications above. You'll be alerted if "
-            + "it drops (Telegram too, if configured). No auto-reconnect.")
+            "Pick a VPN and enable notifications. Configured chat notifications need a working network; FortiClient may require sign-in again.")
+
+        // 디스플레이 keep-awake — 헬퍼의 SleepDisabled 는 시스템·클램쉘 잠자기만 막고
+        // idle display sleep 은 막지 않는다. 화면까지 켜 두고 싶은 사용자를 위한 opt-in
+        // 으로, `caffeinate -d` 와 같은 assertion 을 keep 신호 동안에만 잡는다.
+        // "Blank screen" 과 같은 디스플레이 축이라 바로 위에 둔다.
+        keepDisplayAwakeCheckbox.translatesAutoresizingMaskIntoConstraints = false
+        keepDisplayAwakeCheckbox.title = NSL("general.keepDisplayAwake",
+            "Keep the display on too (like caffeinate -d)")
+        keepDisplayAwakeCheckbox.target = self
+        keepDisplayAwakeCheckbox.action = #selector(keepDisplayAwakeToggled)
+        keepDisplayAwakeCheckbox.state = store.keepDisplayAwakeEnabled ? .on : .off
+        keepDisplayAwakeCheckbox.toolTip = NSL("general.tip.keepDisplayAwake",
+            "Keep the display awake while work keeps the Mac awake. This may delay automatic locking and uses display power. Off by default; lock guard and Dim may still hold the display when this option is off.")
+        let displayAwakeRow = Self.formRow(NSL("general.display", "Display"),
+                                           control: keepDisplayAwakeCheckbox)
+
+        keepDisplayAwakeNote.translatesAutoresizingMaskIntoConstraints = false
+        keepDisplayAwakeNote.font = NSFont.systemFont(ofSize: 11)
+        keepDisplayAwakeNote.textColor = .secondaryLabelColor
+        keepDisplayAwakeNote.isSelectable = false
+        keepDisplayAwakeNote.stringValue = NSL("general.keepDisplayAwakeNote",
+            "Lock guard and Dim can also keep the display awake. Dim lowers brightness without locking; it restores brightness when you return.")
 
         // ADR-0037 §#8 — "Blank screen" 동작 모드: Dim(기본·VPN-안전) vs Sleep.
         // themePopup 과 동일한 popup form-row 문법. Sleep 선택 시 아래 경고 노트가
@@ -386,6 +411,7 @@ final class GeneralPaneViewController: NSViewController {
         let settingsStack = NSStackView(views: [
             languageRow, themeRow, startupRow, loginItemNote, clamshellGuardRow,
             vpnServiceRow, vpnServiceNote,
+            displayAwakeRow, keepDisplayAwakeNote,
             blankModeRow, blankModeNote, updatesRow,
             formSeparator,
             permissionHeader,
@@ -551,6 +577,7 @@ final class GeneralPaneViewController: NSViewController {
         themePopup.selectItem(at: themeOrder.firstIndex(of: store.menuBarTheme) ?? 0)
         clamshellGuardCheckbox.state = store.clamshellLockGuardEnabled ? .on : .off
         vpnNotifyCheckbox.state = store.vpnDisconnectNotifyEnabled ? .on : .off
+        keepDisplayAwakeCheckbox.state = store.keepDisplayAwakeEnabled ? .on : .off
         // ADR-0037 S3 — pane 표시·앱 재활성마다 VPN 서비스 목록을 다시 스캔한다(VPN
         // 앱이 그새 켜졌을 수 있다). 저장값은 reloadVpnServices 가 항상 보존한다.
         reloadVpnServices()
@@ -878,9 +905,25 @@ final class GeneralPaneViewController: NSViewController {
         store.setClamshellLockGuard(clamshellGuardCheckbox.state == .on)
     }
 
-    /// ADR-0037 S3 — persist the opt-in VPN-disconnect notification (independent of
-    /// the clamshell guard). The StateStore setter fires onChange → convergeNow →
-    /// VpnWatcher.apply, which arms or stops the scutil poll to match.
+    /// 디스플레이 keep-awake opt-in 영속. StateStore 세터가 onChange → convergeNow →
+    /// `DisplayAwakeHolder.apply` 로 이어져 assertion 을 즉시 잡거나 놓는다.
+    @objc private func keepDisplayAwakeToggled() {
+        let enabled = keepDisplayAwakeCheckbox.state == .on
+        if enabled && !store.keepDisplayAwakeEnabled {
+            let alert = NSAlert()
+            alert.messageText = NSL("display.enable.title", "Keep the display awake?")
+            alert.informativeText = NSL("display.enable.body", "While work keeps your Mac awake, this also delays display sleep and automatic locking. You can still lock your Mac manually. Dim can lower brightness without locking.")
+            alert.addButton(withTitle: NSL("display.enable.confirm", "Enable"))
+            alert.addButton(withTitle: NSL("display.enable.cancel", "Cancel"))
+            if alert.runModal() != .alertFirstButtonReturn {
+                keepDisplayAwakeCheckbox.state = .off
+                return
+            }
+        }
+        store.setKeepDisplayAwake(enabled)
+    }
+
+    /// ADR-0037 S3 — persist the opt-in VPN-disconnect notification.
     @objc private func vpnNotifyToggled() {
         store.setVpnDisconnectNotify(vpnNotifyCheckbox.state == .on)
     }
