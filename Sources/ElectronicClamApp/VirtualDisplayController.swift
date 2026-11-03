@@ -78,7 +78,7 @@ final class VirtualDisplayController {
             } else {
                 // SPI 미가용/헤드리스. ADR-0037 §폴백 — 이 실패의 *실제 결과*(앵커가
                 // 못 떠서 덮개 닫으면 잠금→VPN 끊김)는 S3 `VpnWatcher` 가 런타임에
-                // 잡는다: VpnWatcher 는 SPI 성공이 아니라 keep+opt-in 게이트로만 도므로,
+                // 잡는다: VpnWatcher 는 SPI 성공이 아니라 알림 opt-in 게이트로만 도므로,
                 // 앵커가 못 떠도 폴링이 살아 있어 실제 Connected→Disconnected 에지에서
                 // "VPN 재인증 필요"를 알린다. 여기서 선제 알림을 또 쏘지 않는 이유 —
                 // start() 는 아직 헤드리스가 아닐 때도(덮개 열림·전이 중) 실패할 수 있어
@@ -106,7 +106,7 @@ final class VirtualDisplayController {
         let r = IOPMAssertionCreateWithName(
             kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
             IOPMAssertionLevel(kIOPMAssertionLevelOn),
-            "Electronic Clam — clamshell lock guard" as CFString,
+            "Electronic Clam - clamshell lock guard" as CFString,
             &aid)
         if r == kIOReturnSuccess {
             idleSleepAssertionID = aid

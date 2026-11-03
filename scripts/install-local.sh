@@ -30,53 +30,113 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 SRC="$ROOT/build/ElectronicClam.app"
-DEST="/Applications/ElectronicClam.app"
-BIN="$DEST/Contents/MacOS/ElectronicClam"
-# Keep the replaced bundle until the new one is verified. Two constraints pick
-# this path: it is outside $ROOT/build, which build.sh wipes with `rm -rf` on
-# every run, and it is a dot-directory, which Spotlight skips — so the backups
-# never show up in BundleScan's mdfind and never trip the ADR-0039 split-brain
-# warning in `eclam status`. Verified 2026-08-24.
+DEST="${ECLAM_INSTALL_DEST:-/Applications/ElectronicClam.app}"
 BACKUP_DIR="${ECLAM_BACKUP_DIR:-$HOME/.eclam-backups}"
-
-# Ad-hoc by default — the point of this script is a local build, and most
-# machines have no Developer ID. build.sh compiles the helper with
-# -DECLAM_DEV_ADHOC under this value so the XPC caller check stays usable.
+QUIT_TIMEOUT="${ECLAM_QUIT_TIMEOUT:-15}"
 export ECLAM_SIGN_ID="${ECLAM_SIGN_ID:--}"
+
+# Custom destinations also make the failure paths testable without touching an
+# installed app. Never replace a symlink or an arbitrary non-app directory.
+if [[ "$DEST" != /*.app || -L "$DEST" ]]; then
+    echo "ERROR: destination must be an absolute, non-symlink .app path" >&2
+    exit 1
+fi
+if [[ ! "$QUIT_TIMEOUT" =~ ^[1-9][0-9]*$ ]] || (( QUIT_TIMEOUT > 300 )); then
+    echo "ERROR: ECLAM_QUIT_TIMEOUT must be 1..300 seconds" >&2
+    exit 1
+fi
+BIN="$DEST/Contents/MacOS/ElectronicClam"
+if [[ "$ECLAM_SIGN_ID" == - ]]; then
+    echo "WARNING: ad-hoc development build; helper XPC caller signature verification is disabled."
+    echo "         Use the signed release for normal distribution."
+fi
 
 echo "==> [install-local] Building ($ECLAM_SIGN_ID)"
 "$SCRIPT_DIR/build.sh"
+[[ -x "$SRC/Contents/MacOS/ElectronicClam" ]] || { echo "ERROR: built app is missing its executable" >&2; exit 1; }
 
 echo "==> [install-local] Quitting the running app"
-# Graceful quit runs restore-on-exit (ADR-0002), so a held SleepDisabled is
-# released instead of being stranded across the swap. No-op if not running.
-osascript -e 'quit app "ElectronicClam"' >/dev/null 2>&1 || true
-sleep 2
-
-if [[ -d "$DEST" ]]; then
-    mkdir -p "$BACKUP_DIR"
-    STAMP="$(date +%y%m%d-%H%M%S)"
-    echo "==> [install-local] Backing up the current install to $BACKUP_DIR"
-    mv "$DEST" "$BACKUP_DIR/ElectronicClam-$STAMP.app"
+# Graceful quit restores sleep/brightness. A timeout must abort replacement,
+# never force-kill an app that may still own power state.
+quit_pid=""
+if pgrep -x ElectronicClam >/dev/null; then
+    # Apple Events can themselves wait indefinitely. Bound the request along
+    # with the app-exit wait, and terminate only our own request process.
+    osascript -e 'quit app "ElectronicClam"' >/dev/null 2>&1 &
+    quit_pid=$!
+fi
+for ((attempt=0; attempt<QUIT_TIMEOUT*5; attempt++)); do
+    if ! pgrep -x ElectronicClam >/dev/null; then break; fi
+    sleep 0.2
+done
+if [[ -n "$quit_pid" ]]; then
+    kill "$quit_pid" 2>/dev/null || true
+    wait "$quit_pid" 2>/dev/null || true
+fi
+if pgrep -x ElectronicClam >/dev/null; then
+    echo "ERROR: app did not quit within $QUIT_TIMEOUT seconds; install unchanged" >&2
+    exit 1
 fi
 
+backup=""
+copy_in_progress=0
+rollback_copy() {
+    status=$?
+    if (( copy_in_progress )); then
+        echo "==> [install-local] Copy interrupted; restoring previous install" >&2
+        if rm -rf -- "$DEST"; then
+            if [[ -n "$backup" ]]; then
+                mv "$backup" "$DEST" || echo "ERROR: restore failed; previous app remains at $backup" >&2
+            fi
+        else
+            echo "ERROR: partial install removal failed; previous app remains at $backup" >&2
+        fi
+    fi
+    exit "$status"
+}
+trap rollback_copy EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+mkdir -p "$(dirname "$DEST")" "$BACKUP_DIR"
+if [[ -e "$DEST" ]]; then
+    # .app.bak avoids Spotlight discovering a second runnable app. Include a
+    # unique suffix so two installs in the same second cannot overwrite backup.
+    backup_epoch="$(/usr/bin/python3 -c 'import time; print(time.time_ns())')"
+    backup="$(mktemp -d "$BACKUP_DIR/ElectronicClam-$(date +%Y%m%d-%H%M%S)-$backup_epoch-XXXXXX").app.bak"
+    rmdir "${backup%.app.bak}"
+    mv "$DEST" "$backup"
+fi
+copy_in_progress=1
 echo "==> [install-local] Installing to $DEST"
 ditto "$SRC" "$DEST"
+[[ -x "$BIN" ]] || { echo "ERROR: installed executable missing" >&2; exit 1; }
+copy_in_progress=0
 
 echo "==> [install-local] Launching"
 open "$DEST"
 sleep 5
 
-# The helper needs its GUI-session registration to rerun after a signature
-# change. repair is idempotent: it prints "nothing to do" on a healthy helper.
 echo "==> [install-local] Repairing the helper"
-"$BIN" repair || true
+"$BIN" repair
 
 echo "==> [install-local] Status"
-"$BIN" status || true
+"$BIN" status
+
+# Prune only after a successful install. Never remove the last recovery copy
+# after a failed launch/repair/status. Paths are passed as arguments, not code.
+/usr/bin/python3 - "$BACKUP_DIR" <<'PYTHON'
+from pathlib import Path
+import shutil
+import sys
+backups = sorted((p for p in Path(sys.argv[1]).glob("ElectronicClam-*.app.bak")
+                  if p.is_dir() and not p.is_symlink()), key=lambda p: p.name, reverse=True)
+for path in backups[3:]:
+    shutil.rmtree(path)
+PYTHON
 
 cat <<EOF
 
 ==> Done. Installed $DEST
-    Backups: $BACKUP_DIR (delete the ones you no longer want)
+    Backups: $BACKUP_DIR (most recent 3 successful replacements retained)
 EOF

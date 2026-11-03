@@ -409,18 +409,18 @@
 "general.sessions" = "Sessions";
 "general.clamshellGuard" = "Prevent lock in clamshell (keep VPN alive)";
 "general.tip.clamshellGuard" = "When your Mac stays awake with the lid closed and no external display, Electronic Clam keeps an invisible virtual display alive so macOS doesn't lock the screen — a lock would drop VPN sessions like FortiClient. No window appears and it draws essentially no power. Off by default.";
-"general.vpnNotify" = "Notify when VPN disconnects (Telegram + local)";
-"general.tip.vpnNotify" = "While the Mac is kept awake, Electronic Clam watches your VPN with scutil and notifies you if it disconnects — a local alert plus Telegram if you've configured it. It never reconnects automatically (FortiClient needs SAML sign-in). Independent of the clamshell guard. Off by default.";
+"general.vpnNotify" = "Notify when VPN disconnects";
+"general.tip.vpnNotify" = "Watch for VPN disconnects independently of keep-awake. Local alerts and configured Telegram/Slack notifications are available while awake; sleep pauses checks and wake rechecks. No automatic reconnection.";
 "general.vpnService" = "VPN service";
 "general.tip.vpnService" = "Pick your VPN service (as macOS sees it in Settings → Network). FortiClient's is usually \"VPN\". Electronic Clam watches it with scutil and, if it drops, notifies you to re-auth — it never reconnects automatically (SAML sign-in required). Use Refresh if your VPN isn't listed yet.";
 "general.vpnRefresh" = "Refresh";
 "general.tip.vpnRefresh" = "Re-scan for VPN services — handy if your VPN app was closed when this opened.";
-"general.vpnServiceNote" = "Pick the VPN to watch, then turn on notifications above. You'll be alerted if it drops (Telegram too, if configured). No auto-reconnect.";
+"general.vpnServiceNote" = "Pick a VPN and enable notifications. Configured chat notifications need a working network; FortiClient may require sign-in again.";
 "general.vpnService.none" = "(no VPN services found — open your VPN app)";
 "general.display" = "Display";
 "general.keepDisplayAwake" = "Keep the display on too (like caffeinate -d)";
-"general.tip.keepDisplayAwake" = "Keeping your Mac awake does not keep the screen on — macOS still turns the display off on its own idle timer. Turn this on and Electronic Clam also holds the display awake for as long as it keeps the Mac awake, the same way caffeinate -d does. It costs backlight power, so leave it off unless you want to watch the work. Off by default.";
-"general.keepDisplayAwakeNote" = "Off, the Mac stays awake but the screen still sleeps on its own timer. \"Blank screen\" below always wins while you're away.";
+"general.tip.keepDisplayAwake" = "Keep the display awake while work keeps the Mac awake. This may delay automatic locking and uses display power. Off by default; lock guard and Dim may still hold the display when this option is off.";
+"general.keepDisplayAwakeNote" = "Lock guard and Dim can also keep the display awake. Dim lowers brightness without locking; it restores brightness when you return.";
 "general.blankScreen" = "Blank screen";
 "blankMode.dim" = "Dim (keep VPN)";
 "blankMode.sleep" = "Sleep displays";
@@ -483,3 +483,27 @@
 "slack.end.remoteLost" = "⚪️ Remote session dropped (network lost) — awake ended after %@";
 "slack.end.generic" = "⚪️ Awake ended after %@";
 "slack.vpn.dropped" = "🔌 VPN disconnected (%@) — FortiClient needs re-auth (SAML). No auto-reconnect.";
+
+"display.enable.title" = "Keep the display awake?";
+
+"display.enable.body" = "While work keeps your Mac awake, this also delays display sleep and automatic locking. You can still lock your Mac manually. Dim can lower brightness without locking.";
+
+"display.enable.confirm" = "Enable";
+
+"display.enable.cancel" = "Cancel";
+
+"display.holders" = "Display held by: %@";
+
+"display.holders.none" = "None";
+
+"display.holders.unknown" = "Unavailable";
+
+"notification.error.cancelled" = "Request cancelled because notification settings changed or the app stopped.";
+
+"notification.error.transport" = "Could not reach the notification service. Check your connection and try again.";
+
+"notification.error.response" = "The notification service returned an unsuccessful or invalid response.";
+
+"slack.error.rejected" = "Slack rejected the request. Check the bot permissions and destination.";
+
+"notification.error.saveSettings" = "Settings could not be saved. Changes apply for this session; restart may restore previous settings. Try saving again.";

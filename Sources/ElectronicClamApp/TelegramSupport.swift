@@ -110,12 +110,16 @@ enum TelegramSupport {
         return nil
     }
 
-    /// sendMessage 응답의 성공 여부 + 실패 시 Telegram 의 description.
+    /// sendMessage 응답의 성공 여부 + 알려진 고정 실패 문구만 반환한다.
     static func parseSendResult(_ data: Data) -> (ok: Bool, error: String?) {
         guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return (false, "unparseable response")
         }
         if root["ok"] as? Bool == true { return (true, nil) }
-        return (false, root["description"] as? String ?? "unknown error")
+        // Only exact known descriptions may be shown; arbitrary server text can echo the token.
+        let description = root["description"] as? String ?? ""
+        let known: Set<String> = ["Bad Request: chat not found", "Unauthorized",
+            "Forbidden: bot was blocked by the user", "Forbidden: bot was kicked from the group chat"]
+        return (false, known.contains(description) ? description : "Telegram rejected the request.")
     }
 }

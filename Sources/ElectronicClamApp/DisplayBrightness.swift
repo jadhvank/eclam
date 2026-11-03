@@ -1,4 +1,5 @@
 import CoreGraphics
+import ColorSync
 import Foundation
 import OSLog
 
@@ -53,13 +54,13 @@ enum DisplayBrightness {
             log.error("DisplayServicesGetBrightness err=\(err, privacy: .public)")
             return nil
         }
-        return value
+        return BrightnessSnapshot.isValidBrightness(value) ? value : nil
     }
 
     /// 내장 디스플레이 밝기 쓰기 (0.0…1.0 으로 clamp). 성공 시 true.
     @discardableResult
     static func set(_ display: CGDirectDisplayID, _ value: Float) -> Bool {
-        guard let fn = symbols.set else { return false }
+        guard value.isFinite, let fn = symbols.set else { return false }
         let err = fn(display, max(0, min(1, value)))
         if err != 0 {
             log.error("DisplayServicesSetBrightness err=\(err, privacy: .public)")
@@ -88,6 +89,8 @@ enum DisplayBrightness {
 protocol BrightnessBackend {
     /// 복원 시점의 내장 디스플레이 id(재해석). 없으면 nil.
     func builtinID() -> CGDirectDisplayID?
+    /// Persistent physical identity, independent of display ID re-enumeration.
+    func panelUUID(_ display: CGDirectDisplayID) -> String?
     /// 밝기 읽기 (0.0…1.0). 실패 시 nil.
     func get(_ display: CGDirectDisplayID) -> Float?
     /// 밝기 쓰기. 성공 시 true(실패면 호출부가 재시도).
@@ -97,6 +100,10 @@ protocol BrightnessBackend {
 /// 기본 백엔드 — `DisplayBrightness` enum 정적 API 로 위임(프로덕션 경로).
 struct DisplayServicesBrightnessBackend: BrightnessBackend {
     func builtinID() -> CGDirectDisplayID? { DisplayBrightness.builtinDisplayID() }
+    func panelUUID(_ display: CGDirectDisplayID) -> String? {
+        guard let uuid = CGDisplayCreateUUIDFromDisplayID(display)?.takeRetainedValue() else { return nil }
+        return CFUUIDCreateString(kCFAllocatorDefault, uuid) as String
+    }
     func get(_ display: CGDirectDisplayID) -> Float? { DisplayBrightness.get(display) }
     @discardableResult
     func set(_ display: CGDirectDisplayID, _ value: Float) -> Bool { DisplayBrightness.set(display, value) }

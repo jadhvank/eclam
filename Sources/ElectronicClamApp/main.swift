@@ -34,4 +34,11 @@ app.setActivationPolicy(.accessory)
 
 let delegate = AppDelegate()
 app.delegate = delegate
+// Keep SIGTERM on the normal AppKit termination path (brightness + sleep cleanup).
+// CLI dispatch above keeps its own signal semantics.
+signal(SIGTERM, SIG_IGN)
+let terminationSignal = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
+terminationSignal.setEventHandler { app.terminate(nil) }
+terminationSignal.resume()
 app.run()
+terminationSignal.cancel()

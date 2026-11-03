@@ -407,18 +407,18 @@
 "general.sessions" = "会话";
 "general.clamshellGuard" = "合盖时防止锁定（保持 VPN 在线）";
 "general.tip.clamshellGuard" = "当 Mac 合上盖子且没有外接显示器仍保持唤醒时，Electronic Clam 会维持一个不可见的虚拟显示器，让 macOS 不锁定屏幕 — 一旦锁定就会断开 FortiClient 之类的 VPN 会话。不会出现任何窗口，几乎不耗电。默认关闭。";
-"general.vpnNotify" = "VPN 断开时通知（Telegram + 本地）";
-"general.tip.vpnNotify" = "在保持 Mac 唤醒期间，Electronic Clam 用 scutil 监视你的 VPN，断开时通知你 — 本地提醒，若已配置还会发 Telegram。它绝不会自动重连（FortiClient 需要 SAML 登录）。与合盖防护相互独立。默认关闭。";
+"general.vpnNotify" = "VPN 断开时通知";
+"general.tip.vpnNotify" = "独立于保持唤醒功能监测 VPN 断开。唤醒时可发送本地通知及已配置的 Telegram/Slack 通知。睡眠期间暂停检查，唤醒后重新检查。不自动重连。";
 "general.vpnService" = "VPN 服务";
 "general.tip.vpnService" = "选择你的 VPN 服务（即 macOS 在系统设置 → 网络中显示的名称）。FortiClient 通常是「VPN」。Electronic Clam 用 scutil 监视它，一旦断开就提醒你重新认证 — 绝不会自动重连（需要 SAML 登录）。如果还没列出你的 VPN，请点击「刷新」。";
 "general.vpnRefresh" = "刷新";
 "general.tip.vpnRefresh" = "重新扫描 VPN 服务 — 如果打开此处时 VPN 应用是关着的，会很有用。";
-"general.vpnServiceNote" = "选择要监视的 VPN，然后在上方开启通知。断开时会提醒你（若已配置也会发 Telegram）。不会自动重连。";
+"general.vpnServiceNote" = "选择 VPN 并启用通知。聊天通知需要网络连接；FortiClient 可能需要重新登录。";
 "general.vpnService.none" = "（未找到 VPN 服务 — 请打开你的 VPN 应用）";
 "general.display" = "显示器";
 "general.keepDisplayAwake" = "同时保持屏幕常亮（等同 caffeinate -d）";
-"general.tip.keepDisplayAwake" = "让 Mac 不休眠并不等于让屏幕常亮 — macOS 仍会按自己的闲置计时器关闭显示器。开启后，Electronic Clam 在保持 Mac 唤醒的同时也会保持显示器唤醒，方式与 caffeinate -d 相同。这会消耗背光电量，除非你想盯着任务进行，否则建议保持关闭。默认关闭。";
-"general.keepDisplayAwakeNote" = "关闭时，Mac 保持唤醒但屏幕仍会按自己的计时器休眠。你离开时，下方的“关闭屏幕”始终优先。";
+"general.tip.keepDisplayAwake" = "工作使 Mac 保持唤醒时，也让屏幕保持唤醒。这可能推迟自动锁定并消耗屏幕电量。默认关闭；关闭后，锁定防护和调暗功能仍可能保持屏幕唤醒。";
+"general.keepDisplayAwakeNote" = "锁定防护和调暗功能也可保持屏幕唤醒。调暗只降低亮度而不锁定，返回时会恢复亮度。";
 "general.blankScreen" = "熄屏";
 "blankMode.dim" = "调暗（保持 VPN）";
 "blankMode.sleep" = "显示器睡眠";
@@ -481,3 +481,27 @@
 "slack.end.remoteLost" = "⚪️ 远程会话中断 (网络丢失) — 唤醒持续 %@ 后结束";
 "slack.end.generic" = "⚪️ 唤醒结束 — %@";
 "slack.vpn.dropped" = "🔌 VPN 已断开（%@）— FortiClient 需要重新认证（SAML）。不会自动重连。";
+
+"display.enable.title" = "也让屏幕保持唤醒？";
+
+"display.enable.body" = "工作使 Mac 保持唤醒时，也会推迟屏幕睡眠和自动锁定。仍可手动锁定 Mac。调暗功能可降低亮度而不锁定。";
+
+"display.enable.confirm" = "启用";
+
+"display.enable.cancel" = "取消";
+
+"display.holders" = "屏幕保持原因：%@";
+
+"display.holders.none" = "无";
+
+"display.holders.unknown" = "无法读取";
+
+"notification.error.cancelled" = "通知设置已更改或应用已停止，请求已取消。";
+
+"notification.error.transport" = "无法连接通知服务。请检查网络后重试。";
+
+"notification.error.response" = "通知服务返回了失败或无效的响应。";
+
+"slack.error.rejected" = "Slack 拒绝了请求。请检查机器人的权限和发送目标。";
+
+"notification.error.saveSettings" = "无法保存设置。更改仅适用于当前会话，重启后可能恢复以前的设置。请重新保存。";

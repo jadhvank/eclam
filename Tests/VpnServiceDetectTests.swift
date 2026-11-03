@@ -18,26 +18,6 @@ import Foundation
 // production 파일을 고치지 않고 순수 함수만 뽑아 쓰기 위한 스캐폴딩. 실제 앱에선
 // StateStore/TelegramNotifier/ReleaseNotifier/NSL 이 진짜 구현을 제공한다.
 
-final class StateStore {
-    var vpnDisconnectNotifyEnabled = false
-    var vpnServiceName = "VPN"
-}
-
-final class TelegramNotifier {
-    static let shared = TelegramNotifier()
-    func notifyVpnDisconnected(serviceName: String) {}
-}
-
-final class ReleaseNotifier {
-    static let shared = ReleaseNotifier()
-    func notifyInfo(identifier: String, title: String, body: String) async {}
-}
-
-func NSL(_ key: String, _ english: String) -> String { english }
-func NSLf(_ key: String, _ english: String, _ args: CVarArg...) -> String {
-    String(format: english, arguments: args)
-}
-
 // MARK: - tiny assert harness (mirrors PolicyTests.swift / LaunchctlInspectTests) ─
 
 var currentSuite = "?"

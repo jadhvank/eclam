@@ -30,6 +30,8 @@ final class SlackNotifier {
     private weak var store: StateStore?
 
     private(set) var settings: SlackSettings = .default
+    /// Non-nil until a failed disk save is retried successfully. Contains only local text.
+    private(set) var settingsSaveError: String?
 
     /// 직전 시작-알림 시각 (ChatNotify.minStartGapSeconds 스로틀).
     private var lastStartNotifiedAt: Date?
@@ -42,20 +44,34 @@ final class SlackNotifier {
     /// 전수 조회가 rate limit 을 부르므로, 못 찾으면 ID 직접 입력을 안내한다.
     private static let maxLookupPages = 5
 
-    /// 전송 타임아웃 짧게 — 메시지는 best-effort 고, 곧 잠들 수도 있는 기계가
-    /// 소켓을 오래 붙들 이유가 없다.
-    private let session: URLSession = {
-        let cfg = URLSessionConfiguration.ephemeral
-        cfg.timeoutIntervalForRequest = 15
-        cfg.timeoutIntervalForResource = 30
-        return URLSession(configuration: cfg)
-    }()
+    private let delivery: NotificationDelivery
+    private let settingsURL: URL?
 
-    private init() {
-        settings = Self.loadSettings()
+    private convenience init() {
+        self.init(settingsURL: Self.fileURL)
+    }
+
+    /// Isolated dependencies keep tests away from real credentials and the network.
+    init(settingsURL: URL?, transport: NotificationTransport = URLSessionNotificationTransport(),
+         schedule: @escaping NotificationDelivery.Scheduler = NotificationDelivery.scheduleOnMain) {
+        self.settingsURL = settingsURL
+        self.delivery = NotificationDelivery(transport: transport, schedule: schedule)
+        if let url = settingsURL, let data = try? Data(contentsOf: url),
+           let decoded = try? JSONDecoder().decode(SlackSettings.self, from: data) {
+            settings = decoded
+        }
+    }
+
+    /// Terminal shutdown: late history callbacks must not start new network work.
+    func stop() {
+        dispatchPrecondition(condition: .onQueue(.main))
+        digestTimer?.invalidate()
+        digestTimer = nil
+        delivery.stop()
     }
 
     func configure(store: StateStore) {
+        dispatchPrecondition(condition: .onQueue(.main))
         self.store = store
     }
 
@@ -70,36 +86,30 @@ final class SlackNotifier {
         return dir.appendingPathComponent("slack.json")
     }
 
-    private static func loadSettings() -> SlackSettings {
-        guard let url = fileURL,
-              let data = try? Data(contentsOf: url),
-              let decoded = try? JSONDecoder().decode(SlackSettings.self, from: data) else {
-            return .default
+    /// Runtime changes take effect immediately; a failed save remains retryable and visible.
+    @discardableResult
+    func update(settings next: SlackSettings) -> Bool {
+        dispatchPrecondition(condition: .onQueue(.main))
+        let changed = settings != next
+        guard changed || settingsSaveError != nil else { return true }
+        if changed {
+            // OFF takes effect even when persistence fails, including during cancellation callbacks.
+            settings = next
+            delivery.invalidate()
+            reconfigureDigestTimer()
         }
-        return decoded
-    }
-
-    /// 저장 + 권한 강제. atomic write 는 파일을 교체하므로 매 저장 후 0600 을
-    /// 다시 박는다 (토큰 포함 파일 — TelegramNotifier.update 와 같은 규칙).
-    func update(settings next: SlackSettings) {
-        guard settings != next else { return }
-        settings = next
-        guard let url = Self.fileURL,
-              let data = try? JSONEncoder().encode(next) else { return }
         do {
-            // 첫 저장의 권한 공백 차단: 빈 파일을 0600 으로 먼저 만들어 둔다.
-            let fm = FileManager.default
-            if !fm.fileExists(atPath: url.path) {
-                fm.createFile(atPath: url.path, contents: nil,
-                              attributes: [.posixPermissions: 0o600])
-            }
-            try data.write(to: url, options: .atomic)
-            try fm.setAttributes(
-                [.posixPermissions: 0o600], ofItemAtPath: url.path)
+            guard let url = settingsURL else { throw SecureNotificationSettings.SaveError.unavailable }
+            try SecureNotificationSettings.write(JSONEncoder().encode(next), to: url)
+            settingsSaveError = nil
+            return true
         } catch {
-            log.error("slack settings save failed: \(error.localizedDescription, privacy: .public)")
+            // Never include filesystem errors: URLs and values can contain secrets.
+            settingsSaveError = NSL("notification.error.saveSettings",
+                "Settings could not be saved. Changes apply for this session; restart may restore previous settings. Try saving again.")
+            log.error("slack settings save failed")
+            return false
         }
-        reconfigureDigestTimer()
     }
 
     // MARK: - Periodic digest
@@ -108,6 +118,7 @@ final class SlackNotifier {
     private func reconfigureDigestTimer() {
         digestTimer?.invalidate()
         digestTimer = nil
+        guard !delivery.stopped else { return }
         guard ChatNotify.shouldSendDigest(settings: settings,
                                           episodeOngoing: episodeStartedAt != nil) else { return }
         let interval = TimeInterval(settings.digestIntervalMin * 60)
@@ -130,6 +141,7 @@ final class SlackNotifier {
     // MARK: - Episode events (AwakeHistoryStore 탭, 메인 스레드)
 
     func episodeStarted(_ ep: AwakeEpisode) {
+        dispatchPrecondition(condition: .onQueue(.main))
         episodeStartedAt = ep.startedAt
         reconfigureDigestTimer()
         guard ChatNotify.shouldNotifyStart(settings: settings,
@@ -149,6 +161,7 @@ final class SlackNotifier {
     }
 
     func episodeEnded(_ ep: AwakeEpisode) {
+        dispatchPrecondition(condition: .onQueue(.main))
         episodeStartedAt = nil
         reconfigureDigestTimer()
         guard ChatNotify.shouldNotifyEnd(settings: settings,
@@ -190,6 +203,7 @@ final class SlackNotifier {
     /// Telegram 쪽과 같은 규칙 — 마스터 opt-in 게이트만 거치고, 하위 토글로
     /// 묵살되지 않는다. `VpnWatcher` 가 disconnect 에지에서 1회 호출한다.
     func notifyVpnDisconnected(serviceName: String) {
+        dispatchPrecondition(condition: .onQueue(.main))
         log.notice("vpn-drop slack: isConfigured(master opt-in)=\(self.settings.isConfigured, privacy: .public) — \(self.settings.isConfigured ? "attempting send" : "skipped (configure Slack to enable)", privacy: .public)")
         let head = NSLf("slack.vpn.dropped",
             "🔌 VPN disconnected (%@) — FortiClient needs re-auth (SAML). No auto-reconnect.",
@@ -202,6 +216,11 @@ final class SlackNotifier {
     /// 테스트 전송. completion 은 메인 스레드, nil ⇒ 성공 / 문자열 ⇒ 에러.
     /// 게이팅을 우회해 master OFF 여도 토큰·채널만 있으면 보낸다.
     func sendTest(completion: @escaping (String?) -> Void) {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard !delivery.stopped else {
+            completion(NotificationDiagnostic.transport(URLError(.cancelled)))
+            return
+        }
         guard settings.isConfiguredIgnoringMaster else {
             completion(NSL("slack.error.notConfigured",
                 "Enter a bot token and a channel, or an incoming webhook URL, first."))
@@ -214,6 +233,11 @@ final class SlackNotifier {
     /// 채널 이름 → 채널 ID 조회 ("Look up ID" 버튼). 이미 ID 형태면 그대로
     /// 돌려준다. completion 은 메인 스레드 (channelId, errorMessage).
     func lookupChannelId(completion: @escaping (String?, String?) -> Void) {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard !delivery.stopped else {
+            completion(nil, NotificationDiagnostic.transport(URLError(.cancelled)))
+            return
+        }
         let token = settings.credential.trimmingCharacters(in: .whitespacesAndNewlines)
         if SlackSupport.credentialKind(token) == .webhook {
             completion(nil, NSL("slack.error.webhookHasChannel",
@@ -250,33 +274,32 @@ final class SlackNotifier {
         if let cursor = cursor { items.append(URLQueryItem(name: "cursor", value: cursor)) }
         comps?.queryItems = items
         guard let url = comps?.url else {
-            DispatchQueue.main.async { completion(nil, "bad URL") }
+            completion(nil, NotificationDiagnostic.invalidResponse)
             return
         }
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
-        let task = session.dataTask(with: request) { [weak self] data, _, error in
-            guard let self = self else { return }
-            if let error = error {
-                DispatchQueue.main.async { completion(nil, error.localizedDescription) }
+        delivery.send(request) { [weak self] data, response, error in
+            guard let self else { return }
+            if let error {
+                completion(nil, NotificationDiagnostic.transport(error))
                 return
             }
-            guard let data = data else {
-                DispatchQueue.main.async { completion(nil, "empty response") }
+            guard let response = response as? HTTPURLResponse,
+                  (200..<300).contains(response.statusCode), let data else {
+                completion(nil, NotificationDiagnostic.invalidResponse)
                 return
             }
-            // ok=false 면 이유를 사람 문장으로 바꿔 돌려준다 (scope 누락이 대부분).
             let posted = SlackSupport.parsePostResult(data)
-            if !posted.ok, let code = posted.error, code != "unparseable response" {
-                let msg = self.message(forFailure: SlackSupport.classify(error: code))
-                DispatchQueue.main.async { completion(nil, msg) }
+            guard posted.ok else {
+                completion(nil, self.message(forFailure: SlackSupport.classify(error: posted.error ?? "")))
                 return
             }
             let found = SlackSupport.parseChannelId(fromConversationsList: data, name: name)
             if let id = found.id {
-                self.log.info("slack channel lookup → found on page \(page, privacy: .public)")
-                DispatchQueue.main.async { completion(id, nil) }
+                self.log.info("slack channel lookup → found")
+                completion(id, nil)
                 return
             }
             if let next = found.nextCursor, page < Self.maxLookupPages {
@@ -284,13 +307,9 @@ final class SlackNotifier {
                                 completion: completion)
                 return
             }
-            self.log.info("slack channel lookup → not found after \(page, privacy: .public) page(s)")
-            DispatchQueue.main.async {
-                completion(nil, NSL("slack.error.noMatch",
-                    "No channel with that name is visible to the bot. Invite the bot to the channel, or paste the channel ID (C…) instead."))
-            }
+            completion(nil, NSL("slack.error.noMatch",
+                "No channel with that name is visible to the bot. Invite the bot to the channel, or paste the channel ID (C…) instead."))
         }
-        task.resume()
     }
 
     // MARK: - Internal
@@ -325,8 +344,8 @@ final class SlackNotifier {
                 "The bot can't post there. Invite it to the channel with /invite @your-bot, then try again.")
         case .rateLimited:
             return NSL("slack.error.rateLimited", "Slack is rate-limiting us. Try again in a minute.")
-        case .other(let code):
-            return code
+        case .other:
+            return NSL("slack.error.rejected", "Slack rejected the request. Check the bot permissions and destination.")
         }
     }
 
@@ -335,11 +354,13 @@ final class SlackNotifier {
     /// (scope 누락·채널 없음 등)는 재시도가 무의미하므로 즉시 실패로 끝낸다.
     private func send(_ text: String,
                       bypassGate: Bool = false,
-                      completion: ((String?) -> Void)? = nil,
-                      isRetry: Bool = false) {
-        if !bypassGate {
-            guard settings.isConfigured else { return }
+                      completion: ((String?) -> Void)? = nil) {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard !delivery.stopped else {
+            completion?(NotificationDiagnostic.transport(URLError(.cancelled)))
+            return
         }
+        guard bypassGate || settings.isConfigured else { return }
         let credential = settings.credential.trimmingCharacters(in: .whitespacesAndNewlines)
         let kind = SlackSupport.credentialKind(credential)
         guard let request = buildRequest(credential: credential, kind: kind, text: text) else {
@@ -348,40 +369,27 @@ final class SlackNotifier {
                    completion: completion)
             return
         }
-
-        let task = session.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-            // 전송 시도 + HTTP 상태 로그. 자격 정보·본문은 남기지 않는다.
-            let httpStatus = (response as? HTTPURLResponse)?.statusCode
-            self.log.info("slack send attempt (\(kind == .webhook ? "webhook" : "api", privacy: .public)) → http=\(httpStatus.map(String.init) ?? "none", privacy: .public)\(error != nil ? " (transport error)" : "", privacy: .public)")
-            if let error = error {
-                if !isRetry {
-                    self.log.notice("slack send failed (\(error.localizedDescription, privacy: .public)); retrying once in 5s")
-                    DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
-                        self.send(text, bypassGate: bypassGate,
-                                  completion: completion, isRetry: true)
-                    }
-                    return
+        delivery.send(request, retryTransportFailure: true) { [weak self] data, response, error in
+            guard let self else { return }
+            if let error {
+                if NotificationDelivery.isCancellation(error) {
+                    completion?(NotificationDiagnostic.transport(error))
+                } else {
+                    self.finish(NotificationDiagnostic.transport(error), completion: completion)
                 }
-                self.finish(error.localizedDescription, completion: completion)
                 return
             }
-            guard let data = data else {
-                self.finish("empty response", completion: completion)
+            guard let response = response as? HTTPURLResponse,
+                  (200..<300).contains(response.statusCode), let data else {
+                self.finish(NotificationDiagnostic.invalidResponse, completion: completion)
                 return
             }
             let parsed = kind == .webhook
-                ? SlackSupport.parseWebhookResult(status: httpStatus ?? 0, body: data)
+                ? SlackSupport.parseWebhookResult(status: response.statusCode, body: data)
                 : SlackSupport.parsePostResult(data)
-            if parsed.ok {
-                self.finish(nil, completion: completion)
-            } else {
-                let code = parsed.error ?? "unknown error"
-                self.finish(self.message(forFailure: SlackSupport.classify(error: code)),
-                            completion: completion)
-            }
+            self.finish(parsed.ok ? nil : self.message(forFailure:
+                SlackSupport.classify(error: parsed.error ?? "")), completion: completion)
         }
-        task.resume()
     }
 
     /// 갈래별 요청 조립. webhook 은 URL 자체가 목적지이자 자격 증명이라
@@ -421,8 +429,6 @@ final class SlackNotifier {
         } else {
             log.info("slack message sent")
         }
-        DispatchQueue.main.async {
-            completion?(error)
-        }
+        completion?(error)
     }
 }

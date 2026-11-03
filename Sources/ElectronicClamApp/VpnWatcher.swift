@@ -2,55 +2,44 @@ import AppKit
 import Foundation
 import OSLog
 
-/// ADR-0037 S3 §폴백 — VPN disconnect 안전망 감시자.
-///
-/// 가상 디스플레이 앵커(S1)는 헤드리스 클램쉘 잠금을 막아 VPN(FortiClient)을
-/// 지킨다. 그러나 미래 macOS 에서 private SPI 가 깨지거나 잠금이 한 번 새어나가면
-/// VPN 이 끊기고, SAML/SSO 재인증 없이는 자동 복구가 불가능하다(ADR-0037 §대안 —
-/// `scutil --nc start` 가 NEPacketTunnelProvider 에 거부되는 것을 실측). 그래서
-/// 폴백은 **"끊김을 감지해 사용자에게 알린다"가 전부** — 자동 재연결은 시도하지
-/// 않는다(불가능하고 깨지기 쉬움).
-///
-/// opt-in 이 켜져 있는 **동안 내내** `scutil --nc status <service>` 를 폴링한다. 진짜
-/// Connected→Disconnected 에지에서만, 에피소드당 1회(디바운스) Telegram(opt-in) +
-/// 로컬 알림을 쏜다. "한 번도 Connected 가 아니었던" 상태에서의 Disconnected 는 무시한다.
-///
-/// **게이트(실측 버그 수정 — RC1)**: master 게이트는 **`store.vpnDisconnectNotifyEnabled`**
-/// **단독** 이다. keep(깨어있기)·잠금 가드(`clamshellLockGuardEnabled`, S1)와 **완전히
-/// 독립** — opt-in 만 켜져 있으면 keep 여부와 무관하게 계속 폴링한다. 이전엔 keep 에
-/// 올라타 있어(`keepAwake && opt-in`), keep 이 떨어지는 바로 그 순간 VPN 도 같이 끊기는데
-/// `apply(keepAwake:false)` 가 `stop()` 으로 상태를 리셋 → 재시작 시 이미 Disconnected 로
-/// 기준선을 다시 잡아 정작 그 Connected→Disconnected 에지를 못 봤다(끊김이 감시자를
-/// 스스로 무장 해제). 그래서 keep 게이트를 떼고 opt-in 동안 상시 감시한다 — 안전 해제를
-/// 관통해 폴링하며 라이브 에지를 직접 목격한다. 15초 `scutil` 읽기는 사실상 공짜라
-/// "idle→폴링0" 비용 논리는 약하다(ADR-0037 S3 재평가).
-///
-/// **App Nap 방어(RC2)**: LSUIElement 백그라운드 앱이라 lid 를 닫으면 메인 런루프
-/// `Timer` 가 App Nap 에 스로틀/서스펜드된다. `start()` 에서 `ProcessInfo.beginActivity`
-/// 토큰을 잡아(`stop()` 에서 반납) 타이머 스로틀만 끈다 — **시스템 슬립은 건드리지 않는다**
-/// (`idleSystemSleepDisabled` 미포함). 폴 타이머는 그대로 `RunLoop.main` 에 둬 `StateStore`
-/// 읽기·알림 호출을 전부 메인에 가둔다(스레드 안전).
-///
-/// **슬립/웨이크 관통(RC4)**: 시스템 슬립을 걸쳐 끊긴 경우를 놓치지 않게
-/// `NSWorkspace` 의 wake/screensDidWake 알림에서 즉시 1회 `poll()` 한다. 슬립 전
-/// `lastWasConnected` 를 유지하므로 "슬립 전 Connected → 웨이크 후 Disconnected" 도
-/// (디바운스로) 한 번 알린다.
-///
-/// **서비스명 자동 탐지(실측 버그 수정)**: 설정된 서비스명(`vpnServiceName`, 기본
-/// "VPN")으로 `scutil` 이 서비스를 못 찾으면(`No service`) Connected 를 한 번도 못
-/// 봐서 끊김 에지가 안 생기고 알림이 안 떴다. 그래서 못 찾을 때 `scutil --nc list`
-/// 에서 FortiClient/SSL VPN 을 자동 탐지해 그 식별자로 폴링한다.
-///
-/// helper·`SleepDisabled` 와 무관하고 root 가 필요 없다(`scutil` 읽기만). `apply(...)`
-/// 는 멱등이라 converge 마다 호출해도 안전하다(S1 `VirtualDisplayController.apply`
-/// 와 같은 자리에서 호출).
+/// VPN observation is independent of keep-awake and the preemptive lock guard.
+/// Preserve the connected baseline through keep/safety changes and real sleep;
+/// observe immediately on wake. Only a confirmed disconnect edge notifies.
+/// The observer prevents App Nap while awake, but owns no sleep-prevention
+/// assertion. Existing helper/virtual-display protection remains independent.
 final class VpnWatcher {
     private let log = Logger(subsystem: "com.jadhvank.eclam", category: "vpn")
     private let store: StateStore
 
-    /// dim/digest 타이머와 같은 메인 런루프 `Timer`. active 인 동안에만 산다
-    /// (= 폴링 여부의 진실 소스). `nil` ⇒ 비활성.
-    private var pollTimer: Timer?
+    struct Dependencies {
+        var readStatus: (String) -> VpnStatus = VpnWatcher.readStatus
+        var autodetect: () -> String? = VpnWatcher.autodetectVpnService
+        var beginActivity: (ProcessInfo.ActivityOptions) -> NSObjectProtocol = {
+            ProcessInfo.processInfo.beginActivity(options: $0, reason: "Electronic Clam - VPN connection monitoring")
+        }
+        var endActivity: (NSObjectProtocol) -> Void = { ProcessInfo.processInfo.endActivity($0) }
+        var schedule: (TimeInterval, @escaping () -> Void) -> (() -> Void) = { interval, callback in
+            let timer = Timer(timeInterval: interval, repeats: true) { _ in callback() }
+            RunLoop.main.add(timer, forMode: .common)
+            return { timer.invalidate() }
+        }
+        var observeWake: (@escaping () -> Void) -> (() -> Void) = { callback in
+            let center = NSWorkspace.shared.notificationCenter
+            let tokens = [NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification].map {
+                center.addObserver(forName: $0, object: nil, queue: .main) { _ in callback() }
+            }
+            return { tokens.forEach { center.removeObserver($0) } }
+        }
+        var notify: ((String) -> Void)? = nil
+    }
+
+    private let dependencies: Dependencies
+    private(set) var isActive = false
+    private var generation = 0
+    private var cancelPolling: (() -> Void)?
+    private var cancelWake: (() -> Void)?
+    private var observedService: String?
+    private var localNotificationTask: Task<Void, Never>?
     /// 폴 간격(초). 끊김은 분 단위가 아니라 초 단위로 알아야 의미 있지만, VPN 상태는
     /// 자주 바뀌지 않으므로 15초면 충분히 촘촘하면서 `scutil` 비용도 미미하다.
     private let pollInterval: TimeInterval = 15
@@ -73,103 +62,59 @@ final class VpnWatcher {
     /// (15초마다 같은 경고를 도배하지 않도록). 해석 성공·재시작 시 리셋.
     private var unresolvedLogged = false
 
-    /// RC2 — App Nap 타이머 스로틀 방어용 activity 토큰. active 인 동안에만 잡는다
-    /// (`start()` 에서 begin, `stop()` 에서 end). `idleSystemSleepDisabled` 는 넣지
-    /// 않아 시스템 슬립은 그대로 둔다 — 우린 폴 타이머만 살아있으면 된다.
     private var activityToken: NSObjectProtocol?
 
-    /// RC4 — 슬립/웨이크 관통용 NSWorkspace 옵저버 토큰들(반납용). active 동안만 산다.
-    private var wakeObservers: [NSObjectProtocol] = []
-
-    init(store: StateStore) {
+    init(store: StateStore, dependencies: Dependencies = Dependencies()) {
         self.store = store
+        self.dependencies = dependencies
     }
 
-    /// converge 경로에서 매번 호출(멱등). S1 `VirtualDisplayController.apply(...)`
-    /// 와 같은 자리에서 호출되지만 게이트는 **독립**이다 — VPN 끊김 알림 opt-in
-    /// (`vpnDisconnectNotifyEnabled`) **단독** 으로 켜고 끈다(keep·잠금 가드와 무관).
-    /// - Parameter keepAwake: 현재 keep(깨어있기) 신호. **RC1**: 게이트에 쓰지 않는다
-    ///   (keep 이 떨어지는 순간의 라이브 끊김 에지를 놓치지 않으려면 상시 감시해야 한다).
-    ///   converge 는 매번 이 값을 넘기지만 여기선 무시하고 opt-in 만 본다.
-    func apply(keepAwake: Bool) {
-        if store.vpnDisconnectNotifyEnabled {
-            start()
-        } else {
-            stop()
-        }
-    }
+    deinit { stop() }
 
-    // MARK: - Lifecycle
+    /// Explicit opt-in, never gated by keep or lock-guard state.
+    func apply(enabled: Bool) {
+        if enabled {
+            if isActive && resolvedForConfigured != store.vpnServiceName { poll() }
+            else { start() }
+        } else { stop() }
+    }
 
     private func start() {
-        guard pollTimer == nil else { return }   // 멱등 — 이미 폴링 중이면 no-op.
+        guard !isActive else { return }
+        isActive = true
+        generation += 1
+        let epoch = generation
         invalidateResolution()
-        // RC2 — App Nap 타이머 스로틀 방어. lid 를 닫은 백그라운드 상태에서도 폴
-        // 타이머가 15초 주기를 지키게 한다. `.idleSystemSleepDisabled` 는 넣지 않아
-        // 시스템 슬립엔 손대지 않는다(우린 타이머만 살리면 된다).
-        activityToken = ProcessInfo.processInfo.beginActivity(
-            options: [.background, .idleDisplaySleepDisabled],
-            reason: "eclam VPN disconnect watcher (poll survives App Nap)")
-        // RC4 — 슬립/웨이크를 걸친 끊김을 놓치지 않게 wake 알림에서 즉시 폴한다.
-        // `lastWasConnected` 는 인스턴스에 살아있어(감시자는 슬립 동안 stop 되지
-        // 않는다) "슬립 전 Connected → 웨이크 후 Disconnected" 도 한 번 잡힌다.
-        installWakeObservers()
-        // 켤 때 현재 상태를 기준선으로 1회 읽는다 — 시작 직후의 첫 폴을 disconnect
-        // 에지로 오인하지 않게 한다(예: 켤 때 이미 Disconnected 면 알리지 않음).
+        activityToken = dependencies.beginActivity(.userInitiatedAllowingIdleSystemSleep)
         let service = currentService()
-        let baseline = Self.readStatus(service: service)
-        lastWasConnected = (baseline == .connected)
+        observedService = service
+        lastWasConnected = dependencies.readStatus(service) == .connected
         notifiedThisEpisode = false
-        let t = Timer(timeInterval: pollInterval, repeats: true) { [weak self] _ in
-            self?.poll()
+        let callback: () -> Void = { [weak self] in
+            guard let self, self.isActive, self.generation == epoch else { return }
+            self.poll()
         }
-        RunLoop.main.add(t, forMode: .common)
-        pollTimer = t
-        log.info("vpn watcher started (configured=\(self.store.vpnServiceName, privacy: .public), resolved=\(service, privacy: .public), status=\(Self.statusName(baseline), privacy: .public))")
+        cancelWake = dependencies.observeWake(callback)
+        cancelPolling = dependencies.schedule(pollInterval, callback)
     }
 
-    private func stop() {
-        guard pollTimer != nil else { return }
-        pollTimer?.invalidate()
-        pollTimer = nil
-        // RC2/RC4 — active 동안만 잡던 activity 토큰·wake 옵저버를 반납한다.
-        removeWakeObservers()
-        if let token = activityToken {
-            ProcessInfo.processInfo.endActivity(token)
-            activityToken = nil
-        }
-        // 다음 start 가 기준선을 새로 잡으므로 에피소드·해석 상태도 리셋해 둔다.
+    /// Explicit, idempotent shutdown even while the opt-in remains enabled.
+    func stop() {
+        guard isActive else { return }
+        isActive = false
+        generation += 1
+        localNotificationTask?.cancel()
+        localNotificationTask = nil
+        cancelPolling?()
+        cancelPolling = nil
+        cancelWake?()
+        cancelWake = nil
+        if let token = activityToken { dependencies.endActivity(token) }
+        activityToken = nil
         lastWasConnected = false
         notifiedThisEpisode = false
+        observedService = nil
         invalidateResolution()
-        log.info("vpn watcher stopped")
-    }
-
-    // MARK: - 슬립/웨이크 관통 (RC4)
-
-    /// `NSWorkspace` 의 wake/screensDidWake 알림을 구독해 깨어날 때 즉시 1회 폴한다.
-    /// 폴 타이머는 최대 15초 뒤에나 돌므로, 웨이크 직후 이미 끊긴 상태를 더 빨리
-    /// 잡으려는 것. 핸들러는 메인에서 불리게 `.main` 큐를 지정한다(StateStore·알림
-    /// 호출을 메인에 가둔다). 관측하는 이름은 `NSWorkspace.shared.notificationCenter`
-    /// 전용이라 반드시 그 센터에서 등록/해제한다.
-    private func installWakeObservers() {
-        guard wakeObservers.isEmpty else { return }
-        let nc = NSWorkspace.shared.notificationCenter
-        for name in [NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification] {
-            let token = nc.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                self?.log.info("vpn: wake notification → immediate poll")
-                self?.poll()
-            }
-            wakeObservers.append(token)
-        }
-    }
-
-    /// wake 옵저버 반납(stop 시). 등록했던 같은 센터에서 제거한다.
-    private func removeWakeObservers() {
-        guard !wakeObservers.isEmpty else { return }
-        let nc = NSWorkspace.shared.notificationCenter
-        for token in wakeObservers { nc.removeObserver(token) }
-        wakeObservers.removeAll()
     }
 
     // MARK: - Polling
@@ -178,8 +123,17 @@ final class VpnWatcher {
     /// 사용자가 감시 중 설정명을 바꾸면 `currentService()` 가 캐시를 무효화해 새
     /// 이름이 반영된다.
     private func poll() {
+        guard isActive else { return }
+        let configurationChanged = resolvedForConfigured != store.vpnServiceName
         let service = currentService()
-        let status = Self.readStatus(service: service)
+        if configurationChanged || observedService != service {
+            localNotificationTask?.cancel()
+            localNotificationTask = nil
+            lastWasConnected = false
+            notifiedThisEpisode = false
+            observedService = service
+        }
+        let status = dependencies.readStatus(service)
         log.debug("vpn poll: service=\(service, privacy: .public) status=\(Self.statusName(status), privacy: .public)")
         switch status {
         case .connected:
@@ -222,13 +176,13 @@ final class VpnWatcher {
         resolvedForConfigured = configured
         // ① 설정명 자체가 실제 서비스인가? (No service 가 아니면 존재 — Connecting
         //    등 transient 도 "존재"로 인정.)
-        if Self.readStatus(service: configured) != .noService {
+        if dependencies.readStatus(configured) != .noService {
             resolvedService = configured
             unresolvedLogged = false
             return configured
         }
         // ② 자동 탐지 — 설정명이 실제와 달라 못 찾는 BUG2 의 핵심 폴백.
-        if let detected = Self.autodetectVpnService() {
+        if let detected = dependencies.autodetect() {
             resolvedService = detected
             unresolvedLogged = false
             log.notice("vpn: configured service '\(configured, privacy: .public)' not found; auto-detected '\(detected, privacy: .public)' from scutil --nc list")
@@ -254,6 +208,7 @@ final class VpnWatcher {
     /// 자동 재연결은 하지 않는다(SAML 재인증 불가 — ADR-0037 §대안). `service` 는
     /// 해석된(실제 폴링 중인) 서비스명이라 메시지가 실물 서비스를 가리킨다.
     private func notifyDropped(service svc: String) {
+        if let notify = dependencies.notify { notify(svc); return }
         log.notice("vpn: \(svc, privacy: .public) Connected→Disconnected — notifying user (no auto-reconnect; SAML re-auth required)")
         // Telegram·Slack: 마스터 opt-in 게이트만 — 설정 안 했으면 조용히 no-op.
         TelegramNotifier.shared.notifyVpnDisconnected(serviceName: svc)
@@ -265,8 +220,12 @@ final class VpnWatcher {
         let body = NSLf("notify.vpnDropped.body",
             "%@ needs re-auth (SAML/SSO). Electronic Clam won't auto-reconnect — open FortiClient and sign in again.",
             svc)
-        Task { await ReleaseNotifier.shared.notifyInfo(
-            identifier: "eclam.vpn.disconnected", title: title, body: body) }
+        let epoch = generation
+        localNotificationTask?.cancel()
+        localNotificationTask = Task { @MainActor [weak self] in
+            guard let self, self.isActive, self.generation == epoch else { return }
+            await ReleaseNotifier.shared.notifyInfo(identifier: "eclam.vpn.disconnected", title: title, body: body)
+        }
     }
 
     // MARK: - scutil parsing

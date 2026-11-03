@@ -25,6 +25,8 @@ final class TelegramNotifier {
     private weak var store: StateStore?
 
     private(set) var settings: TelegramSettings = .default
+    /// Non-nil until a failed disk save is retried successfully. Contains only local text.
+    private(set) var settingsSaveError: String?
 
     /// 직전 시작-알림 시각 (ChatNotify.minStartGapSeconds 스로틀).
     private var lastStartNotifiedAt: Date?
@@ -40,20 +42,34 @@ final class TelegramNotifier {
     private(set) var lastSendResult: String?
     private(set) var lastSendAt: Date?
 
-    /// 전송 타임아웃 짧게 — 메시지는 best-effort 고, 곧 잠들 수도 있는 기계가
-    /// 소켓을 오래 붙들 이유가 없다.
-    private let session: URLSession = {
-        let cfg = URLSessionConfiguration.ephemeral
-        cfg.timeoutIntervalForRequest = 15
-        cfg.timeoutIntervalForResource = 30
-        return URLSession(configuration: cfg)
-    }()
+    private let delivery: NotificationDelivery
+    private let settingsURL: URL?
 
-    private init() {
-        settings = Self.loadSettings()
+    private convenience init() {
+        self.init(settingsURL: Self.fileURL)
+    }
+
+    /// Isolated dependencies keep tests away from real credentials and the network.
+    init(settingsURL: URL?, transport: NotificationTransport = URLSessionNotificationTransport(),
+         schedule: @escaping NotificationDelivery.Scheduler = NotificationDelivery.scheduleOnMain) {
+        self.settingsURL = settingsURL
+        self.delivery = NotificationDelivery(transport: transport, schedule: schedule)
+        if let url = settingsURL, let data = try? Data(contentsOf: url),
+           let decoded = try? JSONDecoder().decode(TelegramSettings.self, from: data) {
+            settings = decoded
+        }
+    }
+
+    /// Terminal shutdown: late history callbacks must not start new network work.
+    func stop() {
+        dispatchPrecondition(condition: .onQueue(.main))
+        digestTimer?.invalidate()
+        digestTimer = nil
+        delivery.stop()
     }
 
     func configure(store: StateStore) {
+        dispatchPrecondition(condition: .onQueue(.main))
         self.store = store
     }
 
@@ -68,39 +84,30 @@ final class TelegramNotifier {
         return dir.appendingPathComponent("telegram.json")
     }
 
-    private static func loadSettings() -> TelegramSettings {
-        guard let url = fileURL,
-              let data = try? Data(contentsOf: url),
-              let decoded = try? JSONDecoder().decode(TelegramSettings.self, from: data) else {
-            return .default
+    /// Runtime changes take effect immediately; a failed save remains retryable and visible.
+    @discardableResult
+    func update(settings next: TelegramSettings) -> Bool {
+        dispatchPrecondition(condition: .onQueue(.main))
+        let changed = settings != next
+        guard changed || settingsSaveError != nil else { return true }
+        if changed {
+            // OFF takes effect even when persistence fails, including during cancellation callbacks.
+            settings = next
+            delivery.invalidate()
+            reconfigureDigestTimer()
         }
-        return decoded
-    }
-
-    /// 저장 + 권한 강제. atomic write 는 파일을 교체하므로 매 저장 후 0600 을
-    /// 다시 박는다 (토큰 포함 파일 — ADR-0028 "토큰 저장").
-    func update(settings next: TelegramSettings) {
-        guard settings != next else { return }
-        settings = next
-        guard let url = Self.fileURL,
-              let data = try? JSONEncoder().encode(next) else { return }
         do {
-            // 첫 저장의 권한 공백 차단: 빈 파일을 0600 으로 먼저 만들어 둔다.
-            // `.atomic` 교체는 기존 파일의 권한을 승계하므로, 이 사전 생성이
-            // 없으면 최초 1회는 umask 기본값(644)으로 잠깐 존재한다.
-            let fm = FileManager.default
-            if !fm.fileExists(atPath: url.path) {
-                fm.createFile(atPath: url.path, contents: nil,
-                              attributes: [.posixPermissions: 0o600])
-            }
-            try data.write(to: url, options: .atomic)
-            try fm.setAttributes(
-                [.posixPermissions: 0o600], ofItemAtPath: url.path)
+            guard let url = settingsURL else { throw SecureNotificationSettings.SaveError.unavailable }
+            try SecureNotificationSettings.write(JSONEncoder().encode(next), to: url)
+            settingsSaveError = nil
+            return true
         } catch {
-            log.error("telegram settings save failed: \(error.localizedDescription, privacy: .public)")
+            // Never include filesystem errors: URLs and values can contain secrets.
+            settingsSaveError = NSL("notification.error.saveSettings",
+                "Settings could not be saved. Changes apply for this session; restart may restore previous settings. Try saving again.")
+            log.error("telegram settings save failed")
+            return false
         }
-        // 간격·마스터가 에피소드 진행 중에 바뀌면 타이머를 새 설정으로 재구성.
-        reconfigureDigestTimer()
     }
 
     // MARK: - Periodic digest (무음 하트비트 — ADR-0028 §7)
@@ -111,6 +118,7 @@ final class TelegramNotifier {
     private func reconfigureDigestTimer() {
         digestTimer?.invalidate()
         digestTimer = nil
+        guard !delivery.stopped else { return }
         guard ChatNotify.shouldSendDigest(settings: settings,
                                                episodeOngoing: episodeOngoing) else { return }
         let interval = TimeInterval(settings.digestIntervalMin * 60)
@@ -135,6 +143,7 @@ final class TelegramNotifier {
     // MARK: - Episode events (AwakeHistoryStore 탭, 메인 스레드)
 
     func episodeStarted(_ ep: AwakeEpisode) {
+        dispatchPrecondition(condition: .onQueue(.main))
         episodeOngoing = true
         episodeStartedAt = ep.startedAt
         reconfigureDigestTimer()
@@ -155,6 +164,7 @@ final class TelegramNotifier {
     }
 
     func episodeEnded(_ ep: AwakeEpisode) {
+        dispatchPrecondition(condition: .onQueue(.main))
         episodeOngoing = false
         episodeStartedAt = nil
         reconfigureDigestTimer()
@@ -203,6 +213,7 @@ final class TelegramNotifier {
     /// 에지에서 1회 호출(에피소드당 1회 디바운스). 메인 스레드에서 호출할 것
     /// (`compose` 가 store 를, `send` 가 `lastSend*` 를 메인 전제로 읽는다).
     func notifyVpnDisconnected(serviceName: String) {
+        dispatchPrecondition(condition: .onQueue(.main))
         // 게이트 결정 로그(BUG2 진단용) — master opt-in 이 꺼져 있으면 send 가 조용히
         // no-op 한다. 로컬 알림은 VpnWatcher 가 별도로 띄우므로 여기서 안 막힌다.
         log.notice("vpn-drop telegram: isConfigured(master opt-in)=\(self.settings.isConfigured, privacy: .public) — \(self.settings.isConfigured ? "attempting send" : "skipped (configure Telegram to enable)", privacy: .public)")
@@ -218,6 +229,11 @@ final class TelegramNotifier {
     /// 게이팅을 우회해 master OFF 여도 토큰·chat id 만 있으면 보낸다 —
     /// 사용자가 켜기 전에 배선부터 확인하는 흐름이 자연스럽다.
     func sendTest(completion: @escaping (String?) -> Void) {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard !delivery.stopped else {
+            completion(NotificationDiagnostic.transport(URLError(.cancelled)))
+            return
+        }
         guard !settings.botToken.isEmpty, !settings.chatId.isEmpty else {
             completion(NSL("telegram.error.notConfigured", "Enter a bot token and chat ID first."))
             return
@@ -229,30 +245,39 @@ final class TelegramNotifier {
     /// getUpdates 로 chat id 자동 감지. 사용자가 봇에 아무 메시지나 보낸 뒤
     /// 눌러야 한다. completion 은 메인 스레드 (chatId, errorMessage).
     func detectChatId(completion: @escaping (String?, String?) -> Void) {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard !delivery.stopped else {
+            completion(nil, NotificationDiagnostic.transport(URLError(.cancelled)))
+            return
+        }
         let token = settings.botToken.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard TelegramSupport.looksLikeBotToken(token) else {
+        guard TelegramSupport.looksLikeBotToken(token),
+              let url = URL(string: "https://api.telegram.org/bot\(token)/getUpdates") else {
             completion(nil, NSL("telegram.error.badToken", "That doesn't look like a bot token (expected 123456:ABC…)."))
             return
         }
-        guard let url = URL(string: "https://api.telegram.org/bot\(token)/getUpdates") else {
-            completion(nil, "bad URL")
-            return
-        }
-        let task = session.dataTask(with: url) { [weak self] data, _, error in
-            let result: (String?, String?)
-            if let error = error {
-                result = (nil, error.localizedDescription)
-            } else if let data = data, let chatId = TelegramSupport.parseChatId(fromGetUpdates: data) {
-                result = (chatId, nil)
+        delivery.send(URLRequest(url: url)) { data, response, error in
+            if let error {
+                completion(nil, NotificationDiagnostic.transport(error))
+                return
+            }
+            guard let response = response as? HTTPURLResponse,
+                  (200..<300).contains(response.statusCode), let data else {
+                completion(nil, NotificationDiagnostic.invalidResponse)
+                return
+            }
+            let parsed = TelegramSupport.parseSendResult(data)
+            guard parsed.ok else {
+                completion(nil, parsed.error ?? NotificationDiagnostic.invalidResponse)
+                return
+            }
+            if let chatId = TelegramSupport.parseChatId(fromGetUpdates: data) {
+                completion(chatId, nil)
             } else {
-                // 빈 결과의 압도적 1위 원인: 사용자가 아직 봇에 말을 안 걸었다.
-                result = (nil, NSL("telegram.error.noUpdates",
+                completion(nil, NSL("telegram.error.noUpdates",
                     "No messages found. Send any message to your bot in Telegram, then try again."))
             }
-            self?.log.info("detectChatId → \(result.0 != nil ? "found" : "not found", privacy: .public)")
-            DispatchQueue.main.async { completion(result.0, result.1) }
         }
-        task.resume()
     }
 
     // MARK: - Internal
@@ -279,49 +304,47 @@ final class TelegramNotifier {
     private func send(_ text: String,
                       bypassGate: Bool = false,
                       silent: Bool = false,
-                      completion: ((String?) -> Void)? = nil,
-                      isRetry: Bool = false) {
-        if !bypassGate {
-            guard settings.isConfigured else { return }
+                      completion: ((String?) -> Void)? = nil) {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard !delivery.stopped else {
+            completion?(NotificationDiagnostic.transport(URLError(.cancelled)))
+            return
         }
+        guard bypassGate || settings.isConfigured else { return }
         let token = settings.botToken.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let url = URL(string: "https://api.telegram.org/bot\(token)/sendMessage") else {
-            finish("bad URL", completion: completion)
+        guard TelegramSupport.looksLikeBotToken(token),
+              !settings.chatId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let url = URL(string: "https://api.telegram.org/bot\(token)/sendMessage") else {
+            finish(NSL("telegram.error.badToken", "That doesn't look like a bot token (expected 123456:ABC…)."),
+                   completion: completion)
             return
         }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         var body: [String: Any] = ["chat_id": settings.chatId, "text": text]
-        // 다이제스트는 무음 — Telegram 이 알림음·배너 없이 배달한다.
         if silent { body["disable_notification"] = true }
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
-        let task = session.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-            // 전송 시도 + HTTP 상태 로그(BUG2 진단용). 토큰·본문은 남기지 않는다.
-            let httpStatus = (response as? HTTPURLResponse)?.statusCode
-            self.log.info("telegram send attempt → http=\(httpStatus.map(String.init) ?? "none", privacy: .public)\(error != nil ? " (transport error)" : "", privacy: .public)")
-            if let error = error {
-                if !isRetry {
-                    self.log.notice("telegram send failed (\(error.localizedDescription, privacy: .public)); retrying once in 5s")
-                    DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
-                        self.send(text, bypassGate: bypassGate, silent: silent,
-                                  completion: completion, isRetry: true)
-                    }
-                    return
+        delivery.send(request, retryTransportFailure: true) { [weak self] data, response, error in
+            guard let self else { return }
+            if let error {
+                if NotificationDelivery.isCancellation(error) {
+                    completion?(NotificationDiagnostic.transport(error))
+                } else {
+                    self.finish(NotificationDiagnostic.transport(error), completion: completion)
                 }
-                self.finish(error.localizedDescription, completion: completion)
                 return
             }
-            guard let data = data else {
-                self.finish("empty response", completion: completion)
+            guard let response = response as? HTTPURLResponse,
+                  (200..<300).contains(response.statusCode), let data else {
+                self.finish(NotificationDiagnostic.invalidResponse, completion: completion)
                 return
             }
             let parsed = TelegramSupport.parseSendResult(data)
-            self.finish(parsed.ok ? nil : (parsed.error ?? "unknown error"), completion: completion)
+            self.finish(parsed.ok ? nil : (parsed.error ?? NotificationDiagnostic.invalidResponse),
+                        completion: completion)
         }
-        task.resume()
     }
 
     /// 결과 기록 + completion 마샬링. 토큰은 절대 로그에 남기지 않는다.
@@ -331,10 +354,8 @@ final class TelegramNotifier {
         } else {
             log.info("telegram message sent")
         }
-        DispatchQueue.main.async {
-            self.lastSendResult = error
-            self.lastSendAt = Date()
-            completion?(error)
-        }
+        lastSendResult = error
+        lastSendAt = Date()
+        completion?(error)
     }
 }

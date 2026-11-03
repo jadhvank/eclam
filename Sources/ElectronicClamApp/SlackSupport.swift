@@ -56,8 +56,11 @@ struct SlackSettings: Codable, Equatable, ChatNotifySettings {
     /// 마스터 토글을 뺀 나머지 조건. "켜기 전에 배선부터 확인"하는 테스트
     /// 전송이 이 값을 본다 (마스터 OFF 여도 테스트는 나가야 한다).
     var isConfiguredIgnoringMaster: Bool {
-        guard !credential.isEmpty else { return false }
-        return SlackSupport.credentialKind(credential) == .webhook || !channel.isEmpty
+        switch SlackSupport.credentialKind(credential) {
+        case .webhook: return true
+        case .botToken: return !SlackSupport.normalizeChannel(channel).isEmpty
+        case .unknown: return false
+        }
     }
 
     // 미래 키 추가에 대비한 back-compat 디코더 (TelegramSettings 패턴).
@@ -96,7 +99,7 @@ enum SlackSupport {
     /// 사용자가 넣은 자격 정보의 갈래. 값의 생김새로만 정하고, 별도 모드
     /// 스위치를 두지 않는다 — 두 형태가 서로 헷갈릴 수 없게 생겼다.
     enum CredentialKind: Equatable {
-        case botToken   // xoxb-… / xoxp-… → chat.postMessage + 채널 지정
+        case botToken   // xoxb-… → chat.postMessage + 채널 지정
         case webhook    // https://hooks.slack.com/services/… → 채널 고정
         case unknown    // 둘 다 아님 (오타)
     }
@@ -108,12 +111,12 @@ enum SlackSupport {
         return .unknown
     }
 
-    /// 토큰 형식 대충 검사 — `xoxb-…`(봇) 또는 `xoxp-…`(사용자). API 호출 전
+    /// 토큰 형식 대충 검사 — `xoxb-…`(봇)만 허용. API 호출 전
     /// 명백한 오타를 UI 단에서 거르는 용도일 뿐, 통과가 유효성을 보장하지는
     /// 않는다 (진짜 검증은 테스트 전송).
     static func looksLikeBotToken(_ token: String) -> Bool {
         let t = token.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard t.hasPrefix("xoxb-") || t.hasPrefix("xoxp-") else { return false }
+        guard t.hasPrefix("xoxb-") else { return false }
         let rest = t.dropFirst(5)
         return rest.count >= 10
             && rest.allSatisfy { $0.isLetter || $0.isNumber || $0 == "-" }
@@ -123,9 +126,16 @@ enum SlackSupport {
     /// 자격 정보 필드에 들어온 임의의 URL 로 전송하지 않기 위해서다.
     static func looksLikeWebhookURL(_ value: String) -> Bool {
         let t = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard t.hasPrefix("https://hooks.slack.com/services/") else { return false }
-        // 접두사 뒤에 실제 경로가 있어야 한다 (T…/B…/secret).
-        return t.dropFirst("https://hooks.slack.com/services/".count).contains("/")
+        guard let url = URLComponents(string: t), url.scheme == "https",
+              url.host == "hooks.slack.com", url.port == nil,
+              url.user == nil, url.password == nil, url.query == nil, url.fragment == nil else {
+            return false
+        }
+        let pieces = url.percentEncodedPath.split(separator: "/", omittingEmptySubsequences: false)
+        guard pieces.count == 5, pieces[0].isEmpty, pieces[1] == "services" else { return false }
+        // Restrict path characters too: no encoded separators, dot segments or whitespace.
+        let allowed = Set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
+        return pieces.dropFirst(2).allSatisfy { !$0.isEmpty && $0.allSatisfy(allowed.contains) }
     }
 
     /// 사용자가 친 채널 표기를 정규화 — 앞뒤 공백과 선행 `#` 를 떼어낸다.
@@ -174,7 +184,7 @@ enum SlackSupport {
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if status == 200 && text.lowercased() == "ok" { return (true, nil) }
         if text.isEmpty { return (false, "HTTP \(status)") }
-        return (false, text)
+        return (false, safeErrorCode(text))
     }
 
     /// chat.postMessage 응답의 성공 여부 + 실패 시 Slack 의 error 코드.
@@ -184,7 +194,7 @@ enum SlackSupport {
             return (false, "unparseable response")
         }
         if root["ok"] as? Bool == true { return (true, nil) }
-        return (false, root["error"] as? String ?? "unknown error")
+        return (false, safeErrorCode(root["error"] as? String ?? "unknown error"))
     }
 
     /// Slack 의 error 코드는 `not_in_channel` 처럼 짧아서 그대로 보여주면
@@ -195,7 +205,7 @@ enum SlackSupport {
         case missingScope    // missing_scope · not_allowed_token_type
         case botNotInChannel // not_in_channel · channel_not_found · is_archived
         case rateLimited     // ratelimited
-        case other(String)   // 그대로 노출
+        case other(String)   // 로컬 고정 문구만 노출
     }
 
     static func classify(error code: String) -> FailureKind {
@@ -212,7 +222,15 @@ enum SlackSupport {
         case "ratelimited", "rate_limited":
             return .rateLimited
         default:
-            return .other(code)
+            return .other("Slack rejected the request.")
         }
+    }
+
+    private static func safeErrorCode(_ code: String) -> String {
+        let known: Set<String> = ["invalid_auth", "not_authed", "token_revoked", "account_inactive",
+            "missing_scope", "not_allowed_token_type", "not_in_channel", "channel_not_found",
+            "is_archived", "no_service", "no_team", "invalid_token", "ratelimited", "rate_limited",
+            "invalid_payload"]
+        return known.contains(code) ? code : "unknown error"
     }
 }

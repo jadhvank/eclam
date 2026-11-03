@@ -4,7 +4,13 @@ All notable changes to Electronic Clam are documented here.
 
 ## [Unreleased]
 
-- **Slack notifications (off by default)** — the same status pings that Telegram gets can now go to a Slack channel through a Slack app you create and own. **Settings → Notifications** holds both backends side by side; enable either one or both, and each keeps its own token, channel, and event checkboxes. Setup needs the `chat:write` bot scope (plus `channels:read` if you want to look up a channel by name instead of pasting its ID), and the bot has to be invited to the channel. Slack's API has no silent delivery, so the periodic status message arrives like any other one — mute the channel if you want it quiet. Nothing is sent until you turn it on, and nothing ever goes to the developer or a third-party server.
+- **Slack notifications (off by default)** — bot tokens or incoming webhooks, alongside Telegram in Settings → Notifications. Pending requests and retries are cancelled when settings change, notifications are disabled, or the app quits. Credentials are saved atomically with user-only permissions; redirects and raw transport-error logging are disabled. Messages go to the selected service and chat/channel; see [security and privacy](docs/security.md). Thanks to [Sejong Yang](https://github.com/kingsj0405) for [#2](https://github.com/jadhvank/eclam/pull/2).
+- **Optional display keep-awake** — keep the display on while existing work and safety conditions permit. Off by default, independent of the clamshell lock guard and manual Dim. Menu and CLI diagnostics report the actual display assertions. Thanks to Sejong Yang for [#3](https://github.com/jadhvank/eclam/pull/3).
+- **VPN observation and brightness restoration** — the VPN notification watcher no longer prevents display or system sleep by itself. Existing system keep-awake and preemptive virtual-display lock protection remain. Dim saves the built-in panel's brightness before changing it and restores it on new keyboard/mouse input, lid opening, wake, keep/safety release or normal shutdown. A small recovery journal retains failed restores; external brightness changes are respected.
+- **Local development installer** — bounded graceful quit, copy-failure rollback and three recent recovery backups. Ad-hoc builds explicitly warn that helper caller-signature verification is disabled. See [local development](docs/local-development.md). Thanks to Sejong Yang for [#4](https://github.com/jadhvank/eclam/pull/4).
+- **Homebrew cleanup** — replace the deprecated uninstall callback with structured steps that preserve unrelated hooks, malformed configurations and permissions ([#5](https://github.com/jadhvank/eclam/issues/5)).
+
+Source integration does not publish a new app release. FortiClient, physical lid/display transitions, automatic brightness and long-running App Nap still require hardware validation before release.
 
 ## [0.6.5] — 2026-09-01
 

@@ -133,10 +133,10 @@ eclam help
 
 - Reads file clocks, not file contents.
 - No telemetry, no tracking, no analytics.
-- XPC caller verification is enforced.
+- Developer ID releases enforce XPC caller verification; ad-hoc development builds disable it.
 - Developer ID signed + Apple notarized.
-- Tokens stay local.
-- Sleep is always restored on exit or crash.
+- Tokens are stored locally with user-only permissions and sent only to their configured service.
+- Normal quit releases power holds; the helper watchdog provides crash recovery.
 - One permission path (`SMAppService`).
 
 See [Security & privacy](docs/security.md) for details.

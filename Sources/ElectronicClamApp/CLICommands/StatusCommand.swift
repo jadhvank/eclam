@@ -41,6 +41,9 @@ enum StatusCommand: CLISubcommand {
         // helper liveness 처럼 숨은 상태를 CLI 에서 관측 가능하게 — "로그인 실행이
         // 잘 안 되는 것 같다"를 추측이 아니라 `eclam status` 로 확인.
         let loginItem = readLoginItem()
+        let displayStatus = DisplayAssertionStatus.read()
+        let appDisplayAssertions = displayStatus.entries?.filter(\.isElectronicClam)
+
 
         // ADR-0039 — split-brain(중복본)·spawn-failure·버전 스큐를 정직하게 노출하기
         // 위한 읽기 전용 신호. mdfind/launchctl 서브프로세스를 돌지만 status 는 이미
@@ -54,6 +57,9 @@ enum StatusCommand: CLISubcommand {
         if json {
             let root: [String: Any] = [
                 "helperStatus": verdict.raw,
+                "appDisplayAssertions": appDisplayAssertions.map { $0.map(\.json) } as Any,
+                "systemDisplaySleepPrevented": displayStatus.systemPreventsDisplaySleep as Any,
+                "displayAssertionReadError": displayStatus.error as Any,
                 // nil when the helper wasn't probed (registration != enabled);
                 // serializes to JSON null, matching the other optional fields.
                 "helperReachable": verdict.reachable as Any,
@@ -84,6 +90,9 @@ enum StatusCommand: CLISubcommand {
             let watchedStr = watched.sorted().joined(separator: ", ")
             print("helper:      \(verdict.human)")
             print("awake:       \(awake)")
+            let displayReasons = appDisplayAssertions.map { $0.isEmpty ? "none" : $0.map(\.name).joined(separator: ", ") } ?? "unknown"
+            print("display:     \(displayReasons) (Electronic Clam assertions)")
+            print("display all: \(displayStatus.systemPreventsDisplaySleep.map { $0 ? "held" : "not held" } ?? "unknown") (system)")
             if let h = holdRemaining, h != 0 {
                 print("hold:        \(h < 0 ? "no expiry (--forever)" : DurationParse.shortFormat(seconds: h) + " left") (CLI)")
             }

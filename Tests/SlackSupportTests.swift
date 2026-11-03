@@ -102,8 +102,8 @@ enum SlackSupportTestMain {
         assert(SlackSupport.looksLikeBotToken("xoxb-123456789012-abcdefghijkl"), "봇 토큰")
         assert(SlackSupport.looksLikeBotToken("  xoxb-123456789012-abcdefghijkl  "),
                "앞뒤 공백은 무시")
-        assert(SlackSupport.looksLikeBotToken("xoxp-123456789012-abcdefghijkl"),
-               "사용자 토큰도 허용")
+        assert(!SlackSupport.looksLikeBotToken("xoxp-123456789012-abcdefghijkl"),
+               "사용자 토큰은 거부")
         assert(!SlackSupport.looksLikeBotToken("123456:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw3"),
                "Telegram 토큰은 거부")
         assert(!SlackSupport.looksLikeBotToken("xoxb-short"), "너무 짧으면 거부")
@@ -135,6 +135,24 @@ enum SlackSupportTestMain {
                "경로 없는 접두사만으로는 안 됨")
         assert(SlackSupport.credentialKind("not-a-credential") == .unknown, "오타는 unknown")
 
+        for bad in [
+            "https://hooks.slack.com/services/T0/B0/s?secret=leak",
+            "https://hooks.slack.com/services/T0/B0/s#fragment",
+            "https://user:pass@hooks.slack.com/services/T0/B0/s",
+            "https://hooks.slack.com:444/services/T0/B0/s",
+            "https://hooks.slack.com.evil.example/services/T0/B0/s",
+            "http://hooks.slack.com/services/T0/B0/s",
+            "https://hooks.slack.com/services/T0//s",
+            "https://hooks.slack.com/services/T0/B0/s/extra",
+            "https://hooks.slack.com/services/T0/B0/%2Fsecret",
+        ] {
+            assert(!SlackSupport.looksLikeWebhookURL(bad), "잘못된 webhook URL 거부")
+        }
+        assert(!cfg(token: "xoxp-123456789012-abcdefghijkl").isConfigured,
+               "사용자 토큰 설정은 전송 불가")
+        assert(!cfg(channel: " # ").isConfigured, "빈 채널은 전송 불가")
+        assert(!SlackSettings.default.isConfigured, "기본값은 완전 OFF")
+
         print("── webhook 은 채널 없이도 보낼 수 있다")
         let hook = "https://hooks.slack.com/services/T01ABCDEF/B02GHIJKL/xxxxxxxxxxxxxxxx"
         assert(cfg(token: hook, channel: "").isConfigured,
@@ -153,7 +171,7 @@ enum SlackSupportTestMain {
                "줄바꿈 붙어도 성공")
         let badPayload = SlackSupport.parseWebhookResult(
             status: 400, body: Data("invalid_payload".utf8))
-        assert(!badPayload.ok && badPayload.error == "invalid_payload", "실패 본문 그대로 노출")
+        assert(!badPayload.ok && badPayload.error == "invalid_payload", "알려진 실패 코드만 허용")
         assert(SlackSupport.parseWebhookResult(status: 500, body: Data()).error == "HTTP 500",
                "본문이 비면 상태 코드로 대체")
         assert(SlackSupport.parseWebhookResult(status: 200, body: Data("ok".utf8)).error == nil,
@@ -200,8 +218,8 @@ enum SlackSupportTestMain {
                "channel_not_found → botNotInChannel")
         assert(SlackSupport.classify(error: "ratelimited") == .rateLimited,
                "ratelimited → rateLimited")
-        assert(SlackSupport.classify(error: "weird_new_code") == .other("weird_new_code"),
-               "모르는 코드는 그대로 노출")
+        assert(SlackSupport.classify(error: "weird_new_code") == .other("Slack rejected the request."),
+               "모르는 코드는 고정 문구로 대체")
 
         print("── 설정 back-compat")
         let legacy = Data("""

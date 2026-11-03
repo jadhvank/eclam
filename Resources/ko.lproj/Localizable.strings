@@ -406,18 +406,18 @@
 "general.sessions" = "세션";
 "general.clamshellGuard" = "클램쉘에서 잠금 방지 (VPN 유지)";
 "general.tip.clamshellGuard" = "덮개를 닫고 외부 디스플레이도 없이 Mac이 깨어있을 때, Electronic Clam이 보이지 않는 가상 디스플레이를 띄워 macOS가 화면을 잠그지 않게 합니다 — 화면이 잠기면 FortiClient 같은 VPN 세션이 끊깁니다. 창은 뜨지 않고 전력도 거의 쓰지 않습니다. 기본값은 꺼짐.";
-"general.vpnNotify" = "VPN이 끊기면 알림 (Telegram + 로컬)";
-"general.tip.vpnNotify" = "Mac을 깨워두는 동안 Electronic Clam이 scutil로 VPN을 지켜보다가 끊기면 알려줍니다 — 로컬 알림과, 설정해 두었다면 Telegram도 함께. 자동으로 재연결하지는 않습니다(FortiClient는 SAML 로그인이 필요합니다). 클램쉘 가드와는 별개입니다. 기본값은 꺼짐.";
+"general.vpnNotify" = "VPN이 끊기면 알림";
+"general.tip.vpnNotify" = "깨어 있기와 별개로 VPN 끊김을 감시합니다. 깨어 있을 때 로컬 알림과 설정된 Telegram/Slack으로 알립니다. 잠자기 중에는 감시가 쉬고, 깨어나면 다시 확인합니다. 자동 재연결은 하지 않습니다.";
 "general.vpnService" = "VPN 서비스";
 "general.tip.vpnService" = "VPN 서비스를 고르세요(macOS가 시스템 설정 → 네트워크에서 보는 이름 그대로). FortiClient는 보통 \"VPN\"입니다. Electronic Clam이 scutil로 지켜보다가 끊기면 재인증하라고 알려줍니다 — 자동으로 재연결하지는 않습니다(SAML 로그인 필요). VPN이 아직 목록에 없으면 새로고침을 누르세요.";
 "general.vpnRefresh" = "새로고침";
 "general.tip.vpnRefresh" = "VPN 서비스를 다시 검색합니다 — 이 화면을 열 때 VPN 앱이 꺼져 있었다면 유용합니다.";
-"general.vpnServiceNote" = "지켜볼 VPN을 고른 뒤 위에서 알림을 켜세요. 끊기면 알려줍니다(설정해 두었다면 Telegram도). 자동 재연결은 없습니다.";
+"general.vpnServiceNote" = "감시할 VPN을 고르고 알림을 켜세요. 채팅 알림은 네트워크 연결이 필요하며, FortiClient는 다시 로그인해야 할 수 있습니다.";
 "general.vpnService.none" = "(VPN 서비스를 찾지 못함 — VPN 앱을 여세요)";
 "general.display" = "디스플레이";
 "general.keepDisplayAwake" = "화면도 계속 켜 두기 (caffeinate -d와 같음)";
-"general.tip.keepDisplayAwake" = "Mac을 깨워 두는 것과 화면을 켜 두는 것은 다릅니다 — macOS는 자체 대기 타이머에 따라 화면을 끕니다. 이 항목을 켜면 Electronic Clam이 Mac을 깨워 두는 동안 화면도 함께 켜 둡니다. caffeinate -d와 같은 방식입니다. 백라이트 전력을 쓰므로, 작업을 눈으로 지켜볼 때만 켜는 편이 좋습니다. 기본값은 꺼짐입니다.";
-"general.keepDisplayAwakeNote" = "꺼 두면 Mac은 깨어 있어도 화면은 자체 타이머대로 꺼집니다. 자리를 비운 동안에는 아래 \"화면 끄기\"가 항상 우선합니다.";
+"general.tip.keepDisplayAwake" = "작업 중 Mac이 깨어 있는 동안 화면도 유지합니다. 자동 잠금이 지연되고 화면 전력을 사용합니다. 기본값은 꺼짐이며, 이 옵션이 꺼져도 잠금 방지나 어둡게 기능이 화면을 유지할 수 있습니다.";
+"general.keepDisplayAwakeNote" = "잠금 방지와 어둡게 기능도 화면을 유지할 수 있습니다. 어둡게는 잠그지 않고 밝기만 낮추며, 돌아오면 밝기를 복원합니다.";
 "general.blankScreen" = "화면 끄기";
 "blankMode.dim" = "어둡게 (VPN 유지)";
 "blankMode.sleep" = "디스플레이 잠자기";
@@ -480,3 +480,27 @@
 "slack.end.remoteLost" = "⚪️ 원격 세션 끊김 (네트워크 유실) — %@ 동안 깨어있다 종료";
 "slack.end.generic" = "⚪️ 깨어있기 종료 — %@";
 "slack.vpn.dropped" = "🔌 VPN 끊김 (%@) — FortiClient 재인증 필요(SAML). 자동 재연결 없음.";
+
+"display.enable.title" = "화면도 계속 켜둘까요?";
+
+"display.enable.body" = "작업 중 Mac이 깨어 있는 동안 화면 잠자기와 자동 잠금이 지연됩니다. 수동 잠금은 계속 사용할 수 있습니다. 어둡게 기능으로 잠그지 않고 밝기를 낮출 수 있습니다.";
+
+"display.enable.confirm" = "켜기";
+
+"display.enable.cancel" = "취소";
+
+"display.holders" = "화면 유지: %@";
+
+"display.holders.none" = "없음";
+
+"display.holders.unknown" = "확인 불가";
+
+"notification.error.cancelled" = "알림 설정이 바뀌었거나 앱이 종료되어 요청이 취소됐습니다.";
+
+"notification.error.transport" = "알림 서비스에 연결할 수 없습니다. 네트워크 연결을 확인하고 다시 시도하세요.";
+
+"notification.error.response" = "알림 서비스가 요청을 거부했거나 올바르지 않은 응답을 반환했습니다.";
+
+"slack.error.rejected" = "Slack이 요청을 거부했습니다. 봇 권한과 전송 대상을 확인하세요.";
+
+"notification.error.saveSettings" = "설정을 저장하지 못했습니다. 변경은 현재 세션에만 적용되며, 재시작하면 이전 설정으로 돌아갈 수 있습니다. 다시 저장해 주세요.";

@@ -407,18 +407,18 @@
 "general.sessions" = "Sesiones";
 "general.clamshellGuard" = "Evitar el bloqueo con la tapa cerrada (mantener la VPN)";
 "general.tip.clamshellGuard" = "Cuando tu Mac sigue despierto con la tapa cerrada y sin pantalla externa, Electronic Clam mantiene viva una pantalla virtual invisible para que macOS no bloquee la pantalla — un bloqueo cortaría sesiones VPN como las de FortiClient. No aparece ninguna ventana y apenas consume energía. Desactivado por defecto.";
-"general.vpnNotify" = "Avisar cuando la VPN se desconecte (Telegram + local)";
-"general.tip.vpnNotify" = "Mientras se mantiene el Mac despierto, Electronic Clam vigila tu VPN con scutil y te avisa si se desconecta — una alerta local más Telegram si lo has configurado. Nunca reconecta automáticamente (FortiClient necesita inicio de sesión SAML). Independiente de la protección con la tapa cerrada. Desactivado por defecto.";
+"general.vpnNotify" = "Avisar si se desconecta la VPN";
+"general.tip.vpnNotify" = "Vigila la VPN independientemente de mantener el Mac activo. Avisa localmente y por Telegram/Slack configurados mientras está despierto. Las comprobaciones se pausan en reposo y se reanudan al despertar. Sin reconexión automática.";
 "general.vpnService" = "Servicio VPN";
 "general.tip.vpnService" = "Elige tu servicio VPN (tal como lo ve macOS en Ajustes → Red). El de FortiClient suele ser \"VPN\". Electronic Clam lo vigila con scutil y, si se cae, te avisa para volver a autenticarte — nunca reconecta automáticamente (se requiere inicio de sesión SAML). Usa Actualizar si tu VPN aún no aparece.";
 "general.vpnRefresh" = "Actualizar";
 "general.tip.vpnRefresh" = "Vuelve a buscar servicios VPN — útil si tu app de VPN estaba cerrada cuando abriste esto.";
-"general.vpnServiceNote" = "Elige la VPN que vigilar y luego activa las notificaciones arriba. Te avisará si se cae (también por Telegram, si lo has configurado). Sin reconexión automática.";
+"general.vpnServiceNote" = "Elige una VPN y activa las notificaciones. Los avisos de chat necesitan red; FortiClient puede requerir iniciar sesión otra vez.";
 "general.vpnService.none" = "(no se encontraron servicios VPN — abre tu app de VPN)";
 "general.display" = "Pantalla";
 "general.keepDisplayAwake" = "Mantener también la pantalla encendida (como caffeinate -d)";
-"general.tip.keepDisplayAwake" = "Mantener el Mac despierto no mantiene la pantalla encendida — macOS sigue apagando la pantalla con su propio temporizador de inactividad. Si activas esto, Electronic Clam también mantiene la pantalla despierta mientras mantiene despierto el Mac, igual que caffeinate -d. Consume energía de retroiluminación, así que déjalo desactivado salvo que quieras ver el trabajo. Desactivado por omisión.";
-"general.keepDisplayAwakeNote" = "Desactivado, el Mac sigue despierto pero la pantalla se apaga con su propio temporizador. «Apagar pantalla», abajo, siempre gana mientras estás ausente.";
+"general.tip.keepDisplayAwake" = "Mantiene la pantalla activa mientras el trabajo mantiene activo el Mac. Puede retrasar el bloqueo automático y consume energía. Desactivado por defecto; la protección de bloqueo y Atenuar pueden mantenerla activa aun así.";
+"general.keepDisplayAwakeNote" = "La protección de bloqueo y Atenuar también pueden mantener la pantalla activa. Atenuar reduce el brillo sin bloquear y lo restaura cuando vuelves.";
 "general.blankScreen" = "Apagar pantalla";
 "blankMode.dim" = "Atenuar (mantener VPN)";
 "blankMode.sleep" = "Suspender pantallas";
@@ -481,3 +481,27 @@
 "slack.end.remoteLost" = "⚪️ Sesión remota perdida (sin red) — despierto durante %@";
 "slack.end.generic" = "⚪️ Fin del periodo despierto — %@";
 "slack.vpn.dropped" = "🔌 VPN desconectada (%@) — FortiClient necesita volver a autenticarse (SAML). Sin reconexión automática.";
+
+"display.enable.title" = "¿Mantener activa la pantalla?";
+
+"display.enable.body" = "Mientras el trabajo mantiene activo el Mac, también se retrasan el reposo de la pantalla y el bloqueo automático. Puedes bloquear el Mac manualmente. Atenuar reduce el brillo sin bloquear.";
+
+"display.enable.confirm" = "Activar";
+
+"display.enable.cancel" = "Cancelar";
+
+"display.holders" = "Pantalla mantenida por: %@";
+
+"display.holders.none" = "Ninguno";
+
+"display.holders.unknown" = "No disponible";
+
+"notification.error.cancelled" = "Solicitud cancelada porque cambiaron las notificaciones o se cerró la app.";
+
+"notification.error.transport" = "No se pudo conectar con el servicio de notificaciones. Comprueba la conexión e inténtalo de nuevo.";
+
+"notification.error.response" = "El servicio de notificaciones devolvió una respuesta fallida o no válida.";
+
+"slack.error.rejected" = "Slack rechazó la solicitud. Comprueba los permisos del bot y el destino.";
+
+"notification.error.saveSettings" = "No se pudo guardar la configuración. Los cambios solo se aplican a esta sesión; al reiniciar puede volver la configuración anterior. Intenta guardar otra vez.";

@@ -228,6 +228,7 @@ final class TelegramPaneViewController: NSViewController, NSTextFieldDelegate {
             digestPopup.selectItem(at: idx)
         }
         syncEnabled()
+        if let error = notifier.settingsSaveError { setResult(error, isError: true) }
     }
 
     /// 이벤트 체크박스만 master 종속 (헤더 주석 참고).
@@ -264,8 +265,14 @@ final class TelegramPaneViewController: NSViewController, NSTextFieldDelegate {
             notifyAwakeEnd: endCheckbox.state == .on,
             notifySafety: safetyCheckbox.state == .on,
             digestIntervalMin: digestOn ? chosen : 0)
-        notifier.update(settings: next)
+        let hadSaveError = notifier.settingsSaveError != nil
+        let saved = notifier.update(settings: next)
         syncEnabled()
+        if let error = notifier.settingsSaveError {
+            setResult(error, isError: true)
+        } else if saved && hadSaveError {
+            setResult("", isError: false)
+        }
     }
 
     @objc private func controlChanged() { commit() }
@@ -307,8 +314,15 @@ final class TelegramPaneViewController: NSViewController, NSTextFieldDelegate {
     }
 
     private func setResult(_ text: String, isError: Bool) {
-        resultLabel.stringValue = text
-        resultLabel.textColor = isError ? .systemRed : .secondaryLabelColor
-        if isError { log.notice("telegram pane: \(text, privacy: .public)") }
+        // Test/lookup success must not hide a still-unsaved settings warning.
+        let saveError = notifier.settingsSaveError
+        let displayed = saveError ?? text
+        let displayedIsError = saveError != nil || isError
+        resultLabel.stringValue = displayed
+        resultLabel.toolTip = displayed
+        resultLabel.maximumNumberOfLines = saveError != nil ? 0 : 2
+        resultLabel.lineBreakMode = saveError != nil ? .byWordWrapping : .byTruncatingTail
+        resultLabel.textColor = displayedIsError ? .systemRed : .secondaryLabelColor
+        if displayedIsError { log.notice("telegram pane: \(displayed, privacy: .public)") }
     }
 }

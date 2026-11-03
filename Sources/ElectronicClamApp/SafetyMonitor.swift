@@ -413,9 +413,9 @@ final class SafetyMonitor {
         // showing ⇒ lid closed.
         let publicClosed = isLaptop ? !hasBuiltIn : false
 
-        let clam = Self.clamshellState()
+        let clam = LidStateReader.read()
         switch clam {
-        case .noLid:
+        case .unavailable:
             // SPI reports no lid. Trust it for a true desktop; if the public side
             // sees a battery the property mis-read, so use the public inference.
             if isLaptop {
@@ -433,24 +433,6 @@ final class SafetyMonitor {
             }
             return spiClosed
         }
-    }
-
-    private enum ClamshellState { case open, closed, noLid }
-
-    /// Track A — IOPMrootDomain's undocumented `AppleClamshellState` (ADR-0021,
-    /// rule #6). Public IOKit functions; only the *key* is undocumented. Read-
-    /// only, no entitlement. Absent ⇒ the machine has no lid (a desktop).
-    private static func clamshellState() -> ClamshellState {
-        let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPMrootDomain"))
-        guard service != 0 else { return .noLid }
-        defer { IOObjectRelease(service) }
-        guard let raw = IORegistryEntryCreateCFProperty(service, "AppleClamshellState" as CFString,
-                                                        kCFAllocatorDefault, 0)?.takeRetainedValue() else {
-            return .noLid
-        }
-        if let closed = raw as? Bool { return closed ? .closed : .open }
-        if let n = raw as? NSNumber { return n.boolValue ? .closed : .open }
-        return .noLid
     }
 
     /// Track B — does this Mac have an internal battery (⇒ it's a laptop)?

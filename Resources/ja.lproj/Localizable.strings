@@ -407,18 +407,18 @@
 "general.sessions" = "セッション";
 "general.clamshellGuard" = "クラムシェルでロックを防ぐ（VPN を維持）";
 "general.tip.clamshellGuard" = "蓋を閉じて外部ディスプレイもない状態で Mac が起きているとき、Electronic Clam が見えない仮想ディスプレイを生かしておき、macOS が画面をロックしないようにします — ロックされると FortiClient のような VPN セッションが切れてしまいます。ウインドウは表示されず、電力もほとんど消費しません。デフォルトはオフです。";
-"general.vpnNotify" = "VPN が切断されたら通知（Telegram + ローカル）";
-"general.tip.vpnNotify" = "Mac を起こしている間、Electronic Clam が scutil で VPN を監視し、切断されたら知らせます — ローカル通知に加え、設定していれば Telegram にも。自動では再接続しません（FortiClient は SAML サインインが必要）。クラムシェルガードとは独立しています。デフォルトはオフです。";
+"general.vpnNotify" = "VPN切断時に通知";
+"general.tip.vpnNotify" = "Macの起動維持とは独立してVPNの切断を監視します。起動中はローカル通知と設定済みのTelegram/Slackで通知します。スリープ中は確認を休止し、復帰時に再確認します。自動再接続は行いません。";
 "general.vpnService" = "VPN サービス";
 "general.tip.vpnService" = "VPN サービスを選びます（macOS がシステム設定 → ネットワークで表示する名前のまま）。FortiClient は通常「VPN」です。Electronic Clam が scutil で監視し、切断されたら再認証を促します — 自動では再接続しません（SAML サインインが必要）。VPN がまだ一覧にない場合は「更新」を使ってください。";
 "general.vpnRefresh" = "更新";
 "general.tip.vpnRefresh" = "VPN サービスを再スキャンします — これを開いたときに VPN アプリが閉じていた場合に便利です。";
-"general.vpnServiceNote" = "監視する VPN を選び、上で通知をオンにしてください。切断されると知らせます（設定していれば Telegram にも）。自動再接続はありません。";
+"general.vpnServiceNote" = "VPNを選び通知を有効にしてください。チャット通知にはネット接続が必要です。FortiClientへの再ログインが必要な場合があります。";
 "general.vpnService.none" = "（VPN サービスが見つかりません — VPN アプリを開いてください）";
 "general.display" = "ディスプレイ";
 "general.keepDisplayAwake" = "画面も点けたままにする（caffeinate -d と同じ）";
-"general.tip.keepDisplayAwake" = "Mac をスリープさせないことと画面を点けたままにすることは別です — macOS は独自のアイドルタイマーで画面を消します。これをオンにすると、Electronic Clam は Mac を起こしている間ディスプレイも起こしたままにします。caffeinate -d と同じ方式です。バックライトの電力を使うため、作業を見ていたいとき以外はオフのままをおすすめします。デフォルトはオフです。";
-"general.keepDisplayAwakeNote" = "オフの場合、Mac は起きたままでも画面は独自のタイマーで消えます。離席中は下の「画面を消す」が常に優先されます。";
+"general.tip.keepDisplayAwake" = "作業中にMacが起きている間、画面も維持します。自動ロックが遅れ、画面の電力を使います。初期設定はオフです。オフでもロック防止や暗くする機能が画面を維持することがあります。";
+"general.keepDisplayAwakeNote" = "ロック防止や暗くする機能も画面を維持できます。暗くする機能はロックせずに明るさを下げ、戻ると復元します。";
 "general.blankScreen" = "画面オフ";
 "blankMode.dim" = "暗くする（VPN 維持）";
 "blankMode.sleep" = "ディスプレイをスリープ";
@@ -481,3 +481,27 @@
 "slack.end.remoteLost" = "⚪️ リモートセッション切断 (ネットワーク喪失) — %@ の起床が終了";
 "slack.end.generic" = "⚪️ 起床終了 — %@";
 "slack.vpn.dropped" = "🔌 VPN が切断されました（%@）— FortiClient は再認証が必要です（SAML）。自動再接続なし。";
+
+"display.enable.title" = "画面も起動したままにしますか？";
+
+"display.enable.body" = "作業中にMacが起きている間、画面のスリープと自動ロックを遅らせます。手動でのロックは可能です。暗くする機能ではロックせずに明るさを下げられます。";
+
+"display.enable.confirm" = "有効にする";
+
+"display.enable.cancel" = "キャンセル";
+
+"display.holders" = "画面を維持: %@";
+
+"display.holders.none" = "なし";
+
+"display.holders.unknown" = "確認できません";
+
+"notification.error.cancelled" = "通知設定の変更またはアプリの終了により、リクエストをキャンセルしました。";
+
+"notification.error.transport" = "通知サービスに接続できません。ネット接続を確認して再試行してください。";
+
+"notification.error.response" = "通知サービスが失敗または無効な応答を返しました。";
+
+"slack.error.rejected" = "Slackがリクエストを拒否しました。ボットの権限と送信先を確認してください。";
+
+"notification.error.saveSettings" = "設定を保存できませんでした。変更は現在のセッションのみ有効です。再起動すると以前の設定に戻る可能性があります。保存を再試行してください。";
