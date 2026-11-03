@@ -70,9 +70,11 @@ final class SystemDimmerResources: DimmerResources {
 /// Owns one brightness episode on the main queue. A pending snapshot outlives
 /// display-sleep prevention and survives process exit in the recovery journal.
 final class BlankDisplayDimmer {
+    enum Origin { case manual, automatic }
     enum RestoreReason: String {
         case input, lidOpened, systemWake, screensWake, displayReconfiguration
         case keep, safety, off, quit, helperUnavailable, dimFailed, recovery
+        case automaticConditionsChanged, externalBrightness
     }
 
     private let log = Logger(subsystem: "com.jadhvank.eclam", category: "dim")
@@ -101,6 +103,21 @@ final class BlankDisplayDimmer {
     private let retryDelay: TimeInterval = 0.2
 
     private(set) var state: BrightnessSessionState = .idle
+    private(set) var origin: Origin?
+    /// One owner (AutoDimCoordinator) uses every completed episode, including
+    /// external brightness changes and recovery, to begin a fresh idle grace.
+    var onEpisodeFinished: (() -> Void)?
+    /// Wake/topology notifications can indicate a return before Dim even starts.
+    /// This requests grace only; it does not change the active episode's restore policy.
+    var onReturnGraceRequested: (() -> Void)?
+    var canStartAutomaticDim: Bool {
+        recoveryChecked && !journalUnavailable && !terminating && state == .idle
+    }
+    var builtinAvailableForAutomaticDim: Bool {
+        guard let display = backend.builtinID(), let uuid = backend.panelUUID(display),
+              UUID(uuidString: uuid) != nil, let value = backend.get(display) else { return false }
+        return BrightnessSnapshot.isValidBrightness(value)
+    }
     var isDimmed: Bool {
         if case .dimmed = state { return true }
         return false
@@ -171,12 +188,23 @@ final class BlankDisplayDimmer {
         }
     }
 
-    func dim(floor: Float = 0) {
+    func dim(floor: Float = 0, origin requestedOrigin: Origin = .manual) {
         guard !terminating else { return }
+        if requestedOrigin == .automatic && !recoveryChecked {
+            recoverInterruptedSession()
+            return
+        }
         recoverInterruptedSession()
         guard !journalUnavailable else { return }
         guard state == .idle else {
-            if case .restorePending = state { requestRestore(reason: .off) }
+            if isDimmed && requestedOrigin == .manual {
+                // Promote ownership without recapturing the dim floor. Ignore
+                // this initiating menu input just as for a new manual episode.
+                origin = .manual
+                trigger = DimReturnTrigger(uptime: uptime(), idleSeconds: idleSeconds(), lidState: lidState())
+            } else if requestedOrigin == .manual, case .restorePending = state {
+                requestRestore(reason: .off)
+            }
             return
         }
         guard BrightnessSnapshot.isValidBrightness(floor) else { return }
@@ -190,6 +218,10 @@ final class BlankDisplayDimmer {
                 trigger = nil
                 return
             }
+            if requestedOrigin == .automatic && original <= floor {
+                trigger = nil
+                return
+            }
             let snapshot = BrightnessSnapshot(displayUUID: uuid, original: original,
                                               lastApplied: min(original, floor), capturedAt: now())
             do { try sessionStore.save(snapshot) }
@@ -198,6 +230,7 @@ final class BlankDisplayDimmer {
                 log.error("brightness journal write failed; refusing to lower brightness")
                 return
             }
+            origin = requestedOrigin
             state = .dimmed(snapshot)
             if !backend.set(display, snapshot.lastApplied) {
                 // A failed API result can still have changed the panel. The same
@@ -207,12 +240,21 @@ final class BlankDisplayDimmer {
                 return
             }
         } else {
+            guard requestedOrigin == .manual else { trigger = nil; return }
             // Explicit headless Dim retains the existing assertion-only contract.
+            origin = .manual
             state = .dimmed(nil)
             panelWasUnavailable = true
         }
         resources.acquire()
         startPolling()
+    }
+
+    /// Option/holder loss never cancels a manually requested Dim. Pending restore
+    /// already released resources and continues via its existing retry lifecycle.
+    func restoreAutomaticDim() {
+        guard origin == .automatic, isDimmed else { return }
+        requestRestore(reason: .automaticConditionsChanged)
     }
 
     /// All return/release paths converge here. Duplicate events share one bounded
@@ -249,6 +291,7 @@ final class BlankDisplayDimmer {
         restoring = false
         guard let snapshot = state.snapshot else {
             state = .idle
+            origin = nil
             return
         }
         state = .restorePending(snapshot)
@@ -261,7 +304,11 @@ final class BlankDisplayDimmer {
 
     private func observe(_ center: NotificationCenter, _ name: Notification.Name, reason: RestoreReason) {
         let observer = center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-            guard let self else { return }
+            guard let self, !self.terminating else { return }
+            // Screen reconfiguration also covers fast lid round-trips between
+            // policy polls. An own-anchor event delays future auto dim, but must
+            // not restore an active Dim unless displayReconfigured() says so.
+            self.onReturnGraceRequested?()
             if reason == .displayReconfiguration { self.displayReconfigured() }
             else { self.requestRestore(reason: reason) }
         }
@@ -303,6 +350,16 @@ final class BlankDisplayDimmer {
         let sample = trigger?.sample(uptime: uptime(), idleSeconds: idleSeconds(), lidState: lidState())
         if sample?.lidOpened == true { requestRestore(reason: .lidOpened) }
         else if sample?.newInput == true { requestRestore(reason: .input) }
+        else if origin == .automatic, case .dimmed(let snapshot?) = state {
+            // Automatic brightness and remote sliders need not generate a local
+            // input event. Relinquish the episode instead of fighting that writer.
+            guard let display = backend.builtinID(), let uuid = backend.panelUUID(display),
+                  snapshot.matchesPanel(uuid), let current = backend.get(display),
+                  snapshot.matches(current, snapshot.lastApplied) else {
+                requestRestore(reason: .externalBrightness)
+                return
+            }
+        }
     }
 
     private func attemptRestore(remaining: Int, generation expectedGeneration: UInt) {
@@ -364,6 +421,8 @@ final class BlankDisplayDimmer {
         trigger = nil
         brightnessResolved = false
         state = .idle
+        origin = nil
+        onEpisodeFinished?()
         return true
     }
 }

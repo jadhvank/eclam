@@ -416,8 +416,8 @@
 "general.vpnService.none" = "(VPN 서비스를 찾지 못함 — VPN 앱을 여세요)";
 "general.display" = "디스플레이";
 "general.keepDisplayAwake" = "화면도 계속 켜 두기 (caffeinate -d와 같음)";
-"general.tip.keepDisplayAwake" = "작업 중 Mac이 깨어 있는 동안 화면도 유지합니다. 자동 잠금이 지연되고 화면 전력을 사용합니다. 기본값은 꺼짐이며, 이 옵션이 꺼져도 잠금 방지나 어둡게 기능이 화면을 유지할 수 있습니다.";
-"general.keepDisplayAwakeNote" = "잠금 방지와 어둡게 기능도 화면을 유지할 수 있습니다. 어둡게는 잠그지 않고 밝기만 낮추며, 돌아오면 밝기를 복원합니다.";
+"general.tip.keepDisplayAwake" = "작업 중 Mac이 깨어 있는 동안 화면도 유지합니다. 자동 잠금이 지연되고 화면 전력을 사용합니다. 기본값은 꺼짐입니다. 켜면 자동으로 어두워진 화면을 복원하며, 수동 어둡게는 계속 사용할 수 있습니다.";
+"general.keepDisplayAwakeNote" = "꺼져 있어도 잠금 방지가 화면을 유지할 수 있습니다. 이때 작업 중에는 시스템의 화면 끄기 시간이 지나면 내장 화면을 자동으로 어둡게 하고, 돌아오면 복원합니다. 화면 끄기가 ‘안 함’이면 자동으로 어둡게 하지 않습니다.";
 "general.blankScreen" = "화면 끄기";
 "blankMode.dim" = "어둡게 (VPN 유지)";
 "blankMode.sleep" = "디스플레이 잠자기";

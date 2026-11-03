@@ -419,8 +419,8 @@
 "general.vpnService.none" = "(no VPN services found — open your VPN app)";
 "general.display" = "Display";
 "general.keepDisplayAwake" = "Keep the display on too (like caffeinate -d)";
-"general.tip.keepDisplayAwake" = "Keep the display awake while work keeps the Mac awake. This may delay automatic locking and uses display power. Off by default; lock guard and Dim may still hold the display when this option is off.";
-"general.keepDisplayAwakeNote" = "Lock guard and Dim can also keep the display awake. Dim lowers brightness without locking; it restores brightness when you return.";
+"general.tip.keepDisplayAwake" = "Keep the display awake while work keeps the Mac awake. This may delay automatic locking and uses display power. Off by default. Turning this on restores automatic Dim; manual Dim remains available.";
+"general.keepDisplayAwakeNote" = "With this off, lock guard can still keep the display awake. The built-in screen then dims after the system display-off interval and restores when you return. “Never” disables automatic Dim.";
 "general.blankScreen" = "Blank screen";
 "blankMode.dim" = "Dim (keep VPN)";
 "blankMode.sleep" = "Sleep displays";

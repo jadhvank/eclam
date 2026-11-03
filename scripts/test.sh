@@ -314,12 +314,21 @@ if [ -f "$ROOT/Tests/DimRestoreTests.swift" ]; then
         "$ROOT/Sources/ElectronicClamApp/LidStateReader.swift" \
         "$ROOT/Sources/ElectronicClamApp/DisplayBrightness.swift" \
         "$ROOT/Sources/ElectronicClamApp/BlankDisplayDimmer.swift" \
+        "$ROOT/Sources/ElectronicClamApp/AutoDimPolicy.swift" \
+        "$ROOT/Sources/ElectronicClamApp/AutoDimCoordinator.swift" \
         "$ROOT/Tests/DimRestoreTests.swift"
     echo "==> Running dim restore tests"
     "$TMP/eclam_dimrestoretests"
 else
     echo "==> Skipping dim restore tests (Tests/DimRestoreTests.swift absent)"
 fi
+
+# ── Automatic Dim policy and idle grace (no power/brightness calls) ────────
+echo "==> Compiling automatic dim policy tests"
+swiftc -target "$TARGET" \
+    "$ROOT/Sources/ElectronicClamApp/AutoDimPolicy.swift" \
+    "$ROOT/Tests/AutoDimPolicyTests.swift" -o "$TMP/eclam_autodimpolicytests"
+"$TMP/eclam_autodimpolicytests"
 
 # ── 실물-외장 판정 테스트 (ADR-0037 §미러링) ────────────────────────────────
 # 판정은 ObjC shim 안의 순수 C 함수(EClamDisplayIsRealExternal)다. build.sh 와

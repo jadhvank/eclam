@@ -23,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// 헬퍼의 `SleepDisabled` 와 무관 — 앱 프로세스가 직접 잡는다(per-pid 자동 해제).
     private var displayAwakeHolder: DisplayAwakeHolder?
     private let dimmer = BlankDisplayDimmer()
+    private var autoDim: AutoDimCoordinator?
     private var isTerminating = false
 
     /// 10s heartbeat fired while `shouldKeepAwake` is true (ADR-0004 §5).
@@ -121,6 +122,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let displayAwakeHolder = DisplayAwakeHolder()
         self.displayAwakeHolder = displayAwakeHolder
         dimmer.recoverInterruptedSession()
+        autoDim = AutoDimCoordinator(dimmer: dimmer, conditions: { [weak self] in
+            guard let self, !self.isTerminating, case .enabled = self.store.registration,
+                  !self.store.helperUnreachable else { return .disabled }
+            // Do not count Dim's own hold or another app's assertions: automatic
+            // dim must stop when our independent display protection disappears.
+            return .init(keep: self.store.shouldKeepAwake,
+                         displayHeld: self.virtualDisplayController?.isHoldingDisplay == true
+                            || self.displayAwakeHolder?.isHolding == true,
+                         keepDisplayOption: self.store.keepDisplayAwakeEnabled)
+        })
 
         // Wire store → convergence engine (debounced XPC).
         store.onChange = { [weak self] in
@@ -276,6 +287,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         vpnWatcher?.stop()
         TelegramNotifier.shared.stop()
         SlackNotifier.shared.stop()
+        autoDim?.stop()
         dimmer.prepareForTermination()
         heartbeatTimer?.cancel()
         heartbeatTimer = nil
@@ -442,6 +454,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             displayAwakeHolder?.apply(keepAwake: false)
             dimmer.requestRestore(reason: .helperUnavailable)
             virtualDisplayController?.apply(keepAwake: false, externalDisplayPresent: store.extDisplayPresent)
+            autoDim?.update()
             return
         }
 
@@ -486,6 +499,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // 이유로 no-op early-return **위**에 둔다 — keep 이 그대로여도 설정만 바뀐 수렴을
         // 반영해야 한다.
         displayAwakeHolder?.apply(keepAwake: target && store.keepDisplayAwakeEnabled)
+        autoDim?.update()
 
         if let last = lastWrittenSleepDisabled, last == target { return }
 
