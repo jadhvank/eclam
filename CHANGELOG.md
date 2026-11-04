@@ -4,6 +4,8 @@ All notable changes to Electronic Clam are documented here.
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-11-04
+
 - **Automatic Dim while the lock guard holds the display** — with display keep-awake off, the built-in panel follows the current macOS display-off interval. “Never” disables automatic Dim. Input, lid opening and wake restore brightness with a fresh idle grace; turning display keep-awake on restores automatic Dim while leaving manual Dim available. The existing brightness snapshot and recovery journal remain the single restoration path.
 - **Slack notifications (off by default)** — bot tokens or incoming webhooks, alongside Telegram in Settings → Notifications. Pending requests and retries are cancelled when settings change, notifications are disabled, or the app quits. Credentials are saved atomically with user-only permissions; redirects and raw transport-error logging are disabled. Messages go to the selected service and chat/channel; see [security and privacy](docs/security.md). Thanks to [Sejong Yang](https://github.com/kingsj0405) for [#2](https://github.com/jadhvank/eclam/pull/2).
 - **Optional display keep-awake** — keep the display on while existing work and safety conditions permit. Off by default, independent of the clamshell lock guard and manual Dim. Menu and CLI diagnostics report the actual display assertions. Thanks to Sejong Yang for [#3](https://github.com/jadhvank/eclam/pull/3).
@@ -11,7 +13,7 @@ All notable changes to Electronic Clam are documented here.
 - **Local development installer** — bounded graceful quit, copy-failure rollback and three recent recovery backups. Ad-hoc builds explicitly warn that helper caller-signature verification is disabled. See [local development](docs/local-development.md). Thanks to Sejong Yang for [#4](https://github.com/jadhvank/eclam/pull/4).
 - **Homebrew cleanup** — replace the deprecated uninstall callback with structured steps that preserve unrelated hooks, malformed configurations and permissions ([#5](https://github.com/jadhvank/eclam/issues/5)).
 
-Source integration does not publish a new app release. FortiClient, physical lid/display transitions, automatic brightness and long-running App Nap still require hardware validation before release.
+Validation: automated tests and CI passed. FortiClient, physical lid/display transitions, automatic brightness and long-running App Nap have not yet been verified on hardware; these will be checked during real-world use.
 
 ## [0.6.5] — 2026-09-01
 

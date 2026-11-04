@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.5-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.7.0-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · **日本語** · [Español](README.es.md)
@@ -170,6 +170,7 @@ open build/ElectronicClam.app
 
 最近のリリース — 全履歴は [CHANGELOG.md](CHANGELOG.md) に:
 
+- **0.7.0** — 画面の点灯維持オプション、明るさを復元する自動 Dim、Slack 通知、ローカルインストーラーと Homebrew の削除処理を改善。VPN の監視だけでスリープを妨げる動作も修正しました。[リリースノート](https://github.com/jadhvank/eclam/releases/tag/v0.7.0)。
 - **0.6.5** — 修正:クラムシェルロックガードを有効にしたまま **画面ミラーリング** で TV を接続しても正しく動くようになりました。ミラーリングで接続したディスプレイ(ミラーした TV、AirPlay)はガードから見えていませんでした — macOS はミラーセットのメンバーをアクティブディスプレイ一覧から外し、ミラーセット全体を 1 画面として報告するためです。その結果、macOS がミラーセッションを確立している最中に、目に見えないアンカーが再ミラー・再生成を繰り返して割り込んでいました。拡張(並べて表示)接続はもともと影響を受けません。またミラーセットが有効な間はアンカーを作らなくなりました — その状況で作ると回収できない仮想ディスプレイが残り、ログアウトするまでガードが機能しなくなっていました。
 - **0.6.4** — クラムシェル VPN ロックガードの修正:VPN 切断通知が実際に届くようになり(通知すべきイベント自身と App Nap によって監視が止まっていました)、App を終了すると目に見えないアンカーも解放され、仮想ディスプレイの名前が明確になり、**Dim** のあとフタを開け直すと明るさが戻ります。さらに、quarantine 属性だけが残っている場合にメニューバーが「Applications へ移動してください」を繰り返すだけの行き止まりを解消し、サーマルカットオフの既定値を `fair` から `serious` に引き上げました(以前の既定値では数分で keep-awake が終了することがありました)。
 - **0.6.3** — 修正:クラムシェルロックガードを有効にした状態で実機の外部ディスプレイを接続しても、保存済みの「内蔵 + 外部」の配置が崩れなくなりました。実機ディスプレイが現れると、目に見えないアンカーが即座に道を譲り(再ミラーしない)、macOS が保存した配置を復元します。外部ディスプレイを外すとアンカーは自動的に戻ります。クラムシェル(ヘッドレス)のロック防止そのものは変わりません。

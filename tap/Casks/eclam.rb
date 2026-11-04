@@ -1,5 +1,5 @@
 cask "eclam" do
-  version "0.6.5"
+  version "0.7.0"
   sha256 :no_check
 
   url "https://github.com/jadhvank/eclam/releases/download/v#{version}/ElectronicClam-#{version}.zip"
