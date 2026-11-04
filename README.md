@@ -10,7 +10,7 @@ It detects *work*, not just a running process.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.5-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.7.0-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -172,6 +172,7 @@ open build/ElectronicClam.app
 
 Recent releases — full history in [CHANGELOG.md](CHANGELOG.md):
 
+- **0.7.0** — Optional display keep-awake, automatic Dim with brightness restoration, Slack notifications, a safer local installer, and current Homebrew cleanup. VPN observation no longer prevents sleep by itself. See [release notes](https://github.com/jadhvank/eclam/releases/tag/v0.7.0).
 - **0.6.5** — Fix: with the clamshell lock guard enabled, connecting a TV via **screen mirroring** now works. Mirrored displays (a mirrored TV, AirPlay) were invisible to the guard — macOS drops a mirror-set member from the active display list and reports the whole mirror set as a single screen — so the invisible anchor kept re-mirroring and re-creating itself while macOS was negotiating the mirror session. Extended (side-by-side) displays were never affected. The guard also no longer creates its anchor while a mirror set is active, which used to leave an unreclaimable virtual display behind and disable the guard for the rest of the login session.
 - **0.6.4** — Fixes for the clamshell VPN lock guard: the VPN-disconnect notification now actually fires (it was stopped by the very event it reports, and by App Nap), the invisible anchor is released when you quit the app, the virtual display is named clearly, and brightness is restored when you reopen the lid after **Dim**. Also: the menu-bar item no longer shows a dead-end "move to Applications" prompt when only a quarantine attribute is left, and the thermal cutoff default moved from `fair` to `serious` (the old default could end a keep-awake session within minutes).
 - **0.6.3** — Fix: with the clamshell lock guard enabled, attaching a real external display no longer disturbs your saved built-in + external arrangement. The invisible anchor now steps aside immediately (no re-mirror) when a real display appears, letting macOS restore your saved layout; it returns automatically when the external is removed. Headless clamshell lock protection is unchanged.

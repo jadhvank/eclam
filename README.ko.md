@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.6.5-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.7.0-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · **한국어** · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -170,6 +170,7 @@ open build/ElectronicClam.app
 
 최근 릴리스 — 전체 내역은 [CHANGELOG.md](CHANGELOG.md):
 
+- **0.7.0** — 화면 계속 켜두기 옵션, 밝기 복원을 갖춘 자동 어둡게, Slack 알림, 설치 복구와 Homebrew 삭제 절차 개선. VPN 감시만으로 잠자기를 막던 동작도 수정했습니다. [릴리스 노트](https://github.com/jadhvank/eclam/releases/tag/v0.7.0).
 - **0.6.5** — 수정. 클램쉘 잠금 방지를 켠 상태에서 **화면 미러링**으로 TV 를 연결해도 정상 동작합니다. 미러링으로 붙인 화면(미러링한 TV, AirPlay)은 잠금 가드에 보이지 않았습니다 — macOS 는 미러셋 멤버를 활성 디스플레이 목록에서 빼고 미러셋 전체를 화면 하나로 보고하기 때문입니다. 그래서 macOS 가 미러 세션을 맺는 동안 보이지 않는 앵커가 계속 재미러·재생성되며 끼어들었습니다. 확장(나란히 놓기) 연결은 원래부터 영향이 없었습니다. 또한 미러셋이 켜져 있는 동안에는 앵커를 만들지 않습니다 — 그 경우 회수되지 않는 가상 디스플레이가 남아 로그아웃 전까지 잠금 방지가 아예 동작하지 않았습니다.
 - **0.6.4** — 클램쉘 VPN 잠금 방지 수정. VPN 끊김 알림이 실제로 뜨고(자기가 알려야 할 바로 그 사건과 App Nap 에 감시가 멈추던 문제), 앱을 종료하면 보이지 않는 앵커가 함께 사라지며, 가상 디스플레이 이름이 명확해지고, **Dim** 후 덮개를 다시 열면 밝기가 복원됩니다. 그리고 quarantine 속성만 남은 경우 메뉴바가 "Applications 로 옮기세요" 안내만 반복하던 막다른 길을 없앴고, 열 컷오프 기본값을 `fair` 에서 `serious` 로 올렸습니다(기존 기본값은 몇 분 만에 keep-awake 를 끝낼 수 있었습니다).
 - **0.6.3** — 수정. 클램쉘 잠금 방지를 켠 상태에서 실물 외장 모니터를 연결해도 더 이상 저장해 둔 내장+외장 화면 배치가 흐트러지지 않습니다. 보이지 않는 앵커가 실물 화면이 나타나면 재미러 없이 즉시 비켜서, macOS가 저장된 배치를 그대로 복원합니다(외장을 빼면 앵커가 자동 복귀). 덮개 닫은 클램쉘 잠금 방지 동작 자체는 그대로입니다.
