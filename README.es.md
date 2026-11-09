@@ -10,31 +10,39 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.7.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.0-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · **Español**
-
-![Demostración del menú de Electronic Clam](docs/assets/eclam-menu-demo.gif)
 
 </div>
 
 ---
 
+## Novedades de v0.8.0 — pantalla encendida desde la barra de menús
+
+- **Clic para alternar:** Desactivado → Mac despierto → Mac y pantalla → Detección automática. El nuevo **icono de sol con anillo** identifica el modo de pantalla encendida sin abrir el menú.
+- **Activado por defecto:** Ajustes → General → **Incluir pantalla encendida en el ciclo del icono**. Desactívalo para conservar el clic de encendido/apagado y los tres iconos originales. Se respeta cualquier preferencia de desactivación guardada antes de actualizar.
+- **Elige cuándo mantener la pantalla encendida:** activar el ajuste solo añade el modo. Selecciona **Mac y pantalla** para usarlo; la detección automática sigue el trabajo sin solicitar protección de pantalla. Las protecciones de seguridad siguen teniendo prioridad.
+
+[Notas de la versión](https://github.com/jadhvank/eclam/releases/tag/v0.8.0) · [Historial completo](CHANGELOG.md)
+
+---
+
 ## Lo más destacado
 
-- **Despierto con la tapa cerrada.** Un interruptor evita que tu Mac duerma incluso con la tapa cerrada — sin comandos de terminal ni contraseña en cada cambio.
-- **Detecta el trabajo, no los procesos.** Permanece despierto solo mientras un agente de programación *produce salida de verdad*; cuando el agente se detiene, tu Mac puede volver a dormir.
+- **Despierto con la tapa cerrada.** El modo Mac despierto evita que tu Mac duerma incluso con la tapa cerrada — sin comandos de terminal ni contraseña en cada cambio.
+- **Detecta el trabajo, no los procesos.** El modo automático permanece despierto solo mientras un agente de programación *produce salida de verdad*; cuando el agente se detiene, tu Mac puede volver a dormir.
 - **5 agentes listos para usar** — Claude Code, Codex, Cursor, opencode, Antigravity — y puedes añadir los que quieras.
 - **Protecciones que se adaptan.** Duerme automáticamente cuando la batería o la temperatura cruzan un límite peligroso.
-- **Consciente de la actividad remota.** No duerme mientras lo usas por SSH, compartir pantalla o Tailscale — y mantiene vivas las compilaciones remotas.
+- **Consciente de la actividad remota.** El modo automático reconoce SSH, compartir pantalla y Tailscale para mantener el trabajo remoto, sujeto a las protecciones de seguridad.
 - **Nunca lee tus conversaciones ni tu código.** La detección de agentes solo mira las marcas de tiempo del transcript, nunca su contenido.
 
 ---
 
 ## Funciones
 
-El objetivo es que tu agente siga trabajando — de forma **segura** — sin interrupciones. Todo lo de abajo está al servicio de eso.
+El objetivo es que tu agente siga trabajando — de forma **segura** — sin interrupciones. Todo lo de abajo está al servicio de eso. Los vídeos muestran menús anteriores; los controles actuales se describen en [Usage](#usage).
 
 ### Mantener despierto según el agente
 
@@ -42,7 +50,7 @@ El objetivo es que tu agente siga trabajando — de forma **segura** — sin int
 
 Es simple: deja que tu agente siga trabajando sin interrupciones.
 
-Por eso el interruptor sigue si el agente *está trabajando ahora mismo*, no si existe un proceso. Mientras trabaja, el Mac permanece despierto; cuando se detiene, se libera (modo **Strict**). También hay un modo **Lax** que simplemente mantiene despierto mientras el proceso esté vivo.
+El modo automático sigue si el agente *está trabajando ahora mismo*, no si existe un proceso. Mientras trabaja, el Mac permanece despierto; cuando se detiene, se libera (modo **Strict**). También hay un modo **Lax** que simplemente mantiene despierto mientras el proceso esté vivo.
 
 **Detectados por defecto (5):** Claude Code · Codex · Cursor · opencode · Antigravity.
 
@@ -69,17 +77,19 @@ Con la corriente desconectada y la tapa cerrada en una mochila, juzga con más c
 
 ![Demostración de la consciencia remota](docs/assets/eclam-demo-remote.gif)
 
-Electronic Clam no duerme mientras usas el Mac en remoto. Detecta SSH, compartir pantalla, Tailscale y apps de control remoto conocidas. Por defecto es simple: permanece despierto mientras estés conectado.
+En modo automático, Electronic Clam mantiene despierto el Mac durante el uso remoto, sujeto a las protecciones de seguridad. Detecta SSH, compartir pantalla, Tailscale y apps de control remoto conocidas. Por defecto es simple: permanece despierto mientras estés conectado.
 
-### Notificaciones de Telegram (desactivadas por defecto)
+### Notificaciones de chat — Telegram y Slack (desactivadas por defecto)
 
-Conecta tu propio bot de Telegram y recibirás un aviso cuando un agente se detenga o tu Mac se duerma — con el % de batería, la temperatura y el nombre del host.
+Conecta tu propio bot de Telegram o aplicación de Slack y recibirás un aviso cuando un agente se detenga o el Mac se duerma, con el porcentaje de batería, la temperatura y el nombre del host.
+
+Ambos servicios están en **Ajustes → Notificaciones** y son independientes: puedes activar uno o los dos. Los mensajes se envían únicamente al servicio configurado, con un token que tú creas y controlas; este queda en un archivo local de acceso exclusivo para tu usuario. Slack necesita una aplicación con el permiso de bot `chat:write` (añade `channels:read` para buscar canales por nombre), instalada en el espacio de trabajo e invitada al canal. Slack no admite entrega silenciosa, por lo que los mensajes periódicos llegan como cualquier otro: silencia el canal si no quieres avisos.
 
 ### Otros
 
 - **CLI + sesiones con nombre** — manéjalo directamente desde la terminal (ver [Usage](#usage)).
 - **Hooks de agente opcionales** — al instalarlos se inyecta un hook de señal de actividad en la configuración de Claude / Codex / Hermes; al desinstalarlos se restauran.
-- **Restauración del sueño garantizada al salir** — tres capas: restauración síncrona al salir, un manejador de SIGTERM y un watchdog de 20 segundos por si la app se cuelga.
+- **Restauración del reposo al salir** — la salida normal y SIGTERM liberan las solicitudes de energía, con un watchdog de 20 segundos en el helper para recuperar tras un fallo.
 - **Protección de la VPN frente al bloqueo en clamshell (opcional).** Sin pantalla externa y con batería, cerrar la tapa normalmente *bloquea* la pantalla — lo que tira una VPN SSL de FortiClient (necesita volver a iniciar sesión por SAML para reconectar). Una pantalla virtual invisible ancla la sesión, así que la pantalla no se bloquea y el túnel sobrevive. La acción **Apagar pantalla** también se divide en **Dim** (oscura pero segura para la VPN, por defecto) y **Sleep**, con una notificación opcional de desconexión de la VPN.
 - **Registro del helper resiliente** — no registra el helper en segundo plano desde una descarga en cuarentena ni desde una ubicación temporal (translocated), donde macOS lo bloquea; en su lugar te guía para mover la app a Applications. Ajustes → General señala copias duplicadas y discrepancias de versión, y `eclam repair` / **Reinstall Helper** recuperan un registro atascado.
 
@@ -94,18 +104,30 @@ Activa **Electronic Clam Helper** en **System Settings → General → Login Ite
 
 ## Usage
 
-**Haz clic izquierdo** en el icono de la barra de menús para alternar el modo despierto. **Haz clic derecho** para abrir el menú completo.
+El **clic izquierdo** alterna **Desactivado → Mac despierto → Mac y pantalla → Detección automática → Desactivado**. El **clic derecho** o **Control-click** abre el menú completo. La aplicación inicia en detección automática.
 
-El icono es una almeja con tres estados: concha en contorno (durmiendo), concha rellena + rayo (lo mantienes despierto tú) y concha rellena + marca remota (un agente, una sesión remota o una protección lo mantiene despierto automáticamente).
+| Modo | Icono | Comportamiento |
+|---|---|---|
+| **Desactivado** | Concha en contorno | Detiene la solicitud de mantener despierto y suprime la actividad automática hasta que elijas otro modo. |
+| **Mac despierto** | Concha rellena + rayo | Mantiene despierto el Mac sin solicitar protección de pantalla. |
+| **Mac y pantalla** | Concha rellena + sol con anillo | Mantiene despiertos el Mac y la pantalla. El sol aparece tras adquirir la protección de pantalla. |
+| **Detección automática** | Concha rellena + mando | Sigue los ajustes de agentes y conexiones remotas. El icono se atenúa mientras espera actividad. |
+
+![Cuatro modos de la barra de menús en apariencia clara y oscura](docs/assets/caffeine-menu-cycle-preview.png)
+
+Ajustes → General → **Incluir pantalla encendida en el ciclo del icono** está activado por defecto. Al desactivarlo se restaura el clic original de encendido/apagado según el estado efectivo y los tres iconos. Si lo desactivas desde Mac y pantalla, se cambia a Mac despierto y se libera la solicitud de pantalla. Se conservan las preferencias de desactivación guardadas.
+
+**Mantener la pantalla encendida puede retrasar el bloqueo automático y consume energía.** Puedes bloquear manualmente o usar Dim. Otras aplicaciones, la protección de bloqueo o Dim también pueden mantenerla encendida; la línea **Display held by** del menú muestra las solicitudes reales. Todos los modos siguen sujetos a las protecciones de seguridad, y un fallo del helper tiene prioridad sobre el icono normal.
 
 ### Menú
 
 | Elemento | Acción |
 |---|---|
 | Encabezado de estado | El estado actual de un vistazo (p. ej. «Dormir al estar inactivo», «Despierto — hasta que salga», «Despierto — sesión remota») |
-| **Mantener el Mac despierto** (⌘K) | Alternar el modo despierto |
+| **Mantener el Mac despierto** (⌘K) | Alternar directamente; conserva el atajo de encendido/apagado |
+| **Modo** ▸ | Selecciona directamente uno de los cuatro modos; aparece si el modo de pantalla está habilitado |
 | **Vigilar agentes** ▸ | Activar/desactivar los agentes a detectar (muestra « • activo» cuando lo está); **Personalizar…** al final |
-| **Apagar pantalla — seguir trabajando** | Apaga las pantallas pero mantiene el Mac y los agentes en marcha |
+| **Apagar pantalla — seguir trabajando** | Atenúa la pantalla integrada sin bloquear (por defecto) o pone las pantallas en reposo mientras continúa el trabajo |
 | **Ajustes…** (⌘,) | Abrir ajustes |
 | **Salir** (⌘Q) | Salir (restaura el sueño antes) |
 
@@ -129,13 +151,13 @@ eclam help
 
 ## Seguridad y privacidad
 
-- Lee los relojes de los archivos, no su contenido.
-- Sin telemetría, sin seguimiento, sin analíticas.
-- Se exige la verificación del llamante XPC.
-- Firmado con Developer ID + notarizado por Apple.
-- Los tokens se quedan en local.
-- El sueño siempre se restaura al salir o al fallar.
-- Una sola vía de permisos (`SMAppService`).
+- Lee las marcas de tiempo de los archivos, no su contenido.
+- Sin telemetría, seguimiento ni analíticas.
+- Las versiones Developer ID verifican al llamante XPC; las compilaciones ad-hoc de desarrollo lo desactivan.
+- Firmado con Developer ID y notarizado por Apple.
+- Los tokens se almacenan localmente con permisos exclusivos del usuario y solo se envían al servicio configurado.
+- La salida normal libera las solicitudes de energía; el watchdog del helper ofrece recuperación ante fallos.
+- Una única vía de permisos: `SMAppService`.
 
 Consulta [Seguridad y privacidad](docs/security.md) para más detalles.
 
@@ -170,6 +192,7 @@ open build/ElectronicClam.app
 
 Lanzamientos recientes — historial completo en [CHANGELOG.md](CHANGELOG.md):
 
+- **0.8.0** — Ciclo de cuatro modos, indicador de sol con anillo, disponibilidad del modo de pantalla activada por defecto respetando ajustes desactivados existentes y selección directa. [Notas de la versión](https://github.com/jadhvank/eclam/releases/tag/v0.8.0).
 - **0.7.0** — Opción para mantener la pantalla encendida, atenuación automática con restauración del brillo, notificaciones de Slack e instalación y limpieza de Homebrew mejoradas. La vigilancia de la VPN ya no impide por sí sola el reposo. [Notas de la versión](https://github.com/jadhvank/eclam/releases/tag/v0.7.0).
 - **0.6.5** — Corrección: con la protección de bloqueo en clamshell activada, conectar un televisor mediante **duplicado de pantalla** ya funciona. Las pantallas conectadas en modo espejo (un televisor duplicado, AirPlay) eran invisibles para la protección: macOS excluye a los miembros de un conjunto de espejo de la lista de pantallas activas y reporta todo el conjunto como una sola pantalla. Por eso el ancla invisible seguía volviendo a espejar y a recrearse justo mientras macOS negociaba la sesión de duplicado. Las pantallas extendidas (una al lado de otra) nunca se vieron afectadas. Además, el ancla ya no se crea mientras hay un conjunto de espejo activo: en ese caso quedaba una pantalla virtual imposible de recuperar y la protección dejaba de funcionar hasta cerrar la sesión.
 - **0.6.4** — Correcciones de la protección de la VPN frente al bloqueo en clamshell: la notificación de desconexión de la VPN ahora sí se dispara (la vigilancia se detenía por el propio evento que debía notificar y por App Nap), el ancla invisible se libera al salir de la app, la pantalla virtual tiene un nombre claro y el brillo se restaura al volver a abrir la tapa después de **Dim**. Además, la barra de menús ya no repite el callejón sin salida «muévela a Aplicaciones» cuando solo queda un atributo de cuarentena, y el corte térmico por defecto pasa de `fair` a `serious` (el valor anterior podía terminar un keep-awake en pocos minutos).

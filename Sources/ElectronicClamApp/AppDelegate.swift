@@ -130,7 +130,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return .init(keep: self.store.shouldKeepAwake,
                          displayHeld: self.virtualDisplayController?.isHoldingDisplay == true
                             || self.displayAwakeHolder?.isHolding == true,
-                         keepDisplayOption: self.store.keepDisplayAwakeEnabled)
+                         keepDisplayOption: self.store.keepDisplayAwakeRequested)
         })
 
         // Wire store → convergence engine (debounced XPC).
@@ -452,6 +452,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             heartbeatArmed.value = false
             lastWrittenSleepDisabled = nil
             displayAwakeHolder?.apply(keepAwake: false)
+            store.update(displayAwakeActive: false)
             dimmer.requestRestore(reason: .helperUnavailable)
             virtualDisplayController?.apply(keepAwake: false, externalDisplayPresent: store.extDisplayPresent)
             autoDim?.update()
@@ -465,7 +466,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // signals (agent/remote) the user just clicked away. Once those have all
         // cleared it has nothing left to suppress, so clear it (per its contract,
         // StateStore.swift) and let future activity wake the Mac again.
-        if store.manualOverrideOff && !store.manualToggle
+        if store.canResumeAutomaticWhenIdle && !store.manualToggle
             && store.activeAgents.isEmpty
             && !(store.remoteCountsAsActivity && store.remoteActive) {
             store.setManualOverrideOff(false)
@@ -498,7 +499,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // 막지 못하므로, 화면까지 켜 두려면 별도 assertion 이 필요하다. 위 둘과 같은
         // 이유로 no-op early-return **위**에 둔다 — keep 이 그대로여도 설정만 바뀐 수렴을
         // 반영해야 한다.
-        displayAwakeHolder?.apply(keepAwake: target && store.keepDisplayAwakeEnabled)
+        displayAwakeHolder?.apply(keepAwake: target && store.keepDisplayAwakeRequested)
+        store.update(displayAwakeActive: displayAwakeHolder?.isHolding == true)
         autoDim?.update()
 
         if let last = lastWrittenSleepDisabled, last == target { return }

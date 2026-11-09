@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """Regenerate the menu-bar status glyphs from the clam art pack.
 
-Source art lives in Resources/icon-src/menubar/ as six 1024x1024 PNGs:
-  clam.{light,dark}.{off,on.bolt,on.remote}.png
+Source art lives in Resources/icon-src/menubar/ as eight 1024x1024 PNGs:
+  clam.{light,dark}.{off,on.bolt,on.sun,on.remote}.png
   - "light" art is black-on-transparent (drawn for a light menu bar)
   - "dark"  art is white-on-transparent (drawn for a dark menu bar)
-The three states are off (outline shell = asleep), on.bolt (filled shell +
+The states are off (outline shell = asleep), on.bolt (filled shell +
 lightning = the user is holding sleep open), on.remote (filled shell + remote =
-an automatic signal is holding it).
+an automatic signal is holding it), and on.sun (display mode).
 
-All six are drawn on the same canvas with the same content bounding box, so we
+All eight are drawn on the same canvas with the same content bounding box, so we
 crop every image to the *union* bbox (one rectangle) before resizing. That keeps
-the three states identically framed in the menu bar — no per-image trim drift.
+all states identically framed in the menu bar — no per-image trim drift.
 
 Output (Resources/, consumed by MenuBarController.statusImage):
-  clam-{off,bolt,remote}-{light,dark}.png   (height 144, aspect preserved)
+  clam-{off,bolt,sun,remote}-{light,dark}.png   (height 144, aspect preserved)
 
 MenuBarController draws the "light" (black) art as a *template* for the System
 theme (the menu bar tints it per appearance) and as-is for the Light theme; the
@@ -33,6 +33,8 @@ OUT_HEIGHT = 144   # NSImage downscales to ~18pt; 144 keeps Retina crisp.
 
 # source filename -> bundled output name
 MAP = {
+    "clam.light.on.sun.png":    "clam-sun-light.png",
+    "clam.dark.on.sun.png":     "clam-sun-dark.png",
     "clam.light.off.png":       "clam-off-light.png",
     "clam.light.on.bolt.png":   "clam-bolt-light.png",
     "clam.light.on.remote.png": "clam-remote-light.png",

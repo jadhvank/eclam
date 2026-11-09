@@ -243,18 +243,17 @@ final class GeneralPaneViewController: NSViewController {
         vpnServiceNote.stringValue = NSL("general.vpnServiceNote",
             "Pick a VPN and enable notifications. Configured chat notifications need a working network; FortiClient may require sign-in again.")
 
-        // 디스플레이 keep-awake — 헬퍼의 SleepDisabled 는 시스템·클램쉘 잠자기만 막고
-        // idle display sleep 은 막지 않는다. 화면까지 켜 두고 싶은 사용자를 위한 opt-in
-        // 으로, `caffeinate -d` 와 같은 assertion 을 keep 신호 동안에만 잡는다.
+        // Include display mode in the icon cycle. Enabling this preference
+        // does not acquire an assertion until the user selects that mode.
         // "Blank screen" 과 같은 디스플레이 축이라 바로 위에 둔다.
         keepDisplayAwakeCheckbox.translatesAutoresizingMaskIntoConstraints = false
         keepDisplayAwakeCheckbox.title = NSL("general.keepDisplayAwake",
-            "Keep the display on too (like caffeinate -d)")
+            "Include screen-on mode in the icon cycle")
         keepDisplayAwakeCheckbox.target = self
         keepDisplayAwakeCheckbox.action = #selector(keepDisplayAwakeToggled)
         keepDisplayAwakeCheckbox.state = store.keepDisplayAwakeEnabled ? .on : .off
         keepDisplayAwakeCheckbox.toolTip = NSL("general.tip.keepDisplayAwake",
-            "Keep the display awake while work keeps the Mac awake. This may delay automatic locking and uses display power. Off by default. Turning this on restores automatic Dim; manual Dim remains available.")
+            "Enabled by default. Click the menu-bar icon to cycle Off → Awake → Awake + screen → Auto. Only Awake + screen keeps the display on and may delay automatic locking. Turning this setting off restores the original on/off click.")
         let displayAwakeRow = Self.formRow(NSL("general.display", "Display"),
                                            control: keepDisplayAwakeCheckbox)
 
@@ -263,7 +262,7 @@ final class GeneralPaneViewController: NSViewController {
         keepDisplayAwakeNote.textColor = .secondaryLabelColor
         keepDisplayAwakeNote.isSelectable = false
         keepDisplayAwakeNote.stringValue = NSL("general.keepDisplayAwakeNote",
-            "With this off, lock guard can still keep the display awake. The built-in screen then dims after the system display-off interval and restores when you return. “Never” disables automatic Dim.")
+            "Choose Awake + screen to keep the display on. Other modes allow automatic Dim when lock guard holds the display; manual Dim remains available.")
 
         // ADR-0037 §#8 — "Blank screen" 동작 모드: Dim(기본·VPN-안전) vs Sleep.
         // themePopup 과 동일한 popup form-row 문법. Sleep 선택 시 아래 경고 노트가
@@ -905,21 +904,10 @@ final class GeneralPaneViewController: NSViewController {
         store.setClamshellLockGuard(clamshellGuardCheckbox.state == .on)
     }
 
-    /// 디스플레이 keep-awake opt-in 영속. StateStore 세터가 onChange → convergeNow →
-    /// `DisplayAwakeHolder.apply` 로 이어져 assertion 을 즉시 잡거나 놓는다.
+    /// Persist mode availability. Disabling exits display mode; enabling only
+    /// exposes it, so this preference no longer needs an activation warning.
     @objc private func keepDisplayAwakeToggled() {
         let enabled = keepDisplayAwakeCheckbox.state == .on
-        if enabled && !store.keepDisplayAwakeEnabled {
-            let alert = NSAlert()
-            alert.messageText = NSL("display.enable.title", "Keep the display awake?")
-            alert.informativeText = NSL("display.enable.body", "While work keeps your Mac awake, this also delays display sleep and automatic locking. You can still lock your Mac manually. Dim can lower brightness without locking.")
-            alert.addButton(withTitle: NSL("display.enable.confirm", "Enable"))
-            alert.addButton(withTitle: NSL("display.enable.cancel", "Cancel"))
-            if alert.runModal() != .alertFirstButtonReturn {
-                keepDisplayAwakeCheckbox.state = .off
-                return
-            }
-        }
         store.setKeepDisplayAwake(enabled)
     }
 

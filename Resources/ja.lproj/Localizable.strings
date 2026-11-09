@@ -416,9 +416,9 @@
 "general.vpnServiceNote" = "VPNを選び通知を有効にしてください。チャット通知にはネット接続が必要です。FortiClientへの再ログインが必要な場合があります。";
 "general.vpnService.none" = "（VPN サービスが見つかりません — VPN アプリを開いてください）";
 "general.display" = "ディスプレイ";
-"general.keepDisplayAwake" = "画面も点けたままにする（caffeinate -d と同じ）";
-"general.tip.keepDisplayAwake" = "作業中にMacが起きている間、画面も維持します。自動ロックが遅れ、画面の電力を使います。初期設定はオフです。オンにすると自動で暗くした画面を復元します。手動で暗くする機能は引き続き使えます。";
-"general.keepDisplayAwakeNote" = "オフでもロック防止が画面を維持することがあります。その場合、作業中はシステムの画面オフ時間が経過すると内蔵画面を自動で暗くし、戻ると復元します。「しない」の設定では自動で暗くしません。";
+"general.keepDisplayAwake" = "アイコンの切り替えに画面維持モードを含める";
+"general.tip.keepDisplayAwake" = "初期設定はオンです。クリックでオフ → Macを起動状態に維持 → Macと画面を維持 → 自動検出の順に切り替わります。画面維持中は自動ロックが遅れる場合があります。この設定をオフにすると従来のオン／オフ操作に戻ります。";
+"general.keepDisplayAwakeNote" = "画面を維持するには「Macと画面を維持」を選びます。他のモードではロック防止が画面を維持している間に自動減光できます。手動減光も利用できます。";
 "general.blankScreen" = "画面オフ";
 "blankMode.dim" = "暗くする（VPN 維持）";
 "blankMode.sleep" = "ディスプレイをスリープ";
@@ -505,3 +505,14 @@
 "slack.error.rejected" = "Slackがリクエストを拒否しました。ボットの権限と送信先を確認してください。";
 
 "notification.error.saveSettings" = "設定を保存できませんでした。変更は現在のセッションのみ有効です。再起動すると以前の設定に戻る可能性があります。保存を再試行してください。";
+
+// Four-mode menu-bar cycle (display mode availability defaults on).
+"mode.off" = "オフ";
+"mode.awake" = "Macを維持";
+"mode.display" = "Macと画面を維持";
+"mode.automatic" = "自動検出";
+"mode.automaticWaiting" = "自動検出 — 活動待ち";
+"mode.displayPending" = "Macを維持 — 画面維持を待機中";
+"mode.cooldown" = "安全ガード — 再開待ち";
+"menu.nextMode" = "クリック: %@";
+"menu.wakeMode" = "モード";

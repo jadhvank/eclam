@@ -404,4 +404,12 @@ swiftc -target "$TARGET" -framework Foundation \
     "$ROOT/Tests/NotificationDeliveryTests.swift" -o "$TMP/notification-delivery"
 "$TMP/notification-delivery"
 
+# Menu-bar selection, legacy opt-out and display request gating.
+echo "==> Compiling menu-bar mode tests"
+swiftc -target "$TARGET" -o "$TMP/eclam_menubarmodetests" \
+    "$ROOT/Sources/ElectronicClamApp/MenuBarWakeState.swift" \
+    "$ROOT/Sources/ElectronicClamApp/SafetyPolicy.swift" \
+    "$ROOT/Tests/MenuBarWakeStateTests.swift"
+"$TMP/eclam_menubarmodetests"
+
 echo "==> All tests passed"

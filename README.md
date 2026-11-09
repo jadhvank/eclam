@@ -10,31 +10,39 @@ It detects *work*, not just a running process.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.7.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.0-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
-
-![Electronic Clam menu demo](docs/assets/eclam-menu-demo.gif)
 
 </div>
 
 ---
 
+## New in v0.8.0 — screen-on mode in the menu bar
+
+- **Click to cycle:** Off → Awake → Awake + screen → Auto detection. The new **ring-sun icon** identifies screen-on mode without opening a menu.
+- **Enabled by default:** Settings → General → **Include screen-on mode in the icon cycle**. Turn it off to keep the original on/off click and three icons. An explicitly saved OFF preference stays off after upgrading.
+- **Choose when to keep the screen on:** enabling the setting only adds the mode. Select **Awake + screen** to activate it; Auto detects work without requesting screen-on protection. Safety guards still take priority.
+
+[Release notes](https://github.com/jadhvank/eclam/releases/tag/v0.8.0) · [Full changelog](CHANGELOG.md)
+
+---
+
 ## Highlights
 
-- **Lid-closed keep-awake.** One toggle stops your Mac from sleeping even with the lid shut — no terminal commands, no password per toggle.
-- **Detects work, not processes.** Stays awake only while a coding agent is *actively producing output*; once the agent stops, your Mac can sleep again.
+- **Lid-closed keep-awake.** Awake mode stops your Mac from sleeping even with the lid shut — no terminal commands, no password per toggle.
+- **Detects work, not processes.** Auto mode stays awake only while a coding agent is *actively producing output*; once the agent stops, your Mac can sleep again.
 - **5 agents out of the box** — Claude Code, Codex, Cursor, opencode, Antigravity — plus any others you add yourself.
 - **Safety guards that adapt.** Auto-sleeps when battery or temperature crosses a danger line.
-- **Remote-activity aware.** Won't sleep while you're on it over SSH, screen sharing, or Tailscale — and keeps remote builds alive.
+- **Remote-activity aware.** Auto mode recognizes SSH, screen sharing, and Tailscale activity to keep remote work running, subject to safety guards.
 - **Never reads your conversations or code.** Agent detection only looks at transcript timestamps, never their contents.
 
 ---
 
 ## Features
 
-The goal is to keep your agent working — **safely** — without interruption. Everything below serves that.
+The goal is to keep your agent working — **safely** — without interruption. Everything below serves that. Demo clips show earlier menu layouts; the current controls are described in [Usage](#usage).
 
 ### Agent-aware keep-awake
 
@@ -42,7 +50,7 @@ The goal is to keep your agent working — **safely** — without interruption. 
 
 The point is simple: let your agent keep working, uninterrupted.
 
-So the toggle tracks whether the agent is *working right now*, not whether a process exists. While it works, the Mac stays awake; when it stops, the hold releases (**Strict** mode). A **Lax** mode that simply stays awake while the process is alive is also available.
+Auto mode tracks whether the agent is *working right now*, not whether a process exists. While it works, the Mac stays awake; when it stops, the hold releases (**Strict** mode). A **Lax** mode that simply stays awake while the process is alive is also available.
 
 **Detected by default (5):** Claude Code · Codex · Cursor · opencode · Antigravity.
 
@@ -69,7 +77,7 @@ With AC unplugged and the lid closed in a bag it judges more conservatively, the
 
 ![Remote awareness demo](docs/assets/eclam-demo-remote.gif)
 
-Electronic Clam won't sleep while you're using the Mac remotely. It detects SSH, screen sharing, Tailscale, and known remote-control apps. The default is simple: stay awake as long as you're connected.
+In Auto mode, Electronic Clam keeps the Mac awake while you use it remotely, subject to safety guards. It detects SSH, screen sharing, Tailscale, and known remote-control apps. The default is simple: stay awake as long as you're connected.
 
 ### Chat notifications — Telegram and Slack (off by default)
 
@@ -81,7 +89,7 @@ Both backends live in **Settings → Notifications** and are independent: enable
 
 - **CLI + named sessions** — drive it straight from the terminal (see [Usage](#usage)).
 - **Optional agent hooks** — installing injects an activity-signal hook into Claude / Codex / Hermes configs; uninstalling restores them.
-- **Guaranteed sleep restore on exit** — three layers: synchronous restore on quit, a SIGTERM handler, and a 20-second watchdog if the app crashes.
+- **Sleep restoration on exit** — normal quit and SIGTERM release power holds, with a 20-second helper watchdog for crash recovery.
 - **Clamshell VPN lock guard (opt-in).** With no external display on battery, closing the lid normally *locks* the screen — which drops a FortiClient SSL VPN (it needs a SAML re-login to reconnect). An invisible virtual display anchors the session so the screen doesn't lock and the tunnel survives. The **Blank screen** action also splits into **Dim** (dark but VPN-safe, default) vs **Sleep**, with an optional VPN-disconnect notification.
 - **Resilient helper setup** — won't register the background helper from a quarantined download or a temporary (translocated) location, where macOS blocks it; it guides you to move the app to Applications instead. Settings → General flags duplicate copies and version mismatches, and `eclam repair` / **Reinstall Helper** recover a wedged registration.
 
@@ -96,16 +104,28 @@ Turn on **Electronic Clam Helper** in **System Settings → General → Login It
 
 ## Usage
 
-**Left-click** the menu bar icon to toggle keep-awake. **Right-click** opens the full menu.
+**Left-click** cycles **Off → Awake → Awake + screen → Auto detection → Off**. **Right-click** or **Control-click** opens the full menu. The app starts in Auto detection.
 
-The icon is a clam shell with three states: an outline shell (asleep), a filled shell + bolt (you're holding it awake), and a filled shell + remote mark (an agent, remote session, or safety hold is keeping it awake automatically).
+| Mode | Icon | Behavior |
+|---|---|---|
+| **Off** | Outline shell | Stops the app's keep-awake request and suppresses automatic activity until you choose another mode. |
+| **Awake** | Filled shell + lightning | Keeps the Mac awake without requesting display protection. |
+| **Awake + screen** | Filled shell + ring sun | Keeps the Mac and screen awake. The sun appears after screen protection is acquired. |
+| **Auto detection** | Filled shell + remote | Follows your agent and remote settings. The icon is dimmed while waiting for activity. |
+
+![Four menu-bar modes in light and dark appearances](docs/assets/caffeine-menu-cycle-preview.png)
+
+Settings → General → **Include screen-on mode in the icon cycle** is ON by default. Turning it OFF restores the original effective-awake on/off click and three-state icon. If you turn it off while using Awake + screen, the app switches to Awake and releases its screen-on request. Existing saved OFF preferences are preserved.
+
+**Screen protection can delay automatic locking and uses display power.** You can still lock manually or use Dim. Other apps, lock guard, or Dim may also hold the screen awake; the menu's **Display held by** line shows actual display assertions. All modes remain subject to the safety guards, and a helper failure takes precedence over the normal icon.
 
 ### Menu
 
 | Item | Action |
 |---|---|
 | Status header | Current state at a glance (e.g., "Asleep when idle", "Awake — until I quit", "Awake — remote session") |
-| **Keep Mac Awake** (⌘K) | Toggle keep-awake |
+| **Keep Mac Awake** (⌘K) | Toggle keep-awake directly; this remains an on/off shortcut |
+| **Mode** ▸ | Select one of the four modes directly; shown when screen-on mode is enabled |
 | **Watch Agents** ▸ | Enable/disable the agents to detect (shows " • active" when one is); **Customize…** at the bottom |
 | **Blank screen — keep working** | Dim the built-in screen without locking (default), or sleep the displays; keep work running |
 | **Settings…** (⌘,) | Open settings |
@@ -172,6 +192,7 @@ open build/ElectronicClam.app
 
 Recent releases — full history in [CHANGELOG.md](CHANGELOG.md):
 
+- **0.8.0** — Four-mode icon cycle, the ring-sun screen-on indicator, default-on mode availability with existing OFF preferences preserved, and direct mode selection. See [release notes](https://github.com/jadhvank/eclam/releases/tag/v0.8.0).
 - **0.7.0** — Optional display keep-awake, automatic Dim with brightness restoration, Slack notifications, a safer local installer, and current Homebrew cleanup. VPN observation no longer prevents sleep by itself. See [release notes](https://github.com/jadhvank/eclam/releases/tag/v0.7.0).
 - **0.6.5** — Fix: with the clamshell lock guard enabled, connecting a TV via **screen mirroring** now works. Mirrored displays (a mirrored TV, AirPlay) were invisible to the guard — macOS drops a mirror-set member from the active display list and reports the whole mirror set as a single screen — so the invisible anchor kept re-mirroring and re-creating itself while macOS was negotiating the mirror session. Extended (side-by-side) displays were never affected. The guard also no longer creates its anchor while a mirror set is active, which used to leave an unreclaimable virtual display behind and disable the guard for the rest of the login session.
 - **0.6.4** — Fixes for the clamshell VPN lock guard: the VPN-disconnect notification now actually fires (it was stopped by the very event it reports, and by App Nap), the invisible anchor is released when you quit the app, the virtual display is named clearly, and brightness is restored when you reopen the lid after **Dim**. Also: the menu-bar item no longer shows a dead-end "move to Applications" prompt when only a quarantine attribute is left, and the thermal cutoff default moved from `fair` to `serious` (the old default could end a keep-awake session within minutes).
