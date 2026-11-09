@@ -90,14 +90,14 @@ cp "$ROOT/Resources/com.jadhvank.eclam.helper.plist" \
     "$LD_DIR/com.jadhvank.eclam.helper.plist"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
-# Menu bar status glyphs (clam art): 3 states (off/bolt/remote) x 2 themes
+# Menu bar status glyphs (clam art): 4 states (off/bolt/sun/remote) x 2 themes
 # (light/dark). MenuBarController picks the variant per state and the Menu Bar
 # Icon theme setting (System/Light/Dark); System renders the light art as a
 # template so the menu bar tints it per appearance. Regenerate from
 # Resources/icon-src/menubar/ via scripts/make-menubar-icons.py.
 # Optional during early dev: if missing, the app falls back to SF Symbols.
-for icon in clam-off-light clam-bolt-light clam-remote-light \
-            clam-off-dark  clam-bolt-dark  clam-remote-dark; do
+for icon in clam-off-light clam-bolt-light clam-sun-light clam-remote-light \
+            clam-off-dark  clam-bolt-dark  clam-sun-dark clam-remote-dark; do
     if [[ -f "$ROOT/Resources/$icon.png" ]]; then
         cp "$ROOT/Resources/$icon.png" "$RES_DIR/$icon.png"
     else

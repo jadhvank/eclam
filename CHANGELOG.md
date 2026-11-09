@@ -4,6 +4,14 @@ All notable changes to Electronic Clam are documented here.
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-11-09
+
+- **Four-mode menu-bar cycle** — left-click cycles Off → Awake → Awake + screen → Auto detection. Right-click and Control-click still open the menu; the existing Keep Mac Awake shortcut stays binary. A Mode submenu offers direct selection.
+- **Ring-sun display indicator** — the original shell silhouette gains a ring sun with eight rays. It appears only after the display assertion is acquired. Auto detection remains visible, dimmed while waiting; safety and helper errors take precedence.
+- **Screen-on mode available by default** — the setting now controls whether the fourth mode is available, rather than keeping the screen on for every awake session. Missing preferences default ON; explicitly saved OFF remains OFF and uses the original click behavior. Choose Awake + screen to activate display protection. Disabling the setting in that mode falls back to Awake.
+- **Explicit OFF in the cycle** — automatic activity does not reactivate it until the next mode selection. Auto continues to respect existing agent and remote preferences. Battery, temperature, cooldown, and timer policies remain in force.
+- **Documentation** — current controls and upgrade behavior now lead the README, with synchronized usage, icon descriptions, and localized documentation.
+
 ## [0.7.0] — 2026-11-04
 
 - **Automatic Dim while the lock guard holds the display** — with display keep-awake off, the built-in panel follows the current macOS display-off interval. “Never” disables automatic Dim. Input, lid opening and wake restore brightness with a fresh idle grace; turning display keep-awake on restores automatic Dim while leaving manual Dim available. The existing brightness snapshot and recovery journal remain the single restoration path.

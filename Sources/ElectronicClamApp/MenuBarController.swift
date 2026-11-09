@@ -38,7 +38,8 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         if let o = screenObserver { NotificationCenter.default.removeObserver(o) }
     }
 
-    /// ADR-0014 — left-click toggles the effective awake state (no double-click).
+    /// ADR-0042 — left-click cycles modes when enabled, otherwise uses the
+    /// ADR-0014 effective-state toggle (no double-click).
     /// Right-click pops the menu. We do NOT permanently assign `statusItem.menu`
     /// so AppKit doesn't auto-pop on left click; right-click is handled by an
     /// NSEvent local monitor (the button's `.rightMouseUp` action routing is
@@ -222,7 +223,21 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             popMenu()
             return
         }
-        toggleAwake()
+        guard store.keepDisplayAwakeEnabled else {
+            toggleAwake()
+            return
+        }
+        guard isEnabled else { openSettingsTapped(); return }
+        store.advanceMenuBarWakeMode()
+        applySelectedWakeMode()
+        refresh()
+    }
+
+    private func applySelectedWakeMode() {
+        let target = store.shouldKeepAwake
+        // Cancel before writing OFF: a CLI hold otherwise vetoes that write.
+        if !target && store.cliHoldActive { bridge.cancelHold() }
+        bridge.setSleepDisabled(target) { _ in }
     }
 
     /// ADR-0014 — a single left-click toggles the *effective* awake state,
@@ -236,7 +251,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             openSettingsTapped()
             return
         }
-        if store.shouldKeepAwake {
+        if store.shouldKeepAwake || store.cliHoldActive {
             // Awake by any cause → the user wants sleep now. setManualOverrideOff
             // clears manualToggle too and suppresses agent/remote auto-signals.
             store.setManualOverrideOff(true)
@@ -263,14 +278,22 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     /// Menu bar glyph height in points. Status bar is ~22pt tall; 18pt leaves padding.
     private static let statusIconHeight: CGFloat = 18
 
-    /// The three menu-bar glyphs (ADR-0005 §1 art set):
+    /// Menu-bar glyphs (ADR-0015, extended by ADR-0042):
     ///   off    — outline shell (asleep)
     ///   bolt   — filled shell + lightning (the user is holding sleep open)
-    ///   remote — filled shell + remote (an automatic signal is holding it)
-    private enum GlyphState: String { case off, bolt, remote }
+    ///   remote — filled shell + remote (auto; dimmed while waiting)
+    ///   sun    — filled shell + ring sun (display assertion acquired)
+    private enum GlyphState: String { case off, bolt, sun, remote }
 
     private func renderStatusButton() {
         guard let button = statusItem.button else { return }
+        button.alphaValue = 1
+        let statusText = headerString(for: store.registration, sleepDisabled: store.sleepDisabled).text
+        button.toolTip = statusText
+        if store.keepDisplayAwakeEnabled && isEnabled && !store.helperUnreachable {
+            button.toolTip = statusText + "\n" + NSLf("menu.nextMode",
+                "Click: %@", modeTitle(store.menuBarWakeMode.next))
+        }
         // P1-a — registered but the helper isn't answering: never render a
         // filled "holding awake" glyph (it would lie). Flag it on the menu bar
         // itself so the silent keep-awake failure is visible without opening the
@@ -289,17 +312,30 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             return
         }
         let on = store.shouldKeepAwake && isEnabled
-        // 3-way: off / manual-awake (bolt) / auto-awake (remote = agent, remote,
-        // or safety hold). The bolt is reserved for `manualToggle` so the user
-        // can tell at a glance whether *they* are holding sleep open or whether
-        // some automatic signal is doing it.
+        // The opt-out path retains the three original effective-state glyphs.
+        // With the cycle enabled, auto is visible while waiting and the sun
+        // appears only after the display assertion has actually been acquired.
         let state: GlyphState
         let fallbackSymbol: String
         let accessibility: String
-        if !on {
+        let watching = store.keepDisplayAwakeEnabled
+            && store.menuBarWakeMode == .automatic && isEnabled
+            && store.safetyRelease == nil
+            && !(store.safetyCooldownUntil.map { $0 > Date() } ?? false)
+        if watching {
+            state = .remote
+            fallbackSymbol = "antenna.radiowaves.left.and.right"
+            accessibility = on ? NSL("a11y.awakeAuto", "Awake (auto)")
+                               : NSL("mode.automaticWaiting", "Auto — waiting for activity")
+            button.alphaValue = on ? 1 : 0.55
+        } else if !on {
             state = .off
             fallbackSymbol = "lightbulb"
             accessibility = NSL("a11y.asleep", "Asleep")
+        } else if store.keepDisplayAwakeRequested && store.displayAwakeActive {
+            state = .sun
+            fallbackSymbol = "sun.max"
+            accessibility = NSL("mode.display", "Awake + screen")
         } else if store.manualToggle {
             state = .bolt
             fallbackSymbol = "lightbulb.fill"
@@ -380,6 +416,22 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         toggle.state = (store.manualToggle && isEnabled) ? .on : .off
         toggle.isEnabled = canToggle
         menu.addItem(toggle)
+
+        if store.keepDisplayAwakeEnabled {
+            let modes = NSMenuItem(title: NSL("menu.wakeMode", "Mode"), action: nil, keyEquivalent: "")
+            let choices = NSMenu()
+            choices.autoenablesItems = false
+            for mode in MenuBarWakeMode.allCases {
+                let choice = NSMenuItem(title: modeTitle(mode), action: #selector(modeTapped(_:)), keyEquivalent: "")
+                choice.target = self
+                choice.tag = mode.rawValue
+                choice.state = store.menuBarWakeMode == mode ? .on : .off
+                choice.isEnabled = canToggle
+                choices.addItem(choice)
+            }
+            modes.submenu = choices
+            menu.addItem(modes)
+        }
 
         // 3. Watch Agents — submenu.
         let watch = NSMenuItem(title: NSL("menu.watchAgents", "Watch Agents"), action: nil, keyEquivalent: "")
@@ -538,6 +590,22 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             }
             return NSLf("header.awakeCliHold", "Awake — CLI hold · %@ left",
                         DurationParse.shortFormat(seconds: store.cliHoldRemainingSeconds))
+        }
+
+        if store.keepDisplayAwakeEnabled {
+            if store.shouldKeepAwake && store.keepDisplayAwakeRequested {
+                return store.displayAwakeActive
+                    ? NSL("mode.display", "Awake + screen")
+                    : NSL("mode.displayPending", "Awake — screen hold pending")
+            }
+            if !store.shouldKeepAwake {
+                if store.safetyCooldownUntil.map({ $0 > Date() }) ?? false {
+                    return NSL("mode.cooldown", "Guard active — cooling down")
+                }
+                if store.menuBarWakeMode == .automatic {
+                    return NSL("mode.automaticWaiting", "Auto — waiting for activity")
+                }
+            }
         }
 
         // 6. Remote session — spec priority: beats agent header.
@@ -736,6 +804,22 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     // MARK: - Actions
+
+    private func modeTitle(_ mode: MenuBarWakeMode) -> String {
+        switch mode {
+        case .off: return NSL("mode.off", "Off")
+        case .awake: return NSL("mode.awake", "Awake")
+        case .display: return NSL("mode.display", "Awake + screen")
+        case .automatic: return NSL("mode.automatic", "Auto detection")
+        }
+    }
+
+    @objc private func modeTapped(_ sender: NSMenuItem) {
+        guard isEnabled, let mode = MenuBarWakeMode(rawValue: sender.tag) else { return }
+        store.setMenuBarWakeMode(mode)
+        applySelectedWakeMode()
+        refresh()
+    }
 
     @objc private func toggleTapped() {
         // If helper is not enabled, surface a fix path based on current state.

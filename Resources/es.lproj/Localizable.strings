@@ -416,9 +416,9 @@
 "general.vpnServiceNote" = "Elige una VPN y activa las notificaciones. Los avisos de chat necesitan red; FortiClient puede requerir iniciar sesión otra vez.";
 "general.vpnService.none" = "(no se encontraron servicios VPN — abre tu app de VPN)";
 "general.display" = "Pantalla";
-"general.keepDisplayAwake" = "Mantener también la pantalla encendida (como caffeinate -d)";
-"general.tip.keepDisplayAwake" = "Mantiene la pantalla activa mientras el trabajo mantiene activo el Mac. Puede retrasar el bloqueo automático y consume energía. Desactivado por defecto. Al activarlo se restaura la atenuación automática; la manual sigue disponible.";
-"general.keepDisplayAwakeNote" = "Aunque esté desactivado, la protección de bloqueo puede mantener la pantalla activa. En ese caso, la pantalla integrada se atenúa tras el tiempo de apagado del sistema y se restaura cuando vuelves. «Nunca» desactiva la atenuación automática.";
+"general.keepDisplayAwake" = "Incluir pantalla encendida en el ciclo del icono";
+"general.tip.keepDisplayAwake" = "Activado por defecto. Haz clic para alternar: Desactivado → Mac despierto → Mac y pantalla → Detección automática. Solo Mac y pantalla mantiene la pantalla encendida y puede retrasar el bloqueo automático. Desactivar este ajuste restaura el clic de encendido y apagado original.";
+"general.keepDisplayAwakeNote" = "Selecciona Mac y pantalla para mantener la pantalla encendida. Los otros modos permiten atenuación automática cuando la protección de bloqueo mantiene la pantalla; la atenuación manual sigue disponible.";
 "general.blankScreen" = "Apagar pantalla";
 "blankMode.dim" = "Atenuar (mantener VPN)";
 "blankMode.sleep" = "Suspender pantallas";
@@ -505,3 +505,14 @@
 "slack.error.rejected" = "Slack rechazó la solicitud. Comprueba los permisos del bot y el destino.";
 
 "notification.error.saveSettings" = "No se pudo guardar la configuración. Los cambios solo se aplican a esta sesión; al reiniciar puede volver la configuración anterior. Intenta guardar otra vez.";
+
+// Four-mode menu-bar cycle (display mode availability defaults on).
+"mode.off" = "Desactivado";
+"mode.awake" = "Mac despierto";
+"mode.display" = "Mac y pantalla";
+"mode.automatic" = "Detección automática";
+"mode.automaticWaiting" = "Automático — esperando actividad";
+"mode.displayPending" = "Mac despierto — esperando pantalla";
+"mode.cooldown" = "Protección activa — esperando reanudación";
+"menu.nextMode" = "Clic: %@";
+"menu.wakeMode" = "Modo";

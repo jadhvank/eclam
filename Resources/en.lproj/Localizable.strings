@@ -418,9 +418,9 @@
 "general.vpnServiceNote" = "Pick a VPN and enable notifications. Configured chat notifications need a working network; FortiClient may require sign-in again.";
 "general.vpnService.none" = "(no VPN services found — open your VPN app)";
 "general.display" = "Display";
-"general.keepDisplayAwake" = "Keep the display on too (like caffeinate -d)";
-"general.tip.keepDisplayAwake" = "Keep the display awake while work keeps the Mac awake. This may delay automatic locking and uses display power. Off by default. Turning this on restores automatic Dim; manual Dim remains available.";
-"general.keepDisplayAwakeNote" = "With this off, lock guard can still keep the display awake. The built-in screen then dims after the system display-off interval and restores when you return. “Never” disables automatic Dim.";
+"general.keepDisplayAwake" = "Include screen-on mode in the icon cycle";
+"general.tip.keepDisplayAwake" = "Enabled by default. Click the menu-bar icon to cycle Off → Awake → Awake + screen → Auto. Only Awake + screen keeps the display on and may delay automatic locking. Turning this setting off restores the original on/off click.";
+"general.keepDisplayAwakeNote" = "Choose Awake + screen to keep the display on. Other modes allow automatic Dim when lock guard holds the display; manual Dim remains available.";
 "general.blankScreen" = "Blank screen";
 "blankMode.dim" = "Dim (keep VPN)";
 "blankMode.sleep" = "Sleep displays";
@@ -507,3 +507,14 @@
 "slack.error.rejected" = "Slack rejected the request. Check the bot permissions and destination.";
 
 "notification.error.saveSettings" = "Settings could not be saved. Changes apply for this session; restart may restore previous settings. Try saving again.";
+
+// Four-mode menu-bar cycle (display mode availability defaults on).
+"mode.off" = "Off";
+"mode.awake" = "Awake";
+"mode.display" = "Awake + screen";
+"mode.automatic" = "Auto detection";
+"mode.automaticWaiting" = "Auto — waiting for activity";
+"mode.displayPending" = "Awake — screen hold pending";
+"mode.cooldown" = "Guard active — cooling down";
+"menu.nextMode" = "Click: %@";
+"menu.wakeMode" = "Mode";

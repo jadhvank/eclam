@@ -416,9 +416,9 @@
 "general.vpnServiceNote" = "选择 VPN 并启用通知。聊天通知需要网络连接；FortiClient 可能需要重新登录。";
 "general.vpnService.none" = "（未找到 VPN 服务 — 请打开你的 VPN 应用）";
 "general.display" = "显示器";
-"general.keepDisplayAwake" = "同时保持屏幕常亮（等同 caffeinate -d）";
-"general.tip.keepDisplayAwake" = "工作使 Mac 保持唤醒时，也让屏幕保持唤醒。这可能推迟自动锁定并消耗屏幕电量。默认关闭。开启后会恢复自动调暗的屏幕；仍可手动调暗。";
-"general.keepDisplayAwakeNote" = "关闭后，锁定防护仍可能保持屏幕唤醒。此时，工作期间内置屏幕会在系统设置的关闭屏幕时间后自动调暗，并在返回时恢复。设为“永不”时不会自动调暗。";
+"general.keepDisplayAwake" = "在图标循环中加入屏幕常亮模式";
+"general.tip.keepDisplayAwake" = "默认开启。点击菜单栏图标依次切换：关闭 → Mac 保持唤醒 → Mac 与屏幕常亮 → 自动检测。只有屏幕常亮模式会保持屏幕开启，并可能延迟自动锁定。关闭此设置可恢复原来的开关操作。";
+"general.keepDisplayAwakeNote" = "选择 Mac 与屏幕常亮以保持屏幕开启。其他模式下，锁定防护保持屏幕开启时可自动调暗；手动调暗仍然可用。";
 "general.blankScreen" = "熄屏";
 "blankMode.dim" = "调暗（保持 VPN）";
 "blankMode.sleep" = "显示器睡眠";
@@ -505,3 +505,14 @@
 "slack.error.rejected" = "Slack 拒绝了请求。请检查机器人的权限和发送目标。";
 
 "notification.error.saveSettings" = "无法保存设置。更改仅适用于当前会话，重启后可能恢复以前的设置。请重新保存。";
+
+// Four-mode menu-bar cycle (display mode availability defaults on).
+"mode.off" = "关闭";
+"mode.awake" = "Mac 保持唤醒";
+"mode.display" = "Mac 与屏幕常亮";
+"mode.automatic" = "自动检测";
+"mode.automaticWaiting" = "自动检测 — 等待活动";
+"mode.displayPending" = "Mac 已唤醒 — 等待屏幕保持";
+"mode.cooldown" = "安全防护 — 等待恢复";
+"menu.nextMode" = "点击：%@";
+"menu.wakeMode" = "模式";

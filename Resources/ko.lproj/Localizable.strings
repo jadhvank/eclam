@@ -415,9 +415,9 @@
 "general.vpnServiceNote" = "감시할 VPN을 고르고 알림을 켜세요. 채팅 알림은 네트워크 연결이 필요하며, FortiClient는 다시 로그인해야 할 수 있습니다.";
 "general.vpnService.none" = "(VPN 서비스를 찾지 못함 — VPN 앱을 여세요)";
 "general.display" = "디스플레이";
-"general.keepDisplayAwake" = "화면도 계속 켜 두기 (caffeinate -d와 같음)";
-"general.tip.keepDisplayAwake" = "작업 중 Mac이 깨어 있는 동안 화면도 유지합니다. 자동 잠금이 지연되고 화면 전력을 사용합니다. 기본값은 꺼짐입니다. 켜면 자동으로 어두워진 화면을 복원하며, 수동 어둡게는 계속 사용할 수 있습니다.";
-"general.keepDisplayAwakeNote" = "꺼져 있어도 잠금 방지가 화면을 유지할 수 있습니다. 이때 작업 중에는 시스템의 화면 끄기 시간이 지나면 내장 화면을 자동으로 어둡게 하고, 돌아오면 복원합니다. 화면 끄기가 ‘안 함’이면 자동으로 어둡게 하지 않습니다.";
+"general.keepDisplayAwake" = "아이콘 순환에 화면 켜짐 유지 모드 포함";
+"general.tip.keepDisplayAwake" = "기본값은 켜짐입니다. 메뉴바 아이콘을 클릭하면 끄기 → Mac 유지 → Mac + 화면 유지 → 자동 감지 순으로 바뀝니다. Mac + 화면 유지에서만 화면을 계속 켜 두며 자동 잠금이 지연될 수 있습니다. 이 설정을 끄면 기존 켜기/끄기 클릭으로 돌아갑니다.";
+"general.keepDisplayAwakeNote" = "화면을 계속 켜 두려면 Mac + 화면 유지를 선택하세요. 다른 모드에서는 잠금 방지가 화면을 유지할 때 자동 어둡게가 작동하며, 수동 어둡게도 사용할 수 있습니다.";
 "general.blankScreen" = "화면 끄기";
 "blankMode.dim" = "어둡게 (VPN 유지)";
 "blankMode.sleep" = "디스플레이 잠자기";
@@ -504,3 +504,14 @@
 "slack.error.rejected" = "Slack이 요청을 거부했습니다. 봇 권한과 전송 대상을 확인하세요.";
 
 "notification.error.saveSettings" = "설정을 저장하지 못했습니다. 변경은 현재 세션에만 적용되며, 재시작하면 이전 설정으로 돌아갈 수 있습니다. 다시 저장해 주세요.";
+
+// Four-mode menu-bar cycle (display mode availability defaults on).
+"mode.off" = "끄기";
+"mode.awake" = "Mac 유지";
+"mode.display" = "Mac + 화면 유지";
+"mode.automatic" = "자동 감지";
+"mode.automaticWaiting" = "자동 감지 — 활동 대기 중";
+"mode.displayPending" = "Mac 유지 — 화면 유지 대기 중";
+"mode.cooldown" = "안전 가드 — 재개 대기 중";
+"menu.nextMode" = "클릭: %@";
+"menu.wakeMode" = "모드";

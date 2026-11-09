@@ -86,7 +86,7 @@ final class StateStore {
     /// ElectronicClam-managed user toggle for "Keep Mac Awake". The detector layer
     /// produces `activeAgents`; the union of `manualToggle ∨ (mode rule)` is what
     /// flips the helper.
-    private(set) var manualToggle: Bool = false
+    var manualToggle: Bool { wakeControl.manualAwake }
 
     /// Mirror of helper's reported `SleepDisabled`. We can diverge from it
     /// briefly while a write is in flight.
@@ -136,12 +136,14 @@ final class StateStore {
     /// 앵커를 띄워 화면 잠금을 막아 VPN 세션을 유지한다.
     private(set) var clamshellLockGuardEnabled: Bool
 
-    /// 디스플레이까지 깨어 있게 유지하는 opt-in(`caffeinate -d` 등가물). 기본 OFF.
-    /// 헬퍼의 `SleepDisabled` 는 시스템·클램쉘 잠자기만 막고 idle display sleep 은
-    /// 막지 않아서, keep-awake 중에도 화면은 `displaysleep` 타이머대로 꺼진다.
-    /// 이 값이 true 이고 keep 신호가 살아있을 때만 `DisplayAwakeHolder` 가
-    /// `PreventUserIdleDisplaySleep` assertion 을 잡는다.
-    private(set) var keepDisplayAwakeEnabled: Bool
+    /// Enables the four-mode menu-bar cycle. Missing preference defaults ON;
+    /// explicit saved OFF is preserved. Display protection needs display mode.
+    private var wakeControl: MenuBarWakeState
+    var keepDisplayAwakeEnabled: Bool { wakeControl.caffeineEnabled }
+    var menuBarWakeMode: MenuBarWakeMode { wakeControl.mode }
+    var keepDisplayAwakeRequested: Bool { wakeControl.wantsDisplay }
+    var canResumeAutomaticWhenIdle: Bool { wakeControl.canResumeAutomaticWhenIdle }
+    private(set) var displayAwakeActive = false
 
     /// ADR-0037 §#8 — "blank displays"(메뉴 "Blank screen") 동작 모드. Default
     /// `.dim`(VPN-안전). `MenuBarController` 의 blank 액션이 이 값으로 dim(어둡게)/
@@ -162,12 +164,9 @@ final class StateStore {
     /// FortiClient/SSL VPN 을 자동 탐지한다.
     private(set) var vpnServiceName: String
 
-    /// v0.4.0 — User explicitly forced sleep on despite active auto signals.
-    /// Set by a double-left-click on the menu bar icon (ADR-0010). Suppresses
-    /// every "would have kept awake" branch except `manualToggle`. Cleared as
-    /// soon as the user single-clicks (which means "I changed my mind, follow
-    /// the toggle again") or all auto signals naturally clear.
-    private(set) var manualOverrideOff: Bool = false
+    /// OFF blocks automatic wake signals. In the legacy click mode it clears
+    /// after activity ends; the four-mode cycle keeps OFF selected explicitly.
+    var manualOverrideOff: Bool { wakeControl.forceOff }
 
     // MARK: - Remote (ADR-0008, ADR-0016)
 
@@ -347,9 +346,8 @@ final class StateStore {
         self.clamshellLockGuardEnabled =
             UserDefaults.standard.bool(forKey: Self.clamshellLockGuardKey)
 
-        // 디스플레이 keep-awake opt-in — 위와 같은 이유로 키 부재 = false = 기본 OFF.
-        self.keepDisplayAwakeEnabled =
-            UserDefaults.standard.bool(forKey: Self.keepDisplayAwakeKey)
+        self.wakeControl = MenuBarWakeState(savedCaffeineEnabled:
+            UserDefaults.standard.object(forKey: Self.keepDisplayAwakeKey) as? Bool)
 
         // ADR-0037 §#8 — blank displays 동작 모드. 기본 `.dim`(VPN-안전); 키가
         // 없거나 미지의 값이면 dim 으로 폴백(`MenuBarTheme` 와 동일 패턴).
@@ -465,18 +463,28 @@ final class StateStore {
 
     func setManualToggle(_ on: Bool) {
         guard manualToggle != on else { return }
-        manualToggle = on
+        setMenuBarWakeMode(on ? .awake : .automatic)
+    }
+
+    func setManualOverrideOff(_ on: Bool) {
+        if on { setMenuBarWakeMode(.off) }
+        else if manualOverrideOff { setMenuBarWakeMode(.automatic) }
+    }
+
+    func setMenuBarWakeMode(_ mode: MenuBarWakeMode) {
+        let previous = wakeControl.mode
+        wakeControl.select(mode)
+        if previous != wakeControl.mode { onChange?() }
+    }
+
+    func advanceMenuBarWakeMode() {
+        wakeControl.click(effectiveAwake: shouldKeepAwake, cliHoldActive: cliHoldActive)
         onChange?()
     }
 
-    /// v0.4.0 — double-left-click handler. Forces sleep even when auto signals
-    /// (agent activity, remote session) would otherwise keep us awake.
-    func setManualOverrideOff(_ on: Bool) {
-        guard manualOverrideOff != on else { return }
-        manualOverrideOff = on
-        // Setting override-off implicitly turns the manual toggle off too;
-        // they are semantically incompatible.
-        if on { manualToggle = false }
+    func update(displayAwakeActive: Bool) {
+        guard self.displayAwakeActive != displayAwakeActive else { return }
+        self.displayAwakeActive = displayAwakeActive
         onChange?()
     }
 
@@ -511,12 +519,11 @@ final class StateStore {
         onChange?()
     }
 
-    /// 디스플레이 keep-awake opt-in 토글. onChange → AppDelegate → convergeNow →
-    /// `DisplayAwakeHolder.apply(...)` 가 assertion 을 잡거나 놓는다. 클램쉘 잠금
-    /// 가드와 **독립**이다 — 이쪽은 화면을 켜 두는 것이고, 가드는 잠금을 막는 것이다.
+    /// Enable/disable the extra display mode. Turning it off in display mode
+    /// falls back to manual Awake and releases only the display assertion.
     func setKeepDisplayAwake(_ on: Bool) {
         guard self.keepDisplayAwakeEnabled != on else { return }
-        self.keepDisplayAwakeEnabled = on
+        wakeControl.setCaffeineEnabled(on)
         UserDefaults.standard.set(on, forKey: Self.keepDisplayAwakeKey)
         onChange?()
     }
