@@ -23,7 +23,7 @@ Distributed Developer ID releases use Team ID and bundle-identifier checks for a
 
 ## Power and brightness cleanup
 
-Normal quit and GUI SIGTERM request brightness restoration and release app-owned power holds. The helper has its own restore-on-exit/watchdog path for system sleep state. Brightness recovery data contains only the built-in panel UUID, original/app-applied brightness and capture time, in a separate `0600` journal. Failed restores remain pending. On the next launch only a recent record for the same panel whose brightness still matches the app's value is eligible for recovery. External brightness changes are respected.
+Normal quit and GUI SIGTERM request brightness restoration and release app-owned power holds. The helper serializes power ownership and retains failed system-sleep restores for retry. Choosing Off cancels active holds and restores sleep in one operation. GUI keep-awake expires when safety checks stop refreshing; independent CLI holds keep their own expiry deadlines. Brightness recovery data contains only the built-in panel UUID, original/app-applied brightness and capture time, in a separate `0600` journal. Failed restores remain pending. On the next launch only a recent record for the same panel whose brightness still matches the app's value is eligible for recovery. External brightness changes are respected.
 
 A crash or SIGKILL cannot synchronously restore display brightness. Recovery after relaunch and actual lid/display timing remain separate from automated tests.
 

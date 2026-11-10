@@ -46,6 +46,7 @@ private let kThermalPressureNotifyName = "com.apple.system.thermalpressurelevel"
 final class SafetyMonitor {
     private let log = Logger(subsystem: "com.jadhvank.eclam", category: "safety")
     private let store: StateStore
+    private let heartbeatLease: SafetyHeartbeatLease
 
     private var batteryRunLoopSource: CFRunLoopSource?
     private var thermalObserver: NSObjectProtocol?
@@ -79,8 +80,9 @@ final class SafetyMonitor {
     /// failed read could trip a spurious `.batteryLow`.
     private var hasCommittedBatterySample = false
 
-    init(store: StateStore) {
+    init(store: StateStore, heartbeatLease: SafetyHeartbeatLease) {
         self.store = store
+        self.heartbeatLease = heartbeatLease
     }
 
     func start() {
@@ -108,6 +110,7 @@ final class SafetyMonitor {
     }
 
     func stop() {
+        heartbeatLease.invalidate()
         if let src = batteryRunLoopSource {
             CFRunLoopRemoveSource(CFRunLoopGetMain(), src, .defaultMode)
             batteryRunLoopSource = nil
@@ -504,6 +507,8 @@ final class SafetyMonitor {
     private func evaluate() {
         let priorRelease = store.safetyRelease
         evaluateCore()
+        // Renew only after policy evaluation, never merely on UI convergence.
+        heartbeatLease.evaluated(safe: store.safetyRelease == nil)
         // Edge detection for notification (ADR-0004 "## 알림"):
         // post only on transitions nil → non-nil. Identifier reuse keeps the
         // banner coalesced even when the same reason re-trips inside cooldown.

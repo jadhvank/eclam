@@ -5,7 +5,7 @@ import OSLog
 /// the app via `setActiveAgents`. Lives outside `HelperService` because the
 /// XPC listener creates a fresh `HelperService` per connection (ADR-0002 §6),
 /// but the published set must survive across those short-lived instances.
-/// Style mirrors `Watchdog.shared`.
+/// Independent of connection lifetime.
 final class ActiveAgentsStore {
     static let shared = ActiveAgentsStore()
     private let lock = NSLock()
@@ -39,9 +39,11 @@ final class HelperService: NSObject, ElectronicClamHelperProtocol {
     /// `HelperListenerDelegate` 가 connection 의 코드사인 정체성으로 판정해
     /// 주입한다 (dev-adhoc 빌드는 항상 false — 식별 불가 graceful fallback).
     private let isHook: Bool
+    private let power: PowerSessionRuntime
 
-    init(isHook: Bool) {
+    init(isHook: Bool, power: PowerSessionRuntime = .shared) {
         self.isHook = isHook
+        self.power = power
         super.init()
     }
 
@@ -58,30 +60,17 @@ final class HelperService: NSObject, ElectronicClamHelperProtocol {
     func setSleepDisabled(_ enabled: Bool, reply: @escaping (Error?) -> Void) {
         if let err = denyIfHook("setSleepDisabled") { reply(err); return }
         log.info("setSleepDisabled(\(enabled, privacy: .public))")
-        // ADR-0025 — CLI TTL hold 활성 중의 off 쓰기(GUI converge·종료 복원)는
-        // 무시한다: hold 가 전원 상태의 소유자이고 만료/취소 시 스스로 복원한다.
-        // (GUI 종료가 hold 를 죽이지 않게 하는 핵심. 사용자 의도의 off 는
-        // `cancelHold` 가 선행한다.) GUI 몫의 watchdog 만 disarm.
-        if !enabled && HoldManager.shared.isActive {
-            log.info("setSleepDisabled(false) deferred — CLI hold active (hold owns restore)")
-            Watchdog.shared.armOrDisarm(keepingAwake: false)
-            reply(nil)
-            return
-        }
-        if PowerController.setSleepDisabled(enabled) {
-            // Re-arm the watchdog so a fresh `keep awake` doesn't trip on the
-            // most recent stale heartbeat (e.g. helper just came back).
-            Watchdog.shared.armOrDisarm(keepingAwake: enabled)
-            reply(nil)
-        } else {
-            let err = NSError(domain: "com.jadhvank.eclam.helper", code: 1,
-                              userInfo: [NSLocalizedDescriptionKey: "pmset failed"])
-            reply(err)
-        }
+        reply(power.setAppAwake(enabled) ? nil : powerError())
+    }
+
+    private func powerError() -> NSError {
+        NSError(domain: "com.jadhvank.eclam.helper", code: 1,
+                userInfo: [NSLocalizedDescriptionKey:
+                    "power state change failed; pending restoration will be retried"])
     }
 
     func currentState(reply: @escaping (Bool, Error?) -> Void) {
-        let value = PowerController.readSleepDisabled()
+        let value = power.state.disabled
         reply(value, nil)
     }
 
@@ -90,14 +79,14 @@ final class HelperService: NSObject, ElectronicClamHelperProtocol {
     func holdSleepDisabled(forSeconds seconds: Double, reply: @escaping (Error?) -> Void) {
         if let err = denyIfHook("holdSleepDisabled") { reply(err); return }
         // 입력 검증 (ADR-0023 정신): 유한 hold 는 [60s, 30d]. 음수는 forever.
-        if seconds >= 0 && (seconds < 60 || seconds > 30 * 24 * 3600) {
+        if !seconds.isFinite || (seconds >= 0 && (seconds < 60 || seconds > 30 * 24 * 3600)) {
             reply(NSError(domain: "com.jadhvank.eclam.helper", code: 3,
                           userInfo: [NSLocalizedDescriptionKey:
                               "hold duration out of range (60s…30d)"]))
             return
         }
         log.info("holdSleepDisabled(forSeconds: \(seconds, privacy: .public))")
-        if HoldManager.shared.arm(seconds: seconds) {
+        if power.armHold(seconds: seconds) {
             reply(nil)
         } else {
             reply(NSError(domain: "com.jadhvank.eclam.helper", code: 1,
@@ -105,16 +94,19 @@ final class HelperService: NSObject, ElectronicClamHelperProtocol {
         }
     }
 
+    /// Legacy selector remains safe for older clients: it now restores too.
     func cancelHold(reply: @escaping (Error?) -> Void) {
-        if let err = denyIfHook("cancelHold") { reply(err); return }
-        log.info("cancelHold()")
-        HoldManager.shared.cancel()
-        reply(nil)
+        cancelHoldAndRestore(reply: reply)
+    }
+
+    func cancelHoldAndRestore(reply: @escaping (Error?) -> Void) {
+        if let err = denyIfHook("cancelHoldAndRestore") { reply(err); return }
+        reply(power.cancelHoldAndRestore() ? nil : powerError())
     }
 
     func currentStateWithHold(reply: @escaping (Bool, Double, Error?) -> Void) {
-        reply(PowerController.readSleepDisabled(),
-              HoldManager.shared.remainingSeconds(), nil)
+        let state = power.state
+        reply(state.disabled, state.remaining, nil)
     }
 
     func pingActivity(source: String, reply: @escaping (Error?) -> Void) {
@@ -131,12 +123,12 @@ final class HelperService: NSObject, ElectronicClamHelperProtocol {
     }
 
     func heartbeat(reply: @escaping (Error?) -> Void) {
-        Watchdog.shared.beat()
+        power.heartbeat()
         reply(nil)
     }
 
     func lastTripReason(reply: @escaping (String?, Error?) -> Void) {
-        reply(Watchdog.shared.lastTripReason, nil)
+        reply(power.lastTripReason, nil)
     }
 
     func setActiveAgents(_ ids: [String], reply: @escaping (Error?) -> Void) {

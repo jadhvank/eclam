@@ -204,7 +204,7 @@ fi
 
 # ── HoldState 직렬화/파싱 테스트 (P3, ADR-0025) ────────────────────────────
 # HoldState.swift 는 stdlib-only(영속 포맷 직렬화) 라 단독 컴파일 가능 —
-# HoldManager 의 IOKit·타이머·파일 I/O 결합은 끌고 오지 않는다.
+# 전원 상태 전환·실패 주입 검증은 아래 PowerSessionController suite가 담당한다.
 if [ -f "$ROOT/Tests/HoldStateTests.swift" ]; then
     echo "==> Compiling hold state tests"
     swiftc -target "$TARGET" \
@@ -404,6 +404,41 @@ swiftc -target "$TARGET" -framework Foundation \
     "$ROOT/Tests/NotificationDeliveryTests.swift" -o "$TMP/notification-delivery"
 "$TMP/notification-delivery"
 
+# Power ownership regression suites inject IOKit/persistence/time. No live helper
+# connection or system power mutation; the RPC suite injects a fake runtime.
+swiftc -target "$TARGET" -framework Foundation \
+    "$ROOT/Sources/Shared/HoldState.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/PowerSessionController.swift" \
+    "$ROOT/Sources/ElectronicClamApp/SafetyHeartbeatLease.swift" \
+    "$ROOT/Tests/PowerSessionControllerTests.swift" -o "$TMP/power-session"
+"$TMP/power-session"
+
+swiftc -target "$TARGET" -framework Foundation -framework IOKit \
+    "$ROOT/Sources/Shared/HelperProtocol.swift" "$ROOT/Sources/Shared/HoldState.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/PowerSessionController.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/PowerSessionRuntime.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/PowerController.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/HelperService.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/ActivityRelay.swift" \
+    "$ROOT/Tests/HelperPowerServiceTests.swift" -o "$TMP/helper-power-service"
+"$TMP/helper-power-service"
+
+swiftc -target "$TARGET" -framework Foundation \
+    "$ROOT/Sources/ElectronicClamApp/SafetyHeartbeatLease.swift" \
+    "$ROOT/Tests/SafetyHeartbeatLeaseTests.swift" -o "$TMP/safety-heartbeat"
+"$TMP/safety-heartbeat"
+
+swiftc -target "$TARGET" -framework Foundation \
+    "$ROOT/Sources/ElectronicClamApp/AgentActivity.swift" \
+    "$ROOT/Tests/ActivityClockRegressionTests.swift" -o "$TMP/activity-clock"
+"$TMP/activity-clock"
+
+swiftc -target "$TARGET" -framework Foundation \
+    "$ROOT/Sources/ElectronicClamApp/AgentActivity.swift" \
+    "$ROOT/Sources/ElectronicClamApp/ClaudeWorkspacePathing.swift" \
+    "$ROOT/Sources/ElectronicClamApp/AgentMtimeProbe.swift" \
+    "$ROOT/Tests/AgentMtimeProbeTests.swift" -o "$TMP/agent-mtime"
+"$TMP/agent-mtime"
 # Menu-bar selection, legacy opt-out and display request gating.
 echo "==> Compiling menu-bar mode tests"
 swiftc -target "$TARGET" -o "$TMP/eclam_menubarmodetests" \

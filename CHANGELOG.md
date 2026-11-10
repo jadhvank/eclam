@@ -4,6 +4,13 @@ All notable changes to Electronic Clam are documented here.
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-11-10
+
+- Serialize helper power ownership and recovery. Failed sleep restoration remains pending and retries; explicit off and hardware safety cancellation use one atomic protocol-v2 operation, including the four-mode menu cycle.
+- Stop GUI heartbeats when safety evaluations are stale. Preserve independent CLI holds and monotonic expiry deadlines.
+- Reject activity timestamps too far in the future and select live Claude workspaces before choosing their newest transcript.
+- Upgrade the app and bundled helper together through Sparkle or Homebrew. Existing 0.8.1 installations can update in-app.
+
 ## [0.8.1] - 2026-11-10
 
 - **Sparkle in-app updates:** check, download, install and relaunch from Settings. Downloads and installation require user action; existing automatic-check preferences are migrated.

@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.2-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · **日本語** · [Español](README.es.md)
@@ -18,6 +18,10 @@
 </div>
 
 ---
+
+## v0.8.2の新機能: スリープ復元の安定性
+
+スリープの復元に失敗すると再試行し、Offを選ぶと有効な維持要求も解除します。安全チェックが更新されない場合はスリープ防止の延長を停止します。未来の時刻の活動記録を除外し、アクティブなClaudeワークスペースを優先します。v0.8.1からは設定で更新できます。
 
 ## v0.8.1の新機能: アプリ内アップデート
 

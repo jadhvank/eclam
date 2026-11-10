@@ -10,7 +10,7 @@ It detects *work*, not just a running process.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.2-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -18,6 +18,10 @@ It detects *work*, not just a running process.
 </div>
 
 ---
+
+## New in v0.8.2: safer sleep recovery
+
+Sleep restoration retries after failures, and choosing Off cancels active holds together. Safety monitoring stops extending awake time if its checks become stale. Agent detection now rejects future timestamps and prioritizes active Claude workspaces. Update from v0.8.1 in Settings.
 
 ## New in v0.8.1: in-app updates
 

@@ -185,17 +185,29 @@ final class HelperBridge {
         }
     }
 
-    /// ADR-0025 — cancel the CLI TTL hold (user clicked "sleep now" while a
-    /// hold was active; the helper ignores plain off-writes during a hold).
-    func cancelHold() {
+    /// Explicit user/safety off is one helper-owned transaction. Only report
+    /// success locally after acknowledgement; failed restores remain retryable.
+    func cancelHoldAndRestore(completion: @escaping (Error?) -> Void = { _ in }) {
         guard let proxy = remoteProxy(errorHandler: { [weak self] err in
-            self?.log.error("cancelHold xpc error: \(err.localizedDescription, privacy: .public)")
-        }) else { return }
-        proxy.cancelHold { [weak self] err in
-            if let err = err {
-                self?.log.error("cancelHold reply error: \(err.localizedDescription, privacy: .public)")
+            DispatchQueue.main.async {
+                self?.store.update(lastError: err.localizedDescription)
+                completion(err)
             }
-            DispatchQueue.main.async { self?.store.update(cliHoldRemaining: 0) }
+        }) else {
+            DispatchQueue.main.async { completion(makeError("no proxy")) }
+            return
+        }
+        AtomicOffRPC.perform(on: proxy) { [weak self] err in
+            DispatchQueue.main.async {
+                if let err = err {
+                    self?.store.update(lastError: err.localizedDescription)
+                } else {
+                    self?.store.update(cliHoldRemaining: 0)
+                    self?.store.update(sleepDisabled: false)
+                    self?.store.update(lastError: nil)
+                }
+                completion(err)
+            }
         }
     }
 

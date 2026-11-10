@@ -2,9 +2,10 @@ import Foundation
 
 /// ADR-0025 — CLI hold 영속 파일(`cli-hold`)의 직렬화/역직렬화 순수 계층.
 ///
-/// `HoldManager`(helper)가 디스크에 쓰고 시작 시 다시 읽는 포맷을 한 곳에 모은다.
+/// `PowerSessionRuntime`(helper)가 디스크에 쓰고 시작 시 다시 읽는 포맷을 한 곳에 모은다.
 /// 파일 I/O·IOKit·타이머에서 분리된 stdlib-only 라 swiftc 단독 컴파일·테스트가
 /// 가능하다(scripts/test.sh). 포맷은 단일 토큰:
+///   - `"restore-pending"`      ⇒ 복원 성공 전까지 재시도
 ///   - `"forever"`              ⇒ 만료 없는 hold
 ///   - `<unix epoch double>`    ⇒ 해당 시각에 만료
 ///
@@ -12,6 +13,8 @@ import Foundation
 /// 만료 시각이 없는(논리상 도달 불가) 경우에도 크래시 대신 `nil` 폴백으로 안전하게
 /// 처리해, 리팩터·오용 시에도 지뢰가 되지 않는다.
 enum HoldState: Equatable {
+    /// A cancelled/expired owner still owes a successful power restoration.
+    case restorePending
     /// 만료 없는 hold (`eclam on --forever`).
     case forever
     /// 주어진 unix epoch(초)에 만료되는 유한 hold.
@@ -20,6 +23,8 @@ enum HoldState: Equatable {
     /// 영속 파일에 쓸 단일 토큰 문자열.
     var serialized: String {
         switch self {
+        case .restorePending:
+            return "restore-pending"
         case .forever:
             return "forever"
         case .until(let epoch):
@@ -32,7 +37,8 @@ enum HoldState: Equatable {
     static func parse(_ raw: String) -> HoldState? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed == "forever" { return .forever }
-        if let epoch = Double(trimmed) { return .until(epoch: epoch) }
+        if trimmed == "restore-pending" { return .restorePending }
+        if let epoch = Double(trimmed), epoch.isFinite { return .until(epoch: epoch) }
         return nil
     }
 

@@ -10,7 +10,7 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.2-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · **Español**
@@ -18,6 +18,10 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 </div>
 
 ---
+
+## Novedades de v0.8.2: restauración del reposo más fiable
+
+La restauración del reposo se reintenta si falla, y Off cancela también las solicitudes activas de mantener el Mac despierto. Si las comprobaciones de seguridad dejan de actualizarse, se detiene la prolongación del tiempo activo. La detección descarta fechas futuras y prioriza los espacios de Claude activos. Actualiza desde v0.8.1 en Ajustes.
 
 ## Novedades de v0.8.1: actualizaciones dentro de la app
 

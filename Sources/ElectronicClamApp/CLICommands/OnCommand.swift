@@ -129,11 +129,11 @@ enum SleepDisabledRPC {
         call { proxy, done in proxy.holdSleepDisabled(forSeconds: seconds, reply: done) }
     }
 
-    /// ADR-0025 — `eclam off`: hold 활성 중의 off 쓰기는 helper 가 무시하므로
-    /// cancelHold 를 먼저 보낸 뒤 off 를 쓴다 (연결 2회 — 단순함 우선).
+    /// One connection, one power mutation. A failed reply leaves daemon-owned
+    /// recovery pending; never cancel a hold separately from restoring power.
     static func cancelHoldThenOff() -> Int32 {
-        let rc = call { proxy, done in proxy.cancelHold(reply: done) }
-        guard rc == 0 else { return rc }
-        return set(false)
+        let rc = call { proxy, done in AtomicOffRPC.perform(on: proxy, reply: done) }
+        if rc == 0 { print("eclam: off") }
+        return rc
     }
 }

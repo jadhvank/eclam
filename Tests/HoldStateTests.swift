@@ -59,6 +59,11 @@ func testParse() {
     assertTrue(HoldState.parse("") == nil, "parse(empty) == nil")
     assertTrue(HoldState.parse("garbage") == nil, "parse(garbage) == nil")
     assertTrue(HoldState.parse("Forever") == nil, "parse(Forever cased) == nil")
+    assertEqual(HoldState.parse(HoldState.restorePending.serialized), .restorePending,
+                "restore-pending survives daemon restart")
+    for value in ["nan", "inf", "-inf"] {
+        assertTrue(HoldState.parse(value) == nil, "non-finite persisted deadline rejected")
+    }
     print("OK: parse")
 }
 

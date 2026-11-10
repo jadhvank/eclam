@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.2-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · **한국어** · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
@@ -18,6 +18,10 @@
 </div>
 
 ---
+
+## v0.8.2 업데이트: 잠자기 복원 안정성
+
+잠자기 복원이 실패하면 재시도하며, Off를 선택하면 활성 유지 요청도 함께 해제합니다. 안전 점검이 오래 갱신되지 않으면 깨어 있는 시간을 더 연장하지 않습니다. 미래 시각의 활동 기록을 제외하고 활성 Claude 작업 공간을 우선 감지합니다. v0.8.1에서는 설정에서 업데이트할 수 있습니다.
 
 ## v0.8.1 업데이트: 앱 안에서 업데이트
 

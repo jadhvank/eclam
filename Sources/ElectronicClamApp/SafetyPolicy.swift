@@ -241,7 +241,7 @@ public enum SafetyPolicy {
     /// a safety hole: a hardware-protection trip (thermal-critical / battery-low /
     /// thermal-serious) computes `target == false`, but the off-write is swallowed
     /// and a hot/draining Mac stays awake. To honor the core promise ("sleep when
-    /// it's safer to"), the app must `cancelHold()` before the off-write — but
+    /// it's safer to"), the app must use atomic `cancelHoldAndRestore()` — but
     /// ONLY for genuine hardware-protection trips:
     ///
     ///   - `target == false`        — we're actually trying to sleep, and
