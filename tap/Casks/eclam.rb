@@ -6,8 +6,8 @@ cask "eclam" do
   name "ElectronicClam"
   desc "Keep the system awake while agents work, with safety guards"
   homepage "https://github.com/jadhvank/eclam"
-  auto_updates true
 
+  auto_updates true
   # build.sh is arm64-only (no universal binary yet — docs/TODO.md). Without
   # this gate an Intel brew install succeeds and the app crashes at launch.
   depends_on arch: :arm64
