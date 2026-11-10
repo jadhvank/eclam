@@ -493,8 +493,10 @@ final class AgentDetector {
         }
 
         // File-mtime channel. For Claude apply workspace pairing (§J).
-        let pair = freshestMatch(pattern: trace.globPattern, now: now)
-        let mtimeMatch = pair.map { AgentActivity.MtimeMatch(path: $0.0, age: $0.1) }
+        let mtimeMatch = AgentMtimeProbe.freshest(
+            paths: Glob.expand(trace.globPattern), now: now,
+            claudeWorkspaces: trace.id == "claude" && !liveClaude.isEmpty ? liveClaude : nil)
+        let pair = mtimeMatch.map { ($0.path, $0.age) }
 
         // Resolve the Claude pairing signal (pure string + Set lookup); only the
         // `claude` trace ever consults it.
@@ -518,25 +520,6 @@ final class AgentDetector {
         return .init(label: trace.label, glob: trace.globPattern,
                      latestMatch: pair?.0, mtimeAge: pair?.1,
                      active: decision.active, reason: decision.reason)
-    }
-
-    private func freshestMatch(pattern: String, now: Date) -> (String, TimeInterval)? {
-        var bestPath: String?
-        var bestAge: TimeInterval = .infinity
-        for path in Glob.expand(pattern) {
-            var st = stat()
-            if stat(path, &st) == 0 {
-                let mtime = Date(timeIntervalSince1970: TimeInterval(st.st_mtimespec.tv_sec)
-                                 + TimeInterval(st.st_mtimespec.tv_nsec) / 1_000_000_000)
-                let age = now.timeIntervalSince(mtime)
-                if age < bestAge {
-                    bestAge = age
-                    bestPath = path
-                }
-            }
-        }
-        if let p = bestPath { return (p, bestAge) }
-        return nil
     }
 
     // MARK: - Claude workspace pairing (ADR-0006 §J)
@@ -698,7 +681,7 @@ final class AgentDetector {
                 continue
             }
             // Fresh enough to count as active?
-            if age <= pidFileGrace {
+            if AgentActivity.isPlausibleAge(age) && age <= pidFileGrace {
                 sources.insert(source)
             }
         }
@@ -873,7 +856,7 @@ final class SessionWatcher {
                 }
                 continue
             }
-            if age <= aliveCutoff && procAlive {
+            if AgentActivity.isPlausibleAge(age) && age <= aliveCutoff && procAlive {
                 alive.insert("session:\(name)")
             }
         }

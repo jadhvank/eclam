@@ -13,6 +13,11 @@ import Foundation
 /// / `mtimeAge` nil exactly as before). `decide(...)` composes both for tests
 /// and any caller that has resolved all signals up front.
 enum AgentActivity {
+    /// Permit only small clock skew. Large future dates otherwise remain fresh
+    /// indefinitely and can hide every legitimate file in a newest-file scan.
+    static func isPlausibleAge(_ age: TimeInterval) -> Bool {
+        age.isFinite && age >= -5
+    }
 
     /// Outcome of a single channel: active or not, plus the human-readable
     /// `reason` surfaced verbatim in `AgentDetectorDebugSnapshot.TraceRow`
@@ -40,7 +45,7 @@ enum AgentActivity {
     static func hookDecision(hookPingAge: TimeInterval?,
                              hookGrace: TimeInterval,
                              pidFilePresent: Bool) -> Decision? {
-        if let age = hookPingAge, age <= hookGrace {
+        if let age = hookPingAge, isPlausibleAge(age), age <= hookGrace {
             return Decision(active: true, reason: "hook-ping (\(Int(age))s)")
         }
         if pidFilePresent {
@@ -68,6 +73,9 @@ enum AgentActivity {
                               claudeSegment: String?) -> Decision {
         guard let m = mtimeMatch else {
             return Decision(active: false, reason: "no-match")
+        }
+        guard isPlausibleAge(m.age) else {
+            return Decision(active: false, reason: "invalid-mtime")
         }
         if m.age > freshness {
             return Decision(active: false, reason: "stale")

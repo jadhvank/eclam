@@ -74,8 +74,8 @@ struct HelperProtocolTests {
         // contract (HelperBridge ↔ HelperService) hangs off this constant;
         // bumping it must be a deliberate act recorded in the same commit
         // (update this expectation alongside the protocol change).
-        check(HelperProtocolVersion.current == 1,
-              "HelperProtocolVersion.current expected 1, got \(HelperProtocolVersion.current) — bump this guard deliberately with the protocol change")
+        check(HelperProtocolVersion.current == 2,
+              "HelperProtocolVersion.current expected 2, got \(HelperProtocolVersion.current) — bump this guard deliberately with the protocol change")
 
         print("OK: HelperProtocol sanitize + version guard")
     }

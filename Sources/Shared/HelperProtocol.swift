@@ -6,7 +6,7 @@ import Foundation
 /// 대조하고, 이 RPC 자체가 없는 pre-handshake daemon 은 reply 타임아웃 +
 /// liveness 프로브로 "구버전 추정" 처리된다.
 public enum HelperProtocolVersion {
-    public static let current = 1
+    public static let current = 2
 }
 
 @objc public protocol ElectronicClamHelperProtocol {
@@ -19,9 +19,13 @@ public enum HelperProtocolVersion {
     /// 유한 값은 helper 가 [60s, 30d] 로 검증한다 (ADR-0023 입력 cap 정신).
     func holdSleepDisabled(forSeconds seconds: Double, reply: @escaping (Error?) -> Void)
 
-    /// ADR-0025 — hold 상태만 비운다. 전원 쓰기는 별도 `setSleepDisabled(false)`
-    /// (hold 활성 중의 off 쓰기는 무시되므로 반드시 cancel 이 먼저).
+    /// Legacy selector. v2 also restores power; new clients use the explicit
+    /// atomic operation below and never fall back to a split cancel/off.
     func cancelHold(reply: @escaping (Error?) -> Void)
+
+    /// v2: cancel every current owner and restore sleep in one serialized
+    /// operation. Failed restoration stays pending in the daemon for retry.
+    func cancelHoldAndRestore(reply: @escaping (Error?) -> Void)
 
     /// ADR-0025 — `currentState` + hold 잔여. `remaining`: `-1` forever,
     /// `0` 없음, `>0` 남은 초. GUI 재수렴이 hold 를 외부 간섭으로 오인해
@@ -67,6 +71,23 @@ public enum HelperProtocolVersion {
     /// /무응답으로 끝나므로, 앱은 reply 타임아웃(2.5s)을 "버전 불명(구버전
     /// 추정)" 으로 다룬다 — `HelperBridge.performVersionHandshake`.
     func protocolVersion(reply: @escaping (Int) -> Void)
+}
+
+/// Shared by GUI and CLI. An old daemon must retain its hold rather than lose
+/// the expiry timer through an unsafe two-RPC fallback.
+enum AtomicOffRPC {
+    static func perform(on proxy: ElectronicClamHelperProtocol,
+                        reply: @escaping (Error?) -> Void) {
+        proxy.protocolVersion { version in
+            guard version >= 2 else {
+                reply(NSError(domain: "com.jadhvank.eclam.helper", code: 4,
+                    userInfo: [NSLocalizedDescriptionKey:
+                        "Helper update required for safe off. Reinstall Helper in Settings, or run eclam repair."]))
+                return
+            }
+            proxy.cancelHoldAndRestore(reply: reply)
+        }
+    }
 }
 
 public enum HelperServiceName {

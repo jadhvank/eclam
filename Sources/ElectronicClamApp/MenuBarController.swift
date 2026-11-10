@@ -235,9 +235,13 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     private func applySelectedWakeMode() {
         let target = store.shouldKeepAwake
-        // Cancel before writing OFF: a CLI hold otherwise vetoes that write.
-        if !target && store.cliHoldActive { bridge.cancelHold() }
-        bridge.setSleepDisabled(target) { _ in }
+        // Explicit mode selection must cancel and restore atomically, including
+        // a CLI hold that arrives after the menu's last state snapshot.
+        if target {
+            bridge.setSleepDisabled(true) { _ in }
+        } else {
+            bridge.cancelHoldAndRestore()
+        }
     }
 
     /// ADR-0014 — a single left-click toggles the *effective* awake state,
@@ -260,12 +264,11 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             store.setManualOverrideOff(false)
             store.setManualToggle(true)
         }
-        // ADR-0025 — '지금 재워' 의도면 CLI TTL hold 도 취소 (helper 는 hold
-        // 중의 off 쓰기를 무시하므로 cancel 이 선행해야 실제로 잠들 수 있다).
-        if !store.shouldKeepAwake && store.cliHoldActive {
-            bridge.cancelHold()
+        if !store.shouldKeepAwake {
+            bridge.cancelHoldAndRestore()
+        } else {
+            bridge.setSleepDisabled(true) { _ in }
         }
-        bridge.setSleepDisabled(store.shouldKeepAwake) { _ in }
     }
 
     // MARK: - Rendering
@@ -825,14 +828,8 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         // If helper is not enabled, surface a fix path based on current state.
         switch store.registration {
         case .enabled:
-            // Flip the user's intent; the convergence engine in AppDelegate
-            // does the XPC write (debounced).
-            store.setManualToggle(!store.manualToggle)
-            // ADR-0025 — 토글을 꺼서 effective 의도가 '재워'가 됐다면 CLI
-            // hold 도 취소 (toggleAwake 와 같은 규칙).
-            if !store.shouldKeepAwake && store.cliHoldActive {
-                bridge.cancelHold()
-            }
+            // Menu and icon use the same effective-state toggle, including CLI holds.
+            toggleAwake()
             refresh()
         case .requiresApproval:
             HelperRegistration.openLoginItemsSettings()

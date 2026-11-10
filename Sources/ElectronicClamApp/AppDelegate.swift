@@ -26,19 +26,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var autoDim: AutoDimCoordinator?
     private var isTerminating = false
 
-    /// 10s heartbeat fired while `shouldKeepAwake` is true (ADR-0004 §5).
-    ///
-    /// 메인 런루프 `Timer` 가 아니라 전용 큐의 `DispatchSourceTimer` 다 — 메인이
-    /// 잠깐 바빠도(예: 무거운 메뉴 렌더·일시적 store 폭주) heartbeat 가 계속
-    /// 나가 helper watchdog 오발(작업 중 맥 재움)을 추가로 막는 방어선. 게이트는
-    /// 메인에서만 갱신되는 `heartbeatArmed` 의 원자적 미러를 읽으므로 타이머 큐
-    /// 에서 락·메인 hop 없이 판정한다. `HelperBridge.heartbeat()`/
-    /// `refreshCurrentState()` 는 내부에서 XPC 큐로 마샬하므로 호출 스레드 자유.
+    /// Background delivery tolerates short UI stalls, but the safety loop must
+    /// renew its lease within 15 seconds. A prolonged main hang stops heartbeats
+    /// and lets the helper's independent 20-second watchdog release app ownership.
     private var heartbeatTimer: DispatchSourceTimer?
     private let heartbeatQueue = DispatchQueue(label: "com.jadhvank.eclam.heartbeat")
-    /// `shouldKeepAwake`(= helper watchdog 무장 조건)의 원자적 미러. converge
-    /// (메인)에서 매 수렴마다 갱신하고, heartbeat 타이머 큐에서 읽는다.
-    private let heartbeatArmed = AtomicBool(false)
+    private let heartbeatLease = SafetyHeartbeatLease()
 
     /// Debounce window for `shouldKeepAwake` → XPC writes. ADR-0006 spec.
     private var pendingConverge: DispatchWorkItem?
@@ -291,7 +284,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         dimmer.prepareForTermination()
         heartbeatTimer?.cancel()
         heartbeatTimer = nil
-        heartbeatArmed.value = false
+        heartbeatLease.keepAwakeRequested = false
         remoteWatcher?.stop()
         remoteWatcher = nil
         safetyMonitor?.stop()
@@ -334,7 +327,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             w.start()
         }
         if safetyMonitor == nil {
-            let m = SafetyMonitor(store: store)
+            let m = SafetyMonitor(store: store, heartbeatLease: heartbeatLease)
             safetyMonitor = m
             m.start()
         }
@@ -351,7 +344,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.bridge?.refreshCurrentState()
             // Only write a heartbeat while keep is active; otherwise the
             // helper watchdog stays disarmed and safety release remains effective.
-            if self.heartbeatArmed.value { self.bridge?.heartbeat() }
+            if self.heartbeatLease.shouldHeartbeat { self.bridge?.heartbeat() }
         }
         t.resume()
         heartbeatTimer = t
@@ -449,7 +442,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Observation/cleanup are local and must still run after helper loss.
         vpnWatcher?.apply(enabled: store.vpnDisconnectNotifyEnabled)
         guard case .enabled = store.registration, !store.helperUnreachable else {
-            heartbeatArmed.value = false
+            heartbeatLease.keepAwakeRequested = false
             lastWrittenSleepDisabled = nil
             displayAwakeHolder?.apply(keepAwake: false)
             store.update(displayAwakeActive: false)
@@ -474,10 +467,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let target = store.shouldKeepAwake
         if !target { dimmer.requestRestore(reason: store.safetyRelease == nil ? .keep : .safety) }
-        // heartbeat 게이트 미러를 매 수렴마다 갱신 — helper watchdog 무장 조건
-        // (keep-awake 명령 중)과 정확히 일치한다. 타이머 큐가 이 값을 읽어
-        // 메인 블록 중에도 heartbeat 를 계속 보낸다.
-        heartbeatArmed.value = target
+        // Intent alone cannot renew the safety lease; SafetyMonitor does that.
+        heartbeatLease.keepAwakeRequested = target
         // Record the awake-since timestamp so SafetyMonitor's timer-cap policy
         // can fire. Idempotent on no-change.
         store.markKeepAwakeTransition(nowAwake: target)
@@ -503,44 +494,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         store.update(displayAwakeActive: displayAwakeHolder?.isHolding == true)
         autoDim?.update()
 
-        if let last = lastWrittenSleepDisabled, last == target { return }
-
-        // ADR-0025 / ADR-0004 — a hardware-protection trip (thermal-critical /
-        // battery-low / thermal-serious) computes target=false, but the helper
-        // ignores plain off-writes while a CLI hold is active ("hold owns
-        // restore"). Without cancelling the hold first the off-write is swallowed
-        // and a hot/draining Mac stays awake even with the GUI running. Cancel the
-        // hold ONLY for genuine hardware trips (NOT the `.timer` cap — that would
-        // defeat `--forever`'s indefinite intent — and NOT a plain off, which must
-        // keep the hold alive across GUI quit).
-        if SafetyPolicy.shouldCancelHoldOnConverge(
+        let cancelHold = SafetyPolicy.shouldCancelHoldOnConverge(
             target: target,
             cliHoldActive: store.cliHoldActive,
-            safetyRelease: store.safetyRelease) {
-            bridge?.cancelHold()
+            safetyRelease: store.safetyRelease)
+        // A newly observed hold must still be cancelled for a hardware trip,
+        // even if the app's last successfully written target was already off.
+        if !cancelHold, let last = lastWrittenSleepDisabled, last == target { return }
+        let completed: (Error?) -> Void = { [weak self] err in
+            self?.lastWrittenSleepDisabled = err == nil ? target : nil
         }
-
-        bridge?.setSleepDisabled(target) { [weak self] err in
-            if err == nil {
-                self?.lastWrittenSleepDisabled = target
-            } else {
-                // On failure, allow the next change to retry.
-                self?.lastWrittenSleepDisabled = nil
-            }
+        if cancelHold {
+            bridge?.cancelHoldAndRestore(completion: completed)
+        } else {
+            bridge?.setSleepDisabled(target, completion: completed)
         }
-    }
-}
-
-/// 메인에서 쓰고 heartbeat 타이머 큐에서 읽는 한 비트의 원자적 미러. converge
-/// 가 갱신하는 `shouldKeepAwake` 게이트를 락 없는 메인 hop 없이 타이머가 읽게
-/// 한다 — 메인이 블록돼도 heartbeat 가 굶지 않는 핵심. NSLock 은 leaf 라 순환
-/// 잠금 없음.
-final class AtomicBool {
-    private let lock = NSLock()
-    private var _value: Bool
-    init(_ value: Bool) { self._value = value }
-    var value: Bool {
-        get { lock.lock(); defer { lock.unlock() }; return _value }
-        set { lock.lock(); _value = newValue; lock.unlock() }
     }
 }

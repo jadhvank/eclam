@@ -378,7 +378,8 @@ private final class WatchSession {
 
     private func tick(now: Date) -> TickOutcome {
         // 1) mtime probe.
-        let mtimeMatch = freshestMatch(pattern: trace.globPattern, now: now)
+        let mtimeMatch = AgentMtimeProbe.freshest(paths: Glob.expand(trace.globPattern), now: now)
+            .map { ($0.path, $0.age) }
         let mtimeFresh: Bool = {
             guard let (_, age) = mtimeMatch else { return false }
             return age <= grace
@@ -388,7 +389,8 @@ private final class WatchSession {
         lock.lock()
         let hookFresh: Bool = {
             guard let last = lastHookPing else { return false }
-            return now.timeIntervalSince(last) <= grace
+            let age = now.timeIntervalSince(last)
+            return AgentActivity.isPlausibleAge(age) && age <= grace
         }()
         lock.unlock()
 
@@ -544,29 +546,6 @@ private final class WatchSession {
             _ = notify_cancel(hookToken)
             hasHookToken = false
         }
-    }
-
-    // MARK: - Glob mtime probe
-
-    /// Lifted from `AgentDetector.freshestMatch`. Returns the freshest matching
-    /// path + its age in seconds, or nil if no glob match.
-    private func freshestMatch(pattern: String, now: Date) -> (String, TimeInterval)? {
-        var bestPath: String?
-        var bestAge: TimeInterval = .infinity
-        for path in Glob.expand(pattern) {
-            var st = stat()
-            if stat(path, &st) == 0 {
-                let mtime = Date(timeIntervalSince1970: TimeInterval(st.st_mtimespec.tv_sec)
-                                 + TimeInterval(st.st_mtimespec.tv_nsec) / 1_000_000_000)
-                let age = now.timeIntervalSince(mtime)
-                if age < bestAge {
-                    bestAge = age
-                    bestPath = path
-                }
-            }
-        }
-        if let p = bestPath { return (p, bestAge) }
-        return nil
     }
 
     // MARK: - Synchronous XPC

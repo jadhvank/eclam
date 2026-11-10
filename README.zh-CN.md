@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.2-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · **中文** · [日本語](README.ja.md) · [Español](README.es.md)
@@ -18,6 +18,10 @@
 </div>
 
 ---
+
+## v0.8.2 新功能: 更可靠的睡眠恢复
+
+睡眠恢复失败后会重试，选择 Off 时会一并取消活动的保持唤醒请求。安全检查长时间未更新时，不再延长唤醒时间。活动检测会排除未来时间戳，并优先选择活跃的 Claude 工作区。v0.8.1 用户可在设置中更新。
 
 ## v0.8.1 新功能: 应用内更新
 
