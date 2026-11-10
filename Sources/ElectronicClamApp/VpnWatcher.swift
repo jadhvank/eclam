@@ -15,7 +15,7 @@ final class VpnWatcher {
         var readStatus: (String) -> VpnStatus = VpnWatcher.readStatus
         var autodetect: () -> String? = VpnWatcher.autodetectVpnService
         var beginActivity: (ProcessInfo.ActivityOptions) -> NSObjectProtocol = {
-            ProcessInfo.processInfo.beginActivity(options: $0, reason: "Electronic Clam - VPN connection monitoring")
+            ProcessInfo.processInfo.beginActivity(options: $0, reason: "Electric Clam - VPN connection monitoring")
         }
         var endActivity: (NSObjectProtocol) -> Void = { ProcessInfo.processInfo.endActivity($0) }
         var schedule: (TimeInterval, @escaping () -> Void) -> (() -> Void) = { interval, callback in
@@ -218,7 +218,7 @@ final class VpnWatcher {
         // 에피소드당 1회다.
         let title = NSL("notify.vpnDropped.title", "VPN disconnected")
         let body = NSLf("notify.vpnDropped.body",
-            "%@ needs re-auth (SAML/SSO). Electronic Clam won't auto-reconnect — open FortiClient and sign in again.",
+            "%@ needs re-auth (SAML/SSO). Electric Clam won't auto-reconnect — open FortiClient and sign in again.",
             svc)
         let epoch = generation
         localNotificationTask?.cancel()

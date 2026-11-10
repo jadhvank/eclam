@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/assets/eclam-icon.png" width="120" alt="Electronic Clam" />
+<img src="docs/assets/eclam-icon.png" width="120" alt="Electric Clam" />
 
-# Electronic Clam
+# Electric Clam
 
 **Agents must keep working. Your Mac shouldn't cook trying.**
 它感知的是*工作*,而不只是一个在运行的进程。
@@ -16,6 +16,8 @@
 [English](README.md) · [한국어](README.ko.md) · **中文** · [日本語](README.ja.md) · [Español](README.es.md)
 
 </div>
+
+> 项目已更名为 **Electric Clam**。新名称将从下一个应用版本开始显示；当前发布版和安装路径仍使用 Electronic Clam / ElectronicClam.app。
 
 ---
 
@@ -82,7 +84,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 ![安全防护演示](docs/assets/eclam-demo-safety.gif)
 
-在合盖(clamshell)模式下把 Mac 放进包里跑重负载,是有发热风险的。Electronic Clam 会盯着温度和电量,情况危险时就让 Mac 睡眠:
+在合盖(clamshell)模式下把 Mac 放进包里跑重负载,是有发热风险的。Electric Clam 会盯着温度和电量,情况危险时就让 Mac 睡眠:
 
 - **电量**: 阈值取决于你的配置:合盖且无外接显示器时为 30%,否则为 10%(可调)。微弱或不稳定的交流供电按电池计。
 - **发热**: 把 macOS 的信号与一个更敏感的内部信号结合,以更快做出反应。
@@ -118,7 +120,7 @@ brew install --cask jadhvank/tap/eclam
 open /Applications/ElectronicClam.app
 ```
 
-在 **System Settings → General → Login Items & Extensions** 中开启 **Electronic Clam Helper**。
+在 **System Settings → General → Login Items & Extensions** 中开启 **Electric Clam Helper**。
 
 ## Usage
 
@@ -183,7 +185,7 @@ eclam help
 
 - **没有 hook 时检测可能延迟几秒。** 未安装 hook 的代理通过轮询其会话日志来检测(~5 秒,锁屏时 ~30 秒)。Claude / Codex / Hermes 在你安装其 hook 后即时生效。
 - **仅用 CLI 时没有安全防护。**
-- **请从 Applications 运行。** 若从 Downloads 或仍处于隔离(quarantine)状态的副本启动,macOS 不会让后台 helper 启动, 请把 Electronic Clam 移到 Applications 文件夹后重新打开。
+- **请从 Applications 运行。** 若从 Downloads 或仍处于隔离(quarantine)状态的副本启动,macOS 不会让后台 helper 启动, 请把 Electric Clam 移到 Applications 文件夹后重新打开。
 - **嵌入 VS Code 的代理**(Cline / Roo Code)没有独立进程,因此 Lax 模式检测受限。
 - **仅支持 Apple Silicon**,macOS 13+ (Ventura)。
 
@@ -223,7 +225,7 @@ open build/ElectronicClam.app
 
 ## 赞助
 
-Electronic Clam 是免费的开源软件。它让你的代理保持唤醒;你的咖啡让开发者保持清醒。☕
+Electric Clam 是免费的开源软件。它让你的代理保持唤醒;你的咖啡让开发者保持清醒。☕
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-%E2%98%95-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/jadhvank)
 

@@ -83,7 +83,7 @@ final class SlackPaneViewController: NSViewController, NSTextFieldDelegate {
         masterCheckbox.target = self
         masterCheckbox.action = #selector(controlChanged)
         let masterTip = NSL("slack.tip.master",
-            "The master switch. Off means Electronic Clam sends nothing to Slack at all. Setup fields and the test button below stay usable so you can wire things up first.")
+            "The master switch. Off means Electric Clam sends nothing to Slack at all. Setup fields and the test button below stay usable so you can wire things up first.")
         masterCheckbox.toolTip = masterTip
 
         setupHelp.font = NSFont.systemFont(ofSize: 11)

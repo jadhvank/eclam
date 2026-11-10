@@ -108,7 +108,7 @@ final class VirtualDisplayController {
         let r = IOPMAssertionCreateWithName(
             kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
             IOPMAssertionLevel(kIOPMAssertionLevelOn),
-            "Electronic Clam - clamshell lock guard" as CFString,
+            "Electric Clam - clamshell lock guard" as CFString,
             &aid)
         if r == kIOReturnSuccess {
             idleSleepAssertionID = aid

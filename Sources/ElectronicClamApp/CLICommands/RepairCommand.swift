@@ -51,7 +51,7 @@ enum RepairCommand: CLISubcommand {
                 + "and use Settings > General > Reinstall Helper.")
             return 2
         }
-        print("eclam repair: relaunching Electronic Clam to repair the helper in its app context…")
+        print("eclam repair: relaunching Electric Clam to repair the helper in its app context…")
         // Graceful quit (no-op if not running) — same path the app uses on quit,
         // so any held sleep is restored cleanly. Then relaunch the bundle.
         _ = Subprocess.capture("/usr/bin/osascript", ["-e", "quit app \"ElectronicClam\""])
@@ -78,15 +78,15 @@ enum RepairCommand: CLISubcommand {
         let post = SMAppService.daemon(plistName: HelperRegistration.plistName).status
         if post == .requiresApproval {
             CLIStderr.print("eclam repair: the helper needs approval. Open System Settings > General > "
-                + "Login Items & Extensions, enable Electronic Clam, then re-run `eclam repair`.")
+                + "Login Items & Extensions, enable Electric Clam, then re-run `eclam repair`.")
             return 3
         }
-        CLIStderr.print("eclam repair: still unreachable after relaunch. Open Electronic Clam and use "
+        CLIStderr.print("eclam repair: still unreachable after relaunch. Open Electric Clam and use "
             + "Settings > General > Reinstall Helper; if it persists, restart your Mac (ADR-0020).")
         // ADR-0039 — 최후수단 안내(자동 실행 금지: sudo + 전역 영향). 죽은 BTM 레코드가
         // 이미 제거된 복사본에 묶여 있으면 resetbtm 만 먹혔던 2026-07-01 사건의 복구 경로.
         CLIStderr.print("If it persists, a stale background record may be bound to a removed copy. "
-            + "Last resort: 'sudo sfltool resetbtm', then reboot and reopen Electronic Clam "
+            + "Last resort: 'sudo sfltool resetbtm', then reboot and reopen Electric Clam "
             + "(this resets ALL apps' login items).")
         return 2
     }
@@ -106,7 +106,7 @@ enum RepairCommand: CLISubcommand {
     private static let helpText = """
     usage: eclam repair
 
-    Recover a registered-but-unreachable helper by relaunching Electronic Clam,
+    Recover a registered-but-unreachable helper by relaunching Electric Clam,
     so its registration runs in the GUI session context (CLI re-registration is
     blocked by macOS — EPERM). Verifies the helper answers XPC afterward.
 

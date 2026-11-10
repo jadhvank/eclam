@@ -69,8 +69,8 @@ Hard rules:
 - Preserve the document structure exactly: headings, tables, lists, blockquotes, badges, images, and link targets.
 - Do NOT translate: code blocks, inline code, CLI commands and flags, file paths, env vars, and identifiers
   (e.g. ElectronicClam, eclam, SMAppService, IOPMSetSystemPowerSetting, LSUIElement, kqueue, mach service).
-- Keep the product name "Electronic Clam" in English everywhere.
-- Under the "# Electronic Clam" title, keep the first bold English tagline ("Keeps your Mac awake while it matters — and lets it sleep when it's safer to.") verbatim, and translate the tagline line after it.
+- Keep the product name "Electric Clam" in English everywhere.
+- Under the "# Electric Clam" title, keep the first bold English tagline ("Keeps your Mac awake while it matters — and lets it sleep when it's safer to.") verbatim, and translate the tagline line after it.
 - Keep image/GIF embeds (docs/assets/*.gif, *.png) and their paths exactly as-is; translate only alt text.
 - Replace the language-bar line (the line after the "<!-- i18n-langbar -->" comment) with exactly this, keeping the comment line above it:
 ${bar}
@@ -92,7 +92,7 @@ EOF
 
   # Sanity check: must start with the centered div and contain the title.
   case "$result" in
-    *'# Electronic Clam'*) : ;;
+    *'# Electric Clam'*) : ;;
     *) echo "✗ output for $code failed sanity check (no title); not written" >&2; return 1 ;;
   esac
 

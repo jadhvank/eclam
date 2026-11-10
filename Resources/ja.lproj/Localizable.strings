@@ -1,4 +1,4 @@
-/* Electronic Clam — 日本語. ADR-0011.
+/* Electric Clam — 日本語. ADR-0011.
    NEEDS HUMAN REVIEW — machine-assisted draft, not yet proofread by a native speaker. */
 
 /* Common */
@@ -50,7 +50,7 @@
 
 
 /* Settings + tabs */
-"settings.title" = "Electronic Clam 設定";
+"settings.title" = "Electric Clam 設定";
 "tab.general" = "一般";
 "tab.agents" = "エージェント";
 "tab.remote" = "リモート";
@@ -61,14 +61,14 @@
 "general.version" = "バージョン %@";
 "general.support" = "☕ コーヒーを一杯おごる";
 "general.language" = "言語";
-"general.statusCard.on" = "Electronic Clam — オン · スリープしません";
-"general.statusCard.off" = "Electronic Clam — オフ · 通常どおりスリープ";
+"general.statusCard.on" = "Electric Clam — オン · スリープしません";
+"general.statusCard.off" = "Electric Clam — オフ · 通常どおりスリープ";
 "general.statusCard.helper" = "ヘルパー権限: %@";
 "general.menuBarTheme" = "メニューバーアイコン";
 "general.startup" = "起動";
 "general.openAtLogin" = "ログイン時に開く";
-"general.tip.openAtLogin" = "ログイン時に Electronic Clam を自動的に起動し、メニューバーで常に監視できるようにします。システム設定 → 一般 → ログイン項目でも管理できます。";
-"general.openAtLogin.needsApproval" = "システム設定 → 一般 → ログイン項目で Electronic Clam がオフになっています。そこでオンにするとログイン時に起動します。";
+"general.tip.openAtLogin" = "ログイン時に Electric Clam を自動的に起動し、メニューバーで常に監視できるようにします。システム設定 → 一般 → ログイン項目でも管理できます。";
+"general.openAtLogin.needsApproval" = "システム設定 → 一般 → ログイン項目で Electric Clam がオフになっています。そこでオンにするとログイン時に起動します。";
 "general.updates" = "アップデート";
 "general.checkForUpdates" = "アップデートを確認…";
 "general.autoCheckUpdates" = "自動的に確認";
@@ -82,7 +82,7 @@
 "update.later" = "後で";
 "update.failed" = "アップデートを確認できませんでした";
 "update.failed.body" = "インターネット接続を確認して、もう一度お試しください。";
-"update.notify.body" = "Electronic Clam %@ が利用可能です — 設定からアップデートしてください。";
+"update.notify.body" = "Electric Clam %@ が利用可能です — 設定からアップデートしてください。";
 "theme.system" = "システム";
 "theme.light" = "ライト";
 "theme.dark" = "ダーク";
@@ -94,7 +94,7 @@
 "agents.section.watched" = "監視中のエージェント";
 "agents.section.hooks" = "フックのインストール";
 "agents.section.hooksAdvanced" = "エージェントフック（任意）";
-"agents.hooks.caption" = "Electronic Clam は各エージェントのセッションログを監視して自動的に検出します — フックは不要です。フックは検出を即時にし、ファイルアクセスが制限された環境でフォールバックを追加するだけです。";
+"agents.hooks.caption" = "Electric Clam は各エージェントのセッションログを監視して自動的に検出します — フックは不要です。フックは検出を即時にし、ファイルアクセスが制限された環境でフォールバックを追加するだけです。";
 "agents.watched.caption" = "各エージェントのセッションログを監視して自動的に検出します。";
 "agents.pollNote" = "検出は約5秒ごとに更新されます(画面ロック中は30秒)。そのため起動直後のエージェントは表示まで数秒かかることがあります。フックを導入したエージェントは即座に反映されます。";
 "agents.col.agent" = "エージェント";
@@ -111,8 +111,8 @@
 "agents.uninstallAll" = "すべてのフックをアンインストール";
 "agents.uninstall" = "アンインストール";
 "agents.add" = "追加";
-"agents.uninstallAll.title" = "すべての Electronic Clam フックをアンインストールしますか？";
-"agents.uninstallAll.body" = "~/.claude/settings.json、~/.codex/config.toml、~/.hermes/config.yaml から Electronic Clam のフックエントリを削除します。他の設定は保持されます。";
+"agents.uninstallAll.title" = "すべての Electric Clam フックをアンインストールしますか？";
+"agents.uninstallAll.body" = "~/.claude/settings.json、~/.codex/config.toml、~/.hermes/config.yaml から Electric Clam のフックエントリを削除します。他の設定は保持されます。";
 "agents.uninstallFail" = "一部のフックをアンインストールできませんでした";
 "agents.couldNotInstall" = "%@ フックをインストールできませんでした";
 "agents.couldNotUninstall" = "%@ フックをアンインストールできませんでした";
@@ -121,14 +121,14 @@
 "agents.ph.id" = "id（例: my-agent）";
 "agents.ph.label" = "ラベル（例: My Agent）";
 "agents.ph.glob" = "Glob（例: ~/.my-agent/logs/*.log）";
-"agents.codexTrust" = "インストール後、Codex CLI で /hooks を実行してこのフックを信頼してください。\nElectronic Clam がフックコードを更新したら再度信頼が必要です。";
+"agents.codexTrust" = "インストール後、Codex CLI で /hooks を実行してこのフックを信頼してください。\nElectric Clam がフックコードを更新したら再度信頼が必要です。";
 "agents.hermesTrust" = "インストール後、次回 Hermes を実行する際にフックのプロンプトを承認してください\n（または ~/.hermes/config.yaml に hooks_auto_accept: true を設定）。";
 
 /* Remote pane (2-tier UI: master checkbox + radios) */
 "remote.master" = "リモートセッションをアクティビティとして扱う";
 "remote.optNeverIdle" = "アイドルでも起こしておく（接続を維持）";
 "remote.optIdleSleep" = "アイドルが次の時間続いたらスリープを許可:";
-"remote.help" = "この Mac に SSH、VNC、画面共有で接続すると、Electronic Clam がセッションが切れないようにスリープを防ぎます。";
+"remote.help" = "この Mac に SSH、VNC、画面共有で接続すると、Electric Clam がセッションが切れないようにスリープを防ぎます。";
 "remote.channels" = "検出されたチャンネル";
 "remote.noneDetected" = "（現在検出されていません）";
 "remote.tip.master" = "リモートセッションは pmset アサーション、who(1)、Tailscale CLI、Claude Code・Codex remote-control、既知のリモート制御デーモンで検出します。オフにするとリモート接続を完全に無視します。";
@@ -204,7 +204,7 @@
 "reason.watchdog" = "ヘルパーウォッチドッグ";
 
 /* Notifications */
-"notify.release.title" = "Electronic Clam がスリープを自動解除しました";
+"notify.release.title" = "Electric Clam がスリープを自動解除しました";
 "notify.batteryLow" = "バッテリー残量低下";
 "notify.thermalSerious" = "温度が高い";
 "notify.thermalCritical" = "温度が危険";
@@ -261,33 +261,33 @@
 "end.unknown" = "終了";
 
 /* ADR-0038 — インストール場所のゲート（隔離/再配置されたバンドルはヘルパーを登録できない） */
-"installgate.title" = "Electronic Clam を「アプリケーション」フォルダに移動してください";
-"installgate.message.quarantined" = "Electronic Clam がダウンロード先から実行されているため、macOS がバックグラウンドヘルパーの起動を許可しません。「アプリケーション」フォルダに移動し、そこから開いてください。";
-"installgate.message.translocated" = "macOS が Electronic Clam を一時的な読み取り専用の場所から実行しています。ヘルパーが起動できるよう、「アプリケーション」フォルダに移動して開き直してください。";
+"installgate.title" = "Electric Clam を「アプリケーション」フォルダに移動してください";
+"installgate.message.quarantined" = "Electric Clam がダウンロード先から実行されているため、macOS がバックグラウンドヘルパーの起動を許可しません。「アプリケーション」フォルダに移動し、そこから開いてください。";
+"installgate.message.translocated" = "macOS が Electric Clam を一時的な読み取り専用の場所から実行しています。ヘルパーが起動できるよう、「アプリケーション」フォルダに移動して開き直してください。";
 "installgate.openApps" = "「アプリケーション」フォルダを開く";
 "installgate.later" = "後で";
 
 /* ADR-0040 — quarantine-in-place 안내 + 메뉴바 상태아이템 미배치 폴백 */
-"installgate.title.quarantinedInPlace" = "Electronic Clam が macOS に検疫(quarantine)されています";
-"installgate.message.quarantinedInPlace" = "Electronic Clam はすでにアプリケーションフォルダにありますが、ダウンロード時の検疫フラグが残っているため、macOS がバックグラウンドヘルパーの起動を拒否しています。ターミナルで次を実行してから、Electronic Clam を開き直してください:\n\nxattr -dr com.apple.quarantine \"%@\"";
+"installgate.title.quarantinedInPlace" = "Electric Clam が macOS に検疫(quarantine)されています";
+"installgate.message.quarantinedInPlace" = "Electric Clam はすでにアプリケーションフォルダにありますが、ダウンロード時の検疫フラグが残っているため、macOS がバックグラウンドヘルパーの起動を拒否しています。ターミナルで次を実行してから、Electric Clam を開き直してください:\n\nxattr -dr com.apple.quarantine \"%@\"";
 "installgate.copyCommand" = "コマンドをコピー";
-"menubar.missing.title" = "Electronic Clam のメニューバーアイコンを表示できません";
-"menubar.missing.body" = "macOS がアイコンをメニューバーに配置していません。macOS 26 ではたいていメニューバーの許可リスト(システム設定 → メニューバー)が原因で、メニューバー整理アプリ(Bartender、Ice、Thaw…)がアイコンを並べ替えたあと壊れたままになることがあります。そこでアプリを「オン」にしても直らないことがあり、Mac を再起動すると直る場合が多いです。設定を開いてあるので Electronic Clam の操作は続けられますし、`eclam` コマンド(`eclam off`、`eclam on`、`eclam status`)はいつでも使えます。";
+"menubar.missing.title" = "Electric Clam のメニューバーアイコンを表示できません";
+"menubar.missing.body" = "macOS がアイコンをメニューバーに配置していません。macOS 26 ではたいていメニューバーの許可リスト(システム設定 → メニューバー)が原因で、メニューバー整理アプリ(Bartender、Ice、Thaw…)がアイコンを並べ替えたあと壊れたままになることがあります。そこでアプリを「オン」にしても直らないことがあり、Mac を再起動すると直る場合が多いです。設定を開いてあるので Electric Clam の操作は続けられますし、`eclam` コマンド(`eclam off`、`eclam on`、`eclam status`)はいつでも使えます。";
 
 /* ADR-0039 — 設定 → 一般のインストール状態ノート（split-brain / 場所 / バージョン不整合） */
-"installhealth.quarantined" = "Electronic Clam がダウンロード先から実行されているため、macOS がヘルパーの起動を許可しません。「アプリケーション」フォルダに移動して開き直してください。";
-"installhealth.translocated" = "macOS が Electronic Clam を一時的な読み取り専用の場所から実行しています。「アプリケーション」フォルダに移動して開き直してください。";
-"installhealth.outside" = "Electronic Clam が「アプリケーション」フォルダの外で実行されているため、ヘルパーが安定して起動できないことがあります。「アプリケーション」に移動して開き直してください。";
-"installhealth.copies" = "Electronic Clam のコピーが複数見つかりました。「アプリケーション」内の 1 つだけを残し、ほかは削除してください:";
+"installhealth.quarantined" = "Electric Clam がダウンロード先から実行されているため、macOS がヘルパーの起動を許可しません。「アプリケーション」フォルダに移動して開き直してください。";
+"installhealth.translocated" = "macOS が Electric Clam を一時的な読み取り専用の場所から実行しています。「アプリケーション」フォルダに移動して開き直してください。";
+"installhealth.outside" = "Electric Clam が「アプリケーション」フォルダの外で実行されているため、ヘルパーが安定して起動できないことがあります。「アプリケーション」に移動して開き直してください。";
+"installhealth.copies" = "Electric Clam のコピーが複数見つかりました。「アプリケーション」内の 1 つだけを残し、ほかは削除してください:";
 "installhealth.skew" = "実行中のアプリ（%1$@）が登録済みのヘルパー（%2$@）と一致しません — 残ったコピーの可能性があります。「ヘルパーを再インストール」を使うか、上の余分なコピーを削除してください。";
 "installhealth.spawnFailed" = "バックグラウンドヘルパーの起動に失敗しました（構成エラー）。「ヘルパーを再インストール」をお試しください。それでも続く場合は Mac を再起動してください。";
 
 /* ADR-0039 — 「ヘルパーを再インストール」でも失敗するときに表示する resetbtm 最終手段 */
-"resetbtm.note" = "ヘルパーがまだ応答しません。削除済みまたは重複したコピーに古いバックグラウンドレコードがひも付いている可能性があります。最終手段として、ターミナルを開いて「sudo sfltool resetbtm」を実行し、Mac を再起動してから Electronic Clam を開き直してください。これはすべてのアプリのログイン項目をリセットします。";
+"resetbtm.note" = "ヘルパーがまだ応答しません。削除済みまたは重複したコピーに古いバックグラウンドレコードがひも付いている可能性があります。最終手段として、ターミナルを開いて「sudo sfltool resetbtm」を実行し、Mac を再起動してから Electric Clam を開き直してください。これはすべてのアプリのログイン項目をリセットします。";
 
 /* ADR-0018 — 初回起動時の承認オンボーディング */
 "onboarding.title" = "Mac をスリープさせないには承認が必要です";
-"onboarding.message" = "システム設定 → 一般 → ログイン項目で Electronic Clam のバックグラウンドヘルパーを許可してください。今すぐ開いて Electronic Clam をオンにしてください。";
+"onboarding.message" = "システム設定 → 一般 → ログイン項目で Electric Clam のバックグラウンドヘルパーを許可してください。今すぐ開いて Electric Clam をオンにしてください。";
 "onboarding.openSettings" = "システム設定を開く";
 "onboarding.later" = "後で";
 
@@ -335,7 +335,7 @@
 "general.helperUnavailable.note" = "アップグレード後、macOS が旧ヘルパーの再起動を拒否することがあります（ad-hoc 署名の制限）。「ヘルパーを再インストール」をクリックし、それでも解決しない場合は Mac を再起動してください。";
 
 /* Hover tooltips — General pane (permission section) */
-"general.tip.permissionStatus" = "macOS が Electronic Clam のバックグラウンドヘルパーの実行を許可しているかどうかです。実際のスリープ制御はヘルパーが行います。";
+"general.tip.permissionStatus" = "macOS が Electric Clam のバックグラウンドヘルパーの実行を許可しているかどうかです。実際のスリープ制御はヘルパーが行います。";
 "general.tip.permissionButton" = "ヘルパーの権限を管理・修復します — 上の状態に応じて、システム設定を開くか登録を再試行します。";
 "general.tip.reinstallHelper" = "バックグラウンドヘルパーの登録を解除して再登録します。アップグレード後にヘルパーが応答しないときや、権限の状態がおかしいときに使ってください。macOS が再承認を求めることがあります。";
 "general.tip.exportDiagnostics" = "最近のログ・設定・ヘルパーの状態をまとめた診断バンドルをデスクトップに保存します — バグ報告に便利です。";
@@ -355,14 +355,14 @@
 "agents.tip.detectNow" = "検知を1回実行し、各エージェントがどのファイルにマッチしたか(またはなぜしなかったか)をそのまま表示します。`eclam debug agents` と同じ出力です。";
 
 /* proposal §5 — 첫 승인 후 1회 안내 */
-"onboarding.enabled.title" = "Electronic Clam の準備ができました";
+"onboarding.enabled.title" = "Electric Clam の準備ができました";
 "onboarding.enabled.body" = "コーディングエージェント(Claude Code、Codex…)を動かしてみてください — 動作中はメニューのドットが緑になり、Mac は起きたままです。シェルをクリックすればいつでも切り替えられます。";
 
 /* ADR-0028 — Telegram 通知 (タブ + パネル) */
 "tab.notifications" = "通知";
 "telegram.privacy" = "デフォルトはオフです。有効にすると、ステータスメッセージはあなた自身が作成・所有するボットトークンを使って Telegram の API のみに送信されます — 開発者や他のサーバーには一切データを送りません。トークンはこの Mac にのみ、ユーザー専用のファイル権限で保存されます。";
 "telegram.master" = "自分の Telegram ボットにステータスを送る";
-"telegram.tip.master" = "マスタースイッチです。オフの間、Electronic Clam はネットワークに何も送信しません。下の設定フィールドとテストボタンはオフでも使えるので、先に接続を確認できます。";
+"telegram.tip.master" = "マスタースイッチです。オフの間、Electric Clam はネットワークに何も送信しません。下の設定フィールドとテストボタンはオフでも使えるので、先に接続を確認できます。";
 "telegram.setup.help" = "設定: ① Telegram で @BotFather に /newbot を送り、ボットを作成してトークンをコピー。② 新しいボットに何かメッセージを送る。③ 下にトークンを貼り付けて自動検出をクリック。";
 "telegram.tokenLabel" = "ボットトークン";
 "telegram.tip.token" = "@BotFather が発行したトークンです。あなたのボットを認証する秘密の値なので公開しないでください。この Mac にのみ保存され(ユーザー専用ファイル)、ログには残りません。";
@@ -385,7 +385,7 @@
 "telegram.error.notConfigured" = "先にボットトークンとチャット ID を入力してください。";
 "telegram.error.badToken" = "ボットトークンの形式ではないようです (例: 123456:ABC…)。";
 "telegram.error.noUpdates" = "メッセージが見つかりません。Telegram でボットに何かメッセージを送ってから再試行してください。";
-"telegram.test" = "🐚 Electronic Clam — テストメッセージ。通知の接続が完了しました。";
+"telegram.test" = "🐚 Electric Clam — テストメッセージ。通知の接続が完了しました。";
 "telegram.start.agent" = "🟢 起床 — %@ が作業中";
 "telegram.start.remote" = "🟢 起床 — リモートセッション (%@)";
 "telegram.start.generic" = "🟢 起床 — Mac を起こしています";
@@ -406,11 +406,11 @@
 /* ADR-0037 — クラムシェルロック防止 · VPN 監視 · 画面オフモード (vdisplay) */
 "general.sessions" = "セッション";
 "general.clamshellGuard" = "クラムシェルでロックを防ぐ（VPN を維持）";
-"general.tip.clamshellGuard" = "蓋を閉じて外部ディスプレイもない状態で Mac が起きているとき、Electronic Clam が見えない仮想ディスプレイを生かしておき、macOS が画面をロックしないようにします — ロックされると FortiClient のような VPN セッションが切れてしまいます。ウインドウは表示されず、電力もほとんど消費しません。デフォルトはオフです。";
+"general.tip.clamshellGuard" = "蓋を閉じて外部ディスプレイもない状態で Mac が起きているとき、Electric Clam が見えない仮想ディスプレイを生かしておき、macOS が画面をロックしないようにします — ロックされると FortiClient のような VPN セッションが切れてしまいます。ウインドウは表示されず、電力もほとんど消費しません。デフォルトはオフです。";
 "general.vpnNotify" = "VPN切断時に通知";
 "general.tip.vpnNotify" = "Macの起動維持とは独立してVPNの切断を監視します。起動中はローカル通知と設定済みのTelegram/Slackで通知します。スリープ中は確認を休止し、復帰時に再確認します。自動再接続は行いません。";
 "general.vpnService" = "VPN サービス";
-"general.tip.vpnService" = "VPN サービスを選びます（macOS がシステム設定 → ネットワークで表示する名前のまま）。FortiClient は通常「VPN」です。Electronic Clam が scutil で監視し、切断されたら再認証を促します — 自動では再接続しません（SAML サインインが必要）。VPN がまだ一覧にない場合は「更新」を使ってください。";
+"general.tip.vpnService" = "VPN サービスを選びます（macOS がシステム設定 → ネットワークで表示する名前のまま）。FortiClient は通常「VPN」です。Electric Clam が scutil で監視し、切断されたら再認証を促します — 自動では再接続しません（SAML サインインが必要）。VPN がまだ一覧にない場合は「更新」を使ってください。";
 "general.vpnRefresh" = "更新";
 "general.tip.vpnRefresh" = "VPN サービスを再スキャンします — これを開いたときに VPN アプリが閉じていた場合に便利です。";
 "general.vpnServiceNote" = "VPNを選び通知を有効にしてください。チャット通知にはネット接続が必要です。FortiClientへの再ログインが必要な場合があります。";
@@ -427,7 +427,7 @@
 
 /* ADR-0037 — VPN 切断通知 (ローカル + Telegram) */
 "notify.vpnDropped.title" = "VPN が切断されました";
-"notify.vpnDropped.body" = "%@ は再認証が必要です（SAML/SSO）。Electronic Clam は自動再接続しません — FortiClient を開いて再度サインインしてください。";
+"notify.vpnDropped.body" = "%@ は再認証が必要です（SAML/SSO）。Electric Clam は自動再接続しません — FortiClient を開いて再度サインインしてください。";
 "telegram.vpn.dropped" = "🔌 VPN が切断されました（%@）— FortiClient は再認証が必要です（SAML）。自動再接続なし。";
 
 /* Slack 通知 — Telegram バックエンドの兄弟 (同じイベント、Slack Web API) */
@@ -435,7 +435,7 @@
 "notifications.backend.slack" = "Slack";
 "slack.privacy" = "デフォルトはオフです。有効にすると、ステータスメッセージはあなた自身が作成・所有する Slack アプリのボットトークンまたは incoming webhook を使って Slack にのみ送信されます — 開発者や他のサーバーには一切データを送りません。認証情報はこの Mac にのみ、ユーザー専用のファイル権限で保存されます。";
 "slack.master" = "自分の Slack ボットにステータスを送る";
-"slack.tip.master" = "マスタースイッチです。オフの間、Electronic Clam は Slack に何も送信しません。下の設定フィールドとテストボタンはオフでも使えるので、先に接続を確認できます。";
+"slack.tip.master" = "マスタースイッチです。オフの間、Electric Clam は Slack に何も送信しません。下の設定フィールドとテストボタンはオフでも使えるので、先に接続を確認できます。";
 "slack.setup.help" = "設定(どちらか一方): ① api.slack.com/apps でアプリを作成。② ボットトークンを使う場合は chat:write スコープを追加し(チャンネル名の検索には channels:read)、ワークスペースにインストールして Bot User OAuth Token をコピーし、/invite @ボット名 で招待。incoming webhook を使う場合は Incoming Webhooks を有効にし、チャンネルごとに webhook を追加して URL をコピー。③ 下に貼り付けてください — webhook はチャンネル不要、ボットトークンは必要です。";
 "slack.tokenLabel" = "トークンまたは webhook";
 "slack.tip.token" = "Slack アプリの Bot User OAuth Token(xoxb- で始まる)または incoming webhook URL(https://hooks.slack.com/services/…)です。webhook はスコープも招待も不要ですが、作成時に決めた1つのチャンネルにのみ送られます。どちらもあなたのアプリを認証する秘密の値なので公開しないでください。この Mac にのみ保存され(ユーザー専用ファイル)、ログには残りません。";
@@ -467,7 +467,7 @@
 "slack.error.missingScope" = "トークンにスコープが足りません。chat:write を追加し(チャンネル名の検索には channels:read も)、ワークスペースにアプリを再インストールしてください。";
 "slack.error.notInChannel" = "ボットがそのチャンネルに投稿できません。/invite @ボット名 で招待してから再試行してください。";
 "slack.error.rateLimited" = "Slack がレート制限をかけています。1分後に再試行してください。";
-"slack.test" = "🐚 Electronic Clam — テストメッセージ。通知の接続が完了しました。";
+"slack.test" = "🐚 Electric Clam — テストメッセージ。通知の接続が完了しました。";
 "slack.digest" = "📊 まだ起きています — %@";
 "slack.start.agent" = "🟢 起床 — %@ が作業中";
 "slack.start.remote" = "🟢 起床 — リモートセッション (%@)";

@@ -7,7 +7,7 @@ import ServiceManagement
 ///
 /// Distinct from `HelperRegistration`, which registers the *privileged daemon*
 /// via `SMAppService.daemon(plistName:)`. This registers the app bundle itself
-/// via `SMAppService.mainApp`, so Electronic Clam relaunches into the menu bar
+/// via `SMAppService.mainApp`, so Electric Clam relaunches into the menu bar
 /// after a reboot/login. No plist, no helper — the OS owns the Login Items entry
 /// and is the single source of truth (we never mirror it into UserDefaults; we
 /// read `status` live on every render).

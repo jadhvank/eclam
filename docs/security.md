@@ -1,6 +1,6 @@
 # Security & privacy
 
-Electronic Clam has no telemetry or analytics. Agent detection reads transcript file timestamps, not conversation or code contents. Network features and local credentials are described below.
+Electric Clam has no telemetry or analytics. Agent detection reads transcript file timestamps, not conversation or code contents. Network features and local credentials are described below.
 
 ## Network traffic and recipients
 

@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/assets/eclam-icon.png" width="120" alt="Electronic Clam" />
+<img src="docs/assets/eclam-icon.png" width="120" alt="Electric Clam" />
 
-# Electronic Clam
+# Electric Clam
 
 **Agents must keep working. Your Mac shouldn't cook trying.**
 It detects *work*, not just a running process.
@@ -16,6 +16,8 @@ It detects *work*, not just a running process.
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
 
 </div>
+
+> The project is now named **Electric Clam**. The new name will appear in the next app release; existing downloads and installation paths still use Electronic Clam / ElectronicClam.app.
 
 ---
 
@@ -82,7 +84,7 @@ By default agents are detected by polling their session logs (~5 s, ~30 s while 
 
 ![Safety guard demo](docs/assets/eclam-demo-safety.gif)
 
-Running a heavy workload in clamshell mode inside a bag is a thermal risk. Electronic Clam watches temperature and battery, and lets the Mac sleep when things get risky:
+Running a heavy workload in clamshell mode inside a bag is a thermal risk. Electric Clam watches temperature and battery, and lets the Mac sleep when things get risky:
 
 - **Battery**: the threshold depends on your setup: 30% with the lid closed and no external display, 10% otherwise (adjustable). A weak or unstable AC connection counts as battery.
 - **Thermal**: combines the macOS signal with a more sensitive internal one to react faster.
@@ -95,7 +97,7 @@ With AC unplugged and the lid closed in a bag it judges more conservatively, the
 
 ![Remote awareness demo](docs/assets/eclam-demo-remote.gif)
 
-In Auto mode, Electronic Clam keeps the Mac awake while you use it remotely, subject to safety guards. It detects SSH, screen sharing, Tailscale, and known remote-control apps. The default is simple: stay awake as long as you're connected.
+In Auto mode, Electric Clam keeps the Mac awake while you use it remotely, subject to safety guards. It detects SSH, screen sharing, Tailscale, and known remote-control apps. The default is simple: stay awake as long as you're connected.
 
 ### Chat notifications: Telegram and Slack (off by default)
 
@@ -118,7 +120,7 @@ brew install --cask jadhvank/tap/eclam
 open /Applications/ElectronicClam.app
 ```
 
-Turn on **Electronic Clam Helper** in **System Settings → General → Login Items & Extensions**.
+Turn on **Electric Clam Helper** in **System Settings → General → Login Items & Extensions**.
 
 ## Usage
 
@@ -183,7 +185,7 @@ See [Security & privacy](docs/security.md) for details.
 
 - **Detection can lag a few seconds without a hook.** Agents without an installed hook are detected by polling their session logs (~5 s, ~30 s while locked). Claude / Codex / Hermes are instant once you install their hooks.
 - **No safety guards in CLI-only use.**
-- **Run it from Applications.** Launched from Downloads or a still-quarantined copy, macOS won't let the background helper start. Move Electronic Clam to your Applications folder and reopen it.
+- **Run it from Applications.** Launched from Downloads or a still-quarantined copy, macOS won't let the background helper start. Move Electric Clam to your Applications folder and reopen it.
 - **VS Code-embedded agents** (Cline / Roo Code) have no standalone process, so Lax-mode detection is limited.
 - **Apple Silicon only**, macOS 13+ (Ventura).
 
@@ -223,7 +225,7 @@ Earlier: agent-aware detection and the `watch` / `session` CLI (0.5.x), state-co
 
 ## Support
 
-Electronic Clam is free and open source. It keeps your agent awake; your coffee keeps the developer awake. ☕
+Electric Clam is free and open source. It keeps your agent awake; your coffee keeps the developer awake. ☕
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-%E2%98%95-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/jadhvank)
 

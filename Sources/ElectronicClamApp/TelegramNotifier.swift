@@ -238,7 +238,7 @@ final class TelegramNotifier {
             completion(NSL("telegram.error.notConfigured", "Enter a bot token and chat ID first."))
             return
         }
-        let head = NSL("telegram.test", "🐚 Electronic Clam — test message. Notifications are wired up.")
+        let head = NSL("telegram.test", "🐚 Electric Clam — test message. Notifications are wired up.")
         send(compose(head), bypassGate: true, completion: completion)
     }
 

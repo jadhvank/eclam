@@ -38,7 +38,7 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
     private var hooksExpanded = false
     private let hooksCaption = NSTextField(labelWithString:
         NSL("agents.hooks.caption",
-        "Electronic Clam detects agents automatically by watching their "
+        "Electric Clam detects agents automatically by watching their "
         + "session logs — no hook needed. Hooks only make detection instant "
         + "and add a fallback when file access is restricted."))
 
@@ -60,7 +60,7 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
     private let codexTrustHint = NSTextField(labelWithString:
         NSL("agents.codexTrust",
         "After install, run /hooks in Codex CLI to trust this hook.\n" +
-        "Re-trust needed when Electronic Clam updates the hook code."))
+        "Re-trust needed when Electric Clam updates the hook code."))
 
     /// ADR-0006 §E (v0.3.2) — Hermes also has a first-use trust prompt for
     /// shell-command hooks. Bypass options exist but we keep the default
@@ -140,7 +140,7 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         let colSource = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("source"))
         colSource.title = NSL("agents.col.pattern", "Pattern")
         colSource.headerToolTip = NSL("agents.tip.pattern",
-            "The file path Electronic Clam watches to tell this agent is working. "
+            "The file path Electric Clam watches to tell this agent is working. "
             + "~/ is your home folder.")
         colSource.width = 240
         colSource.minWidth = 200
@@ -506,9 +506,9 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
 
     @objc private func uninstallAllTapped() {
         let confirm = NSAlert()
-        confirm.messageText = NSL("agents.uninstallAll.title", "Uninstall all Electronic Clam hooks?")
+        confirm.messageText = NSL("agents.uninstallAll.title", "Uninstall all Electric Clam hooks?")
         confirm.informativeText = NSL("agents.uninstallAll.body",
-            "Removes Electronic Clam hook entries from "
+            "Removes Electric Clam hook entries from "
             + "~/.claude/settings.json, ~/.codex/config.toml, and "
             + "~/.hermes/config.yaml. Your other settings are preserved.")
         confirm.alertStyle = .informational

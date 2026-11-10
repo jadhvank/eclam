@@ -156,7 +156,7 @@ final class GeneralPaneViewController: NSViewController {
         loginItemCheckbox.target = self
         loginItemCheckbox.action = #selector(loginItemToggled)
         let loginItemTip = NSL("general.tip.openAtLogin",
-            "Launch Electronic Clam automatically when you log in, so it's always watching in the menu bar. You can also manage this in System Settings → General → Login Items.")
+            "Launch Electric Clam automatically when you log in, so it's always watching in the menu bar. You can also manage this in System Settings → General → Login Items.")
         loginItemCheckbox.toolTip = loginItemTip
         let startupRow = Self.formRow(NSL("general.startup", "Startup"), control: loginItemCheckbox)
 
@@ -178,7 +178,7 @@ final class GeneralPaneViewController: NSViewController {
         clamshellGuardCheckbox.state = store.clamshellLockGuardEnabled ? .on : .off
         clamshellGuardCheckbox.toolTip = NSL("general.tip.clamshellGuard",
             "When your Mac stays awake with the lid closed and no external display, "
-            + "Electronic Clam keeps an invisible virtual display alive so macOS "
+            + "Electric Clam keeps an invisible virtual display alive so macOS "
             + "doesn't lock the screen — a lock would drop VPN sessions like "
             + "FortiClient. No window appears and it draws essentially no power. "
             + "Off by default.")
@@ -213,7 +213,7 @@ final class GeneralPaneViewController: NSViewController {
         vpnServicePopup.autoenablesItems = false
         let vpnServiceTip = NSL("general.tip.vpnService",
             "Pick your VPN service (as macOS sees it in Settings → Network). FortiClient's "
-            + "is usually \"VPN\". Electronic Clam watches it with scutil and, if it drops, "
+            + "is usually \"VPN\". Electric Clam watches it with scutil and, if it drops, "
             + "notifies you to re-auth — it never reconnects automatically (SAML sign-in "
             + "required). Use Refresh if your VPN isn't listed yet.")
         vpnServicePopup.toolTip = vpnServiceTip
@@ -321,7 +321,7 @@ final class GeneralPaneViewController: NSViewController {
         permissionStatusLabel.font = NSFont.systemFont(ofSize: 12)
         permissionStatusLabel.alignment = .left
         let statusTip = NSL("general.tip.permissionStatus",
-            "Whether macOS allows Electronic Clam's background helper to run. The helper is the part that actually controls sleep.")
+            "Whether macOS allows Electric Clam's background helper to run. The helper is the part that actually controls sleep.")
         permissionStatusLabel.toolTip = statusTip
         permissionButton.translatesAutoresizingMaskIntoConstraints = false
         permissionButton.bezelStyle = .inline
@@ -440,13 +440,13 @@ final class GeneralPaneViewController: NSViewController {
         iconView.translatesAutoresizingMaskIntoConstraints = false
         if let appIcon = NSImage(named: NSImage.applicationIconName) {
             iconView.image = appIcon
-        } else if let symbol = NSImage(systemSymbolName: "lightbulb.fill", accessibilityDescription: "Electronic Clam") {
+        } else if let symbol = NSImage(systemSymbolName: "lightbulb.fill", accessibilityDescription: "Electric Clam") {
             let cfg = NSImage.SymbolConfiguration(pointSize: 24, weight: .regular)
             iconView.image = symbol.withSymbolConfiguration(cfg)
         }
         iconView.imageScaling = .scaleProportionallyUpOrDown
 
-        let nameLabel = NSTextField(labelWithString: "Electronic Clam")
+        let nameLabel = NSTextField(labelWithString: "Electric Clam")
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
 
@@ -617,15 +617,15 @@ final class GeneralPaneViewController: NSViewController {
         var lines: [String] = []
         if let block = block {
             lines.append(block.kind == .quarantined
-                ? NSL("installhealth.quarantined", "Electronic Clam is running from a download location, so macOS won’t let its helper start. Move it to the Applications folder and reopen it.")
-                : NSL("installhealth.translocated", "macOS is running Electronic Clam from a temporary read-only location. Move it to the Applications folder and reopen it."))
+                ? NSL("installhealth.quarantined", "Electric Clam is running from a download location, so macOS won’t let its helper start. Move it to the Applications folder and reopen it.")
+                : NSL("installhealth.translocated", "macOS is running Electric Clam from a temporary read-only location. Move it to the Applications folder and reopen it."))
         } else if !inApps {
-            lines.append(NSL("installhealth.outside", "Electronic Clam is running outside the Applications folder, which can stop its helper from starting reliably. Move it to Applications and reopen it."))
+            lines.append(NSL("installhealth.outside", "Electric Clam is running outside the Applications folder, which can stop its helper from starting reliably. Move it to Applications and reopen it."))
         }
         if copies.count > 1 {
             let paths = copies.map { "  • \($0.shortVersion ?? "?")  \($0.path)" }.joined(separator: "\n")
             lines.append(NSL("installhealth.copies",
-                "Multiple copies of Electronic Clam were found. Keep only the one in Applications and delete the rest:") + "\n" + paths)
+                "Multiple copies of Electric Clam were found. Keep only the one in Applications and delete the rest:") + "\n" + paths)
         }
         if let reg = job?.parentBundleVersion, let appVer = appVer, reg != appVer {
             lines.append(NSLf("installhealth.skew",
@@ -665,8 +665,8 @@ final class GeneralPaneViewController: NSViewController {
         let on = store.sleepDisabled
         statusDot.color = on ? .systemGreen : .systemGray
         statusTitle.stringValue = on
-            ? NSL("general.statusCard.on", "Electronic Clam — On · staying awake")
-            : NSL("general.statusCard.off", "Electronic Clam — Off · sleeps normally")
+            ? NSL("general.statusCard.on", "Electric Clam — On · staying awake")
+            : NSL("general.statusCard.off", "Electric Clam — Off · sleeps normally")
         let perm = Self.permissionStatus(store.registration)
         statusHelper.stringValue = NSLf("general.statusCard.helper", "Helper: %@", perm.text)
     }
@@ -751,7 +751,7 @@ final class GeneralPaneViewController: NSViewController {
         loginItemNote.isHidden = !needsApproval
         if needsApproval {
             loginItemNote.stringValue = "⚠\u{FE0E} " + NSL("general.openAtLogin.needsApproval",
-                "Electronic Clam is turned off in System Settings → General → Login Items. Switch it on there to launch at login.")
+                "Electric Clam is turned off in System Settings → General → Login Items. Switch it on there to launch at login.")
         }
     }
 
@@ -843,7 +843,7 @@ final class GeneralPaneViewController: NSViewController {
         resetBtmNote.isHidden = recovered
         guard !recovered else { return }
         resetBtmNote.stringValue = "⚠\u{FE0E} " + NSL("resetbtm.note",
-            "The helper still isn’t responding. A stale background record may be bound to a removed or duplicate copy. As a last resort, open Terminal and run “sudo sfltool resetbtm”, then restart your Mac and reopen Electronic Clam. This resets every app’s login items.")
+            "The helper still isn’t responding. A stale background record may be bound to a removed or duplicate copy. As a last resort, open Terminal and run “sudo sfltool resetbtm”, then restart your Mac and reopen Electric Clam. This resets every app’s login items.")
     }
 
     /// proposal §2 — 진단 번들 내보내기. 성공 시 Finder에서 파일 선택, 실패 시 NSAlert.

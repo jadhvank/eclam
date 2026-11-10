@@ -3,7 +3,7 @@ import Foundation
 /// `eclam help` — static usage block.
 enum HelpCommand: CLISubcommand {
     static let usage = """
-    Electronic Clam — menu bar utility to keep macOS awake while agents work.
+    Electric Clam — menu bar utility to keep macOS awake while agents work.
 
     USAGE:
       eclam on [--for <dur>] [--forever]   (default: auto-release in 2h)

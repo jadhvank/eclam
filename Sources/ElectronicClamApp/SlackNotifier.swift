@@ -226,7 +226,7 @@ final class SlackNotifier {
                 "Enter a bot token and a channel, or an incoming webhook URL, first."))
             return
         }
-        let head = NSL("slack.test", "🐚 Electronic Clam — test message. Notifications are wired up.")
+        let head = NSL("slack.test", "🐚 Electric Clam — test message. Notifications are wired up.")
         send(compose(head), bypassGate: true, completion: completion)
     }
 

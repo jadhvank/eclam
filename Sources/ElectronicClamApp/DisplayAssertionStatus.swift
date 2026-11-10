@@ -7,7 +7,7 @@ enum DisplayAssertionStatus {
     struct Entry: Equatable {
         let pid: Int32
         let name: String
-        var isElectronicClam: Bool { name.hasPrefix("Electronic Clam") || name.hasPrefix("eclam") }
+        var isElectronicClam: Bool { name.hasPrefix("Electric Clam") || name.hasPrefix("Electronic Clam") || name.hasPrefix("eclam") }
         var json: [String: Any] { ["pid": pid, "name": name] }
     }
     struct Snapshot {
