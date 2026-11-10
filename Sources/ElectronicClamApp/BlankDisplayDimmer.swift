@@ -48,13 +48,13 @@ final class SystemDimmerResources: DimmerResources {
         var identifier: IOPMAssertionID = 0
         let result = IOPMAssertionCreateWithName(kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
                                                 IOPMAssertionLevel(kIOPMAssertionLevelOn),
-                                                "Electronic Clam - dim" as CFString, &identifier)
+                                                "Electric Clam - dim" as CFString, &identifier)
         if result == kIOReturnSuccess { assertion = identifier }
         else { log.error("dim display assertion failed: \(result, privacy: .public)") }
         // The IOKit assertion above owns display-sleep prevention. This activity
         // prevents App Nap throttling of return polling without another power hold.
         activity = ProcessInfo.processInfo.beginActivity(options: .userInitiatedAllowingIdleSystemSleep,
-                                                         reason: "Electronic Clam - dim return polling")
+                                                         reason: "Electric Clam - dim return polling")
     }
 
     func release() {

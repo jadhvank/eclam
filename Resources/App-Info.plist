@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Electronic Clam</string>
+    <string>Electric Clam</string>
     <key>CFBundleDisplayName</key>
-    <string>Electronic Clam</string>
+    <string>Electric Clam</string>
     <key>CFBundleIdentifier</key>
     <string>com.jadhvank.eclam</string>
     <key>CFBundleExecutable</key>
@@ -51,6 +51,6 @@
     <key>SUVerifyUpdateBeforeExtraction</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
-    <string>© 2026 Electronic Clam</string>
+    <string>© 2026 Electric Clam</string>
 </dict>
 </plist>

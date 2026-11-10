@@ -168,7 +168,7 @@ static void EClamReconfigCallback(CGDirectDisplayID display,
         // 1) Descriptor — KVC 로 설정(프로퍼티 이름 드리프트에 견고). 1920x1080,
         //    물리 크기는 ~81 DPI(비-retina)가 되도록 600x340mm.
         id descriptor = [[descCls alloc] init];
-        [descriptor setValue:@"Electronic Clam Virtual Display" forKey:@"name"];
+        [descriptor setValue:@"Electric Clam Virtual Display" forKey:@"name"];
         [descriptor setValue:@1920 forKey:@"maxPixelsWide"];
         [descriptor setValue:@1080 forKey:@"maxPixelsHigh"];
         [descriptor setValue:[NSValue valueWithSize:NSMakeSize(600, 340)]

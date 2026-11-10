@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build, package, publish a GitHub release, and patch the Homebrew cask.
-# Electronic Clam (eclam). Developer ID signed + notarized + stapled (ADR-0020 §③).
+# Electric Clam (eclam). Developer ID signed + notarized + stapled (ADR-0020 §③).
 # Ported from the LidAwake-era _archive script.
 #
 # Usage:
@@ -32,7 +32,7 @@ BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$ROOT/Resources/Ap
 LATEST="$(gh api "repos/$REPO/releases/latest" --jq .tag_name)"
 python3 "$ROOT/scripts/validate-release-version.py" "$VERSION" "$BUILD" "$LATEST"
 
-echo "==> Releasing Electronic Clam $VERSION ($TAG) to $REPO"
+echo "==> Releasing Electric Clam $VERSION ($TAG) to $REPO"
 
 # Never mutate a published release: clients may have cached its signed feed.
 if EXISTING="$(gh release view "$TAG" --repo "$REPO" --json isDraft --jq .isDraft 2>/dev/null)"; then
@@ -97,7 +97,7 @@ fi
 # Upload both assets to a draft; only then make the version discoverable.
 if ! gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
     gh release create "$TAG" --repo "$REPO" --draft \
-        --title "Electronic Clam $VERSION" \
+        --title "Electric Clam $VERSION" \
         --notes "See CHANGELOG.md. Updates are installed only when you choose."
 fi
 [[ "$(gh release view "$TAG" --repo "$REPO" --json isDraft --jq .isDraft)" == "true" ]] || {

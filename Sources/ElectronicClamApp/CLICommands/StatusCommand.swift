@@ -91,7 +91,7 @@ enum StatusCommand: CLISubcommand {
             print("helper:      \(verdict.human)")
             print("awake:       \(awake)")
             let displayReasons = appDisplayAssertions.map { $0.isEmpty ? "none" : $0.map(\.name).joined(separator: ", ") } ?? "unknown"
-            print("display:     \(displayReasons) (Electronic Clam assertions)")
+            print("display:     \(displayReasons) (Electric Clam assertions)")
             print("display all: \(displayStatus.systemPreventsDisplaySleep.map { $0 ? "held" : "not held" } ?? "unknown") (system)")
             if let h = holdRemaining, h != 0 {
                 print("hold:        \(h < 0 ? "no expiry (--forever)" : DurationParse.shortFormat(seconds: h) + " left") (CLI)")

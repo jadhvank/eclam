@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/assets/eclam-icon.png" width="120" alt="Electronic Clam" />
+<img src="docs/assets/eclam-icon.png" width="120" alt="Electric Clam" />
 
-# Electronic Clam
+# Electric Clam
 
 **Agents must keep working. Your Mac shouldn't cook trying.**
 ただ動いているプロセスではなく、*作業*そのものを検知します。
@@ -16,6 +16,8 @@
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · **日本語** · [Español](README.es.md)
 
 </div>
+
+> プロジェクト名を **Electric Clam** に変更しました。アプリへの反映は次回リリースからです。現在の配布版とインストール先は Electronic Clam / ElectronicClam.app のままです.
 
 ---
 
@@ -82,7 +84,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 ![安全ガードのデモ](docs/assets/eclam-demo-safety.gif)
 
-クラムシェルモードでバッグに入れたまま重いワークロードを走らせるのは発熱リスクです。Electronic Clam は温度とバッテリーを見ていて、危険になったら Mac をスリープさせます:
+クラムシェルモードでバッグに入れたまま重いワークロードを走らせるのは発熱リスクです。Electric Clam は温度とバッテリーを見ていて、危険になったら Mac をスリープさせます:
 
 - **バッテリー**: しきい値は構成によって変わります:フタを閉じて外部ディスプレイなしなら 30%、それ以外は 10%(調整可)。弱い/不安定な AC 接続はバッテリー扱いです。
 - **発熱**: macOS の信号に、より敏感な内部信号を組み合わせて素早く反応します。
@@ -118,7 +120,7 @@ brew install --cask jadhvank/tap/eclam
 open /Applications/ElectronicClam.app
 ```
 
-**System Settings → General → Login Items & Extensions** で **Electronic Clam Helper** をオンにしてください。
+**System Settings → General → Login Items & Extensions** で **Electric Clam Helper** をオンにしてください。
 
 ## Usage
 
@@ -183,7 +185,7 @@ eclam help
 
 - **hook がないと検知が数秒遅れることがあります。** hook を入れていないエージェントはセッションログのポーリングで検知します(~5 秒、ロック中は ~30 秒)。Claude / Codex / Hermes は hook を入れれば即座です。
 - **CLI だけでは安全ガードがありません。**
-- **Applications から実行してください。** Downloads や隔離(quarantine)されたままのコピーから起動すると、macOS がバックグラウンド helper を起動させません, Electronic Clam を Applications フォルダへ移してから開き直してください。
+- **Applications から実行してください。** Downloads や隔離(quarantine)されたままのコピーから起動すると、macOS がバックグラウンド helper を起動させません, Electric Clam を Applications フォルダへ移してから開き直してください。
 - **VS Code 組み込みのエージェント**(Cline / Roo Code)は独立したプロセスがないため、Lax モードの検知は限定的です。
 - **Apple Silicon 専用**、macOS 13+ (Ventura)。
 
@@ -223,7 +225,7 @@ open build/ElectronicClam.app
 
 ## 支援
 
-Electronic Clam は無料のオープンソースです。エージェントを起こしておくのは Electronic Clam、開発者を起こしておくのはあなたのコーヒー。☕
+Electric Clam は無料のオープンソースです。エージェントを起こしておくのは Electric Clam、開発者を起こしておくのはあなたのコーヒー。☕
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-%E2%98%95-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/jadhvank)
 

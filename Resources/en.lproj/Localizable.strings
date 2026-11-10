@@ -1,4 +1,4 @@
-/* Electronic Clam — English (source of truth). ADR-0011. */
+/* Electric Clam — English (source of truth). ADR-0011. */
 
 /* Common */
 "common.ok" = "OK";
@@ -51,7 +51,7 @@
 
 
 /* Settings window + tabs */
-"settings.title" = "Electronic Clam Settings";
+"settings.title" = "Electric Clam Settings";
 "tab.general" = "General";
 "tab.agents" = "Agents";
 "tab.remote" = "Remote";
@@ -62,14 +62,14 @@
 "general.version" = "Version %@";
 "general.support" = "☕ Buy me a coffee";
 "general.language" = "Language";
-"general.statusCard.on" = "Electronic Clam — On · staying awake";
-"general.statusCard.off" = "Electronic Clam — Off · sleeps normally";
+"general.statusCard.on" = "Electric Clam — On · staying awake";
+"general.statusCard.off" = "Electric Clam — Off · sleeps normally";
 "general.statusCard.helper" = "Helper: %@";
 "general.menuBarTheme" = "Menu Bar Icon";
 "general.startup" = "Startup";
 "general.openAtLogin" = "Open at login";
-"general.tip.openAtLogin" = "Launch Electronic Clam automatically when you log in, so it's always watching in the menu bar. You can also manage this in System Settings → General → Login Items.";
-"general.openAtLogin.needsApproval" = "Electronic Clam is turned off in System Settings → General → Login Items. Switch it on there to launch at login.";
+"general.tip.openAtLogin" = "Launch Electric Clam automatically when you log in, so it's always watching in the menu bar. You can also manage this in System Settings → General → Login Items.";
+"general.openAtLogin.needsApproval" = "Electric Clam is turned off in System Settings → General → Login Items. Switch it on there to launch at login.";
 "general.updates" = "Updates";
 "general.checkForUpdates" = "Check for Updates…";
 "general.autoCheckUpdates" = "Automatically check";
@@ -83,7 +83,7 @@
 "update.later" = "Later";
 "update.failed" = "Couldn't check for updates";
 "update.failed.body" = "Check your internet connection and try again.";
-"update.notify.body" = "Electronic Clam %@ is available — open Settings to update.";
+"update.notify.body" = "Electric Clam %@ is available — open Settings to update.";
 "theme.system" = "System";
 "theme.light" = "Light";
 "theme.dark" = "Dark";
@@ -95,7 +95,7 @@
 "agents.section.watched" = "Watched agents";
 "agents.section.hooks" = "Install hooks";
 "agents.section.hooksAdvanced" = "Agent hooks (optional)";
-"agents.hooks.caption" = "Electronic Clam detects agents automatically by watching their session logs — no hook needed. Hooks only make detection instant and add a fallback when file access is restricted.";
+"agents.hooks.caption" = "Electric Clam detects agents automatically by watching their session logs — no hook needed. Hooks only make detection instant and add a fallback when file access is restricted.";
 "agents.watched.caption" = "Detected automatically by watching each agent's session log.";
 "agents.pollNote" = "Detection refreshes about every 5 seconds (30 s while the screen is locked), so a just-started agent can take a few seconds to show. Agents with a hook installed register instantly.";
 "agents.col.agent" = "Agent";
@@ -112,8 +112,8 @@
 "agents.uninstallAll" = "Uninstall all hooks";
 "agents.uninstall" = "Uninstall";
 "agents.add" = "Add";
-"agents.uninstallAll.title" = "Uninstall all Electronic Clam hooks?";
-"agents.uninstallAll.body" = "Removes Electronic Clam hook entries from ~/.claude/settings.json, ~/.codex/config.toml, and ~/.hermes/config.yaml. Your other settings are preserved.";
+"agents.uninstallAll.title" = "Uninstall all Electric Clam hooks?";
+"agents.uninstallAll.body" = "Removes Electric Clam hook entries from ~/.claude/settings.json, ~/.codex/config.toml, and ~/.hermes/config.yaml. Your other settings are preserved.";
 "agents.uninstallFail" = "Some hooks could not be uninstalled";
 "agents.couldNotInstall" = "Could not install %@ hook";
 "agents.couldNotUninstall" = "Could not uninstall %@ hook";
@@ -122,14 +122,14 @@
 "agents.ph.id" = "id (e.g. my-agent)";
 "agents.ph.label" = "Label (e.g. My Agent)";
 "agents.ph.glob" = "Glob (e.g. ~/.my-agent/logs/*.log)";
-"agents.codexTrust" = "After install, run /hooks in Codex CLI to trust this hook.\nRe-trust needed when Electronic Clam updates the hook code.";
+"agents.codexTrust" = "After install, run /hooks in Codex CLI to trust this hook.\nRe-trust needed when Electric Clam updates the hook code.";
 "agents.hermesTrust" = "After install, approve the hook prompt the next time you run Hermes\n(or set hooks_auto_accept: true in ~/.hermes/config.yaml).";
 
 /* Remote pane (2-tier UI: master checkbox + radios) */
 "remote.master" = "Count remote sessions as activity";
 "remote.optNeverIdle" = "Keep awake even when idle (stay connected)";
 "remote.optIdleSleep" = "Allow sleep when idle for";
-"remote.help" = "When you SSH, VNC, or Screen Share into this Mac, Electronic Clam keeps it awake so the session doesn't drop.";
+"remote.help" = "When you SSH, VNC, or Screen Share into this Mac, Electric Clam keeps it awake so the session doesn't drop.";
 "remote.channels" = "Detected channels";
 "remote.noneDetected" = "(none currently detected)";
 "remote.tip.master" = "Remote sessions are detected via pmset assertions, who(1), the Tailscale CLI, Claude Code and Codex remote-control, and known remote-control daemons. Turn this off to ignore remote connections entirely.";
@@ -206,7 +206,7 @@
 "reason.watchdog" = "Helper watchdog";
 
 /* Auto-release notifications */
-"notify.release.title" = "Electronic Clam auto-released sleep";
+"notify.release.title" = "Electric Clam auto-released sleep";
 "notify.batteryLow" = "Battery low";
 "notify.thermalSerious" = "Thermal serious";
 "notify.thermalCritical" = "Thermal critical";
@@ -263,33 +263,33 @@
 "end.unknown" = "ended";
 
 /* ADR-0038 — install-location gate (quarantined/translocated bundle can't register the helper) */
-"installgate.title" = "Move Electronic Clam to your Applications folder";
-"installgate.message.quarantined" = "Electronic Clam is running from a download location, so macOS won’t let its background helper start. Move it to the Applications folder and open it from there.";
-"installgate.message.translocated" = "macOS is running Electronic Clam from a temporary read-only location. Move it to the Applications folder and reopen it so its helper can start.";
+"installgate.title" = "Move Electric Clam to your Applications folder";
+"installgate.message.quarantined" = "Electric Clam is running from a download location, so macOS won’t let its background helper start. Move it to the Applications folder and open it from there.";
+"installgate.message.translocated" = "macOS is running Electric Clam from a temporary read-only location. Move it to the Applications folder and reopen it so its helper can start.";
 "installgate.openApps" = "Open Applications Folder";
 "installgate.later" = "Later";
 
 /* ADR-0040 — quarantine-in-place 안내 + 메뉴바 상태아이템 미배치 폴백 */
-"installgate.title.quarantinedInPlace" = "Electronic Clam is quarantined by macOS";
-"installgate.message.quarantinedInPlace" = "Electronic Clam is already in your Applications folder, but it still carries the download quarantine flag, so macOS refuses to start its background helper. Run this in Terminal, then reopen Electronic Clam:\n\nxattr -dr com.apple.quarantine \"%@\"";
+"installgate.title.quarantinedInPlace" = "Electric Clam is quarantined by macOS";
+"installgate.message.quarantinedInPlace" = "Electric Clam is already in your Applications folder, but it still carries the download quarantine flag, so macOS refuses to start its background helper. Run this in Terminal, then reopen Electric Clam:\n\nxattr -dr com.apple.quarantine \"%@\"";
 "installgate.copyCommand" = "Copy Command";
-"menubar.missing.title" = "Electronic Clam’s menu bar icon can’t be shown";
-"menubar.missing.body" = "macOS is not placing the icon in the menu bar. On macOS 26 this is usually the menu bar allow-list (System Settings → Menu Bar), which can stay broken after a menu bar organiser (Bartender, Ice, Thaw…) rearranges icons. Turning the app “on” there does not always fix it; restarting your Mac often does. Settings is open so you can still control Electronic Clam, and the `eclam` command (`eclam off`, `eclam on`, `eclam status`) always works.";
+"menubar.missing.title" = "Electric Clam’s menu bar icon can’t be shown";
+"menubar.missing.body" = "macOS is not placing the icon in the menu bar. On macOS 26 this is usually the menu bar allow-list (System Settings → Menu Bar), which can stay broken after a menu bar organiser (Bartender, Ice, Thaw…) rearranges icons. Turning the app “on” there does not always fix it; restarting your Mac often does. Settings is open so you can still control Electric Clam, and the `eclam` command (`eclam off`, `eclam on`, `eclam status`) always works.";
 
 /* ADR-0039 — install-health note in Settings → General (split-brain / location / version skew) */
-"installhealth.quarantined" = "Electronic Clam is running from a download location, so macOS won’t let its helper start. Move it to the Applications folder and reopen it.";
-"installhealth.translocated" = "macOS is running Electronic Clam from a temporary read-only location. Move it to the Applications folder and reopen it.";
-"installhealth.outside" = "Electronic Clam is running outside the Applications folder, which can stop its helper from starting reliably. Move it to Applications and reopen it.";
-"installhealth.copies" = "Multiple copies of Electronic Clam were found. Keep only the one in Applications and delete the rest:";
+"installhealth.quarantined" = "Electric Clam is running from a download location, so macOS won’t let its helper start. Move it to the Applications folder and reopen it.";
+"installhealth.translocated" = "macOS is running Electric Clam from a temporary read-only location. Move it to the Applications folder and reopen it.";
+"installhealth.outside" = "Electric Clam is running outside the Applications folder, which can stop its helper from starting reliably. Move it to Applications and reopen it.";
+"installhealth.copies" = "Multiple copies of Electric Clam were found. Keep only the one in Applications and delete the rest:";
 "installhealth.skew" = "The running app (%1$@) doesn’t match the registered helper (%2$@) — likely leftover copies. Use Reinstall Helper, or remove the extra copies above.";
 "installhealth.spawnFailed" = "The background helper failed to start (a configuration error). Try Reinstall Helper; if it persists, restart your Mac.";
 
 /* ADR-0039 — resetbtm last resort shown when Reinstall Helper still fails */
-"resetbtm.note" = "The helper still isn’t responding. A stale background record may be bound to a removed or duplicate copy. As a last resort, open Terminal and run “sudo sfltool resetbtm”, then restart your Mac and reopen Electronic Clam. This resets every app’s login items.";
+"resetbtm.note" = "The helper still isn’t responding. A stale background record may be bound to a removed or duplicate copy. As a last resort, open Terminal and run “sudo sfltool resetbtm”, then restart your Mac and reopen Electric Clam. This resets every app’s login items.";
 
 /* ADR-0018 — first-run approval onboarding */
 "onboarding.title" = "Approval needed to keep your Mac awake";
-"onboarding.message" = "Electronic Clam needs you to allow its background helper in System Settings → General → Login Items. Open it now and switch Electronic Clam on.";
+"onboarding.message" = "Electric Clam needs you to allow its background helper in System Settings → General → Login Items. Open it now and switch Electric Clam on.";
 "onboarding.openSettings" = "Open System Settings";
 "onboarding.later" = "Later";
 
@@ -319,7 +319,7 @@
 /* Hover tooltips (Safety·Agents) + keys missed by code↔lproj drift — 2026-06-11 */
 "agents.tip.hookOptional" = "Skip the hook if the trust step is a hassle — file-watching still detects the agent.";
 "agents.tip.lax" = "Keeps the Mac awake while a watched agent's process is alive — even during long idle waits, like waiting on a model reply.";
-"agents.tip.pattern" = "The file path Electronic Clam watches to tell this agent is working. ~/ is your home folder.";
+"agents.tip.pattern" = "The file path Electric Clam watches to tell this agent is working. ~/ is your home folder.";
 "agents.tip.strict" = "Counts an agent as active only while its session log is actively changing, so a finished or idle agent stops holding the Mac awake.";
 "history.timeline" = "Last 24 hours";
 "menu.blankDisplays" = "Blank screen — keep working";
@@ -329,7 +329,7 @@
 "safety.tip.cooldown" = "'Cooldown' is a 5-minute pause after a guard lets the Mac sleep, so it doesn't re-engage instantly. '—' means no guard has fired this session.";
 "safety.tip.currentState" = "A live readout of what the guards see right now.";
 "safety.tip.lastRelease" = "The most recent reason a guard let the Mac sleep this session. '(none)' means the guards never had to step in.";
-"safety.tip.master" = "The master switch for every guard below. When on, Electronic Clam lets the Mac sleep again once any limit — battery, temperature, or awake-time — is crossed.";
+"safety.tip.master" = "The master switch for every guard below. When on, Electric Clam lets the Mac sleep again once any limit — battery, temperature, or awake-time — is crossed.";
 "safety.tip.maxDuration" = "Let the Mac sleep after it's been kept awake this long in one continuous stretch. 'Unlimited' never caps it. Not applied in Desktop mode (AC + lid open + external display).";
 "safety.tip.thermalCutoff" = "Let the Mac sleep once it reaches this heat stage. Lower stages sleep sooner and safer; the live temperature is under 'Current state' below.";
 
@@ -337,7 +337,7 @@
 "general.helperUnavailable.note" = "After an upgrade, macOS may refuse to relaunch the old helper (ad-hoc signing limitation). Click Reinstall Helper; if it still fails, restart your Mac.";
 
 /* Hover tooltips — General pane (permission section) */
-"general.tip.permissionStatus" = "Whether macOS allows Electronic Clam's background helper to run. The helper is the part that actually controls sleep.";
+"general.tip.permissionStatus" = "Whether macOS allows Electric Clam's background helper to run. The helper is the part that actually controls sleep.";
 "general.tip.permissionButton" = "Manages or repairs the helper permission — opens System Settings or retries registration, depending on the state above.";
 "general.tip.reinstallHelper" = "Unregisters and re-registers the background helper. Use this when the helper stops responding after an upgrade or the permission state looks stuck. macOS may ask you to approve the helper again.";
 "general.tip.exportDiagnostics" = "Saves a diagnostics bundle (recent logs, settings, helper status) to your Desktop — useful when filing a bug report.";
@@ -357,14 +357,14 @@
 "agents.tip.detectNow" = "Runs one detection pass and shows exactly which file each agent matched (or why it didn't). Same output as `eclam debug agents`.";
 
 /* proposal §5 — 첫 승인 후 1회 안내 */
-"onboarding.enabled.title" = "Electronic Clam is ready";
+"onboarding.enabled.title" = "Electric Clam is ready";
 "onboarding.enabled.body" = "Run a coding agent (Claude Code, Codex…) — the menu dot turns green while it works, and your Mac stays awake. Click the shell anytime to toggle.";
 
 /* ADR-0028 — Telegram notifications (tab + pane) */
 "tab.notifications" = "Notifications";
 "telegram.privacy" = "Off by default. When enabled, status messages go only to Telegram's API using a bot token you create and own — nothing is ever sent to the developer or any other server. The token is stored locally with user-only file permissions.";
 "telegram.master" = "Send status to my Telegram bot";
-"telegram.tip.master" = "The master switch. Off means Electronic Clam sends nothing over the network at all. Setup fields and the test button below stay usable so you can wire things up first.";
+"telegram.tip.master" = "The master switch. Off means Electric Clam sends nothing over the network at all. Setup fields and the test button below stay usable so you can wire things up first.";
 "telegram.setup.help" = "Setup: ① In Telegram, message @BotFather → /newbot and copy the token. ② Send any message to your new bot. ③ Paste the token below and click Detect.";
 "telegram.tokenLabel" = "Bot token";
 "telegram.tip.token" = "The token @BotFather gave you. It authenticates *your* bot — keep it private. Stored on this Mac only (user-readable file), never logged.";
@@ -387,7 +387,7 @@
 "telegram.error.notConfigured" = "Enter a bot token and chat ID first.";
 "telegram.error.badToken" = "That doesn't look like a bot token (expected 123456:ABC…).";
 "telegram.error.noUpdates" = "No messages found. Send any message to your bot in Telegram, then try again.";
-"telegram.test" = "🐚 Electronic Clam — test message. Notifications are wired up.";
+"telegram.test" = "🐚 Electric Clam — test message. Notifications are wired up.";
 "telegram.start.agent" = "🟢 Awake — %@ is working";
 "telegram.start.remote" = "🟢 Awake — remote session (%@)";
 "telegram.start.generic" = "🟢 Awake — keeping the Mac up";
@@ -408,11 +408,11 @@
 /* ADR-0037 — clamshell guard · VPN watch · blank-screen mode (vdisplay) */
 "general.sessions" = "Sessions";
 "general.clamshellGuard" = "Prevent lock in clamshell (keep VPN alive)";
-"general.tip.clamshellGuard" = "When your Mac stays awake with the lid closed and no external display, Electronic Clam keeps an invisible virtual display alive so macOS doesn't lock the screen — a lock would drop VPN sessions like FortiClient. No window appears and it draws essentially no power. Off by default.";
+"general.tip.clamshellGuard" = "When your Mac stays awake with the lid closed and no external display, Electric Clam keeps an invisible virtual display alive so macOS doesn't lock the screen — a lock would drop VPN sessions like FortiClient. No window appears and it draws essentially no power. Off by default.";
 "general.vpnNotify" = "Notify when VPN disconnects";
 "general.tip.vpnNotify" = "Watch for VPN disconnects independently of keep-awake. Local alerts and configured Telegram/Slack notifications are available while awake; sleep pauses checks and wake rechecks. No automatic reconnection.";
 "general.vpnService" = "VPN service";
-"general.tip.vpnService" = "Pick your VPN service (as macOS sees it in Settings → Network). FortiClient's is usually \"VPN\". Electronic Clam watches it with scutil and, if it drops, notifies you to re-auth — it never reconnects automatically (SAML sign-in required). Use Refresh if your VPN isn't listed yet.";
+"general.tip.vpnService" = "Pick your VPN service (as macOS sees it in Settings → Network). FortiClient's is usually \"VPN\". Electric Clam watches it with scutil and, if it drops, notifies you to re-auth — it never reconnects automatically (SAML sign-in required). Use Refresh if your VPN isn't listed yet.";
 "general.vpnRefresh" = "Refresh";
 "general.tip.vpnRefresh" = "Re-scan for VPN services — handy if your VPN app was closed when this opened.";
 "general.vpnServiceNote" = "Pick a VPN and enable notifications. Configured chat notifications need a working network; FortiClient may require sign-in again.";
@@ -429,7 +429,7 @@
 
 /* ADR-0037 — VPN-disconnect notifications (local + Telegram) */
 "notify.vpnDropped.title" = "VPN disconnected";
-"notify.vpnDropped.body" = "%@ needs re-auth (SAML/SSO). Electronic Clam won't auto-reconnect — open FortiClient and sign in again.";
+"notify.vpnDropped.body" = "%@ needs re-auth (SAML/SSO). Electric Clam won't auto-reconnect — open FortiClient and sign in again.";
 "telegram.vpn.dropped" = "🔌 VPN disconnected (%@) — FortiClient needs re-auth (SAML). No auto-reconnect.";
 
 /* Slack notifications — sibling of the Telegram backend (same events, Slack Web API) */
@@ -437,7 +437,7 @@
 "notifications.backend.slack" = "Slack";
 "slack.privacy" = "Off by default. When enabled, status messages go only to Slack, using a bot token or an incoming webhook from a Slack app you create and own — nothing is ever sent to the developer or any other server. The credential is stored locally with user-only file permissions.";
 "slack.master" = "Send status to my Slack bot";
-"slack.tip.master" = "The master switch. Off means Electronic Clam sends nothing to Slack at all. Setup fields and the test button below stay usable so you can wire things up first.";
+"slack.tip.master" = "The master switch. Off means Electric Clam sends nothing to Slack at all. Setup fields and the test button below stay usable so you can wire things up first.";
 "slack.setup.help" = "Setup, either way: ① At api.slack.com/apps, create an app. ② For a bot token, add the chat:write scope (channels:read to look up channel names), install to your workspace, copy the Bot User OAuth Token, and invite the bot with /invite @your-bot. For an incoming webhook, turn on Incoming Webhooks, add one for a channel, and copy its URL. ③ Paste it below — a webhook needs no channel, a bot token does.";
 "slack.tokenLabel" = "Token or webhook";
 "slack.tip.token" = "Either the Bot User OAuth Token from your Slack app (starts with xoxb-), or an incoming webhook URL (https://hooks.slack.com/services/…). A webhook needs no scopes and no invite, but posts to the one channel it was created for. Either way it authenticates *your* app — keep it private. Stored on this Mac only (user-readable file), never logged.";
@@ -469,7 +469,7 @@
 "slack.error.missingScope" = "The token is missing a scope. Add chat:write (and channels:read to look up channel names), then reinstall the app to your workspace.";
 "slack.error.notInChannel" = "The bot can't post there. Invite it to the channel with /invite @your-bot, then try again.";
 "slack.error.rateLimited" = "Slack is rate-limiting us. Try again in a minute.";
-"slack.test" = "🐚 Electronic Clam — test message. Notifications are wired up.";
+"slack.test" = "🐚 Electric Clam — test message. Notifications are wired up.";
 "slack.digest" = "📊 Still awake — %@";
 "slack.start.agent" = "🟢 Awake — %@ is working";
 "slack.start.remote" = "🟢 Awake — remote session (%@)";

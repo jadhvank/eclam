@@ -38,7 +38,7 @@ final class RemotePaneViewController: NSViewController {
 
     private let helpLabel = NSTextField(labelWithString:
         NSL("remote.help",
-        "When you SSH, VNC, or Screen Share into this Mac, Electronic Clam " +
+        "When you SSH, VNC, or Screen Share into this Mac, Electric Clam " +
         "keeps it awake so the session doesn't drop."))
     private let channelsHeader = NSTextField(labelWithString: NSL("remote.channels", "Detected channels"))
     private let channelsBody = NSTextField(labelWithString: NSL("remote.noneDetected", "(none currently detected)"))

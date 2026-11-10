@@ -64,7 +64,7 @@ enum SleepDisabledRPC {
         case .enabled:
             break
         case .requiresApproval:
-            CLIStderr.print("eclam: helper requires approval. Open System Settings > General > Login Items & Extensions and enable Electronic Clam.")
+            CLIStderr.print("eclam: helper requires approval. Open System Settings > General > Login Items & Extensions and enable Electric Clam.")
             return 3
         case .notFound:
             CLIStderr.print("eclam: helper not registered (.notFound). Launch ElectronicClam.app once to register the daemon.")

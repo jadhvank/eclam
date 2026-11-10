@@ -191,13 +191,13 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         placementFallbackShown = true
         log.error("opening Settings as fallback for the missing menu bar icon")
         onOpenSettings()
-        let title = NSL("menubar.missing.title", "Electronic Clam’s menu bar icon can’t be shown")
+        let title = NSL("menubar.missing.title", "Electric Clam’s menu bar icon can’t be shown")
         // 문자열은 조각으로 나눠 잇는다 — 한 식으로 이으면 타입 체커가 시간 초과한다.
         let cause = "macOS is not placing the icon in the menu bar. On macOS 26 this is usually "
             + "the menu bar allow-list (System Settings → Menu Bar), which can stay broken "
             + "after a menu bar organiser (Bartender, Ice, Thaw…) rearranges icons."
         let remedy = " Turning the app “on” there does not always fix it; restarting your Mac "
-            + "often does. Settings is open so you can still control Electronic Clam, and the "
+            + "often does. Settings is open so you can still control Electric Clam, and the "
             + "`eclam` command (`eclam off`, `eclam on`, `eclam status`) always works."
         let body = NSL("menubar.missing.body", cause + remedy)
         Task { await ReleaseNotifier.shared.notifyInfo(

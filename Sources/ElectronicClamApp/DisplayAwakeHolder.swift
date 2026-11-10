@@ -33,7 +33,7 @@ final class DisplayAwakeHolder {
         let result = IOPMAssertionCreateWithName(
             kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
             IOPMAssertionLevel(kIOPMAssertionLevelOn),
-            "Electronic Clam - keep display awake" as CFString, &id)
+            "Electric Clam - keep display awake" as CFString, &id)
         guard result == kIOReturnSuccess else {
             Logger(subsystem: "com.jadhvank.eclam", category: "displayawake")
                 .error("Display assertion acquisition failed: \(result, privacy: .public)")

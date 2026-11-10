@@ -166,7 +166,7 @@ final class SafetyPaneViewController: TimedRefreshPaneViewController {
         -> (master: String, battery: String, thermal: String,
             duration: String, state: String, release: String) {
         let masterTip = NSL("safety.tip.master",
-            "The master switch for every guard below. When on, Electronic Clam "
+            "The master switch for every guard below. When on, Electric Clam "
             + "lets the Mac sleep again once any limit — battery, temperature, or "
             + "awake-time — is crossed.")
         masterCheckbox.toolTip = masterTip

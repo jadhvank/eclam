@@ -76,7 +76,7 @@ final class TelegramPaneViewController: NSViewController, NSTextFieldDelegate {
         masterCheckbox.target = self
         masterCheckbox.action = #selector(controlChanged)
         let masterTip = NSL("telegram.tip.master",
-            "The master switch. Off means Electronic Clam sends nothing over the network at all. Setup fields and the test button below stay usable so you can wire things up first.")
+            "The master switch. Off means Electric Clam sends nothing over the network at all. Setup fields and the test button below stay usable so you can wire things up first.")
         masterCheckbox.toolTip = masterTip
 
         setupHelp.font = NSFont.systemFont(ofSize: 11)

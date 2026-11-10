@@ -1,4 +1,4 @@
-/* Electronic Clam — 简体中文. ADR-0011.
+/* Electric Clam — 简体中文. ADR-0011.
    NEEDS HUMAN REVIEW — machine-assisted draft, not yet proofread by a native speaker. */
 
 /* Common */
@@ -50,7 +50,7 @@
 
 
 /* Settings + tabs */
-"settings.title" = "Electronic Clam 设置";
+"settings.title" = "Electric Clam 设置";
 "tab.general" = "通用";
 "tab.agents" = "代理";
 "tab.remote" = "远程";
@@ -61,14 +61,14 @@
 "general.version" = "版本 %@";
 "general.support" = "☕ 请我喝杯咖啡";
 "general.language" = "语言";
-"general.statusCard.on" = "Electronic Clam — 已开启 · 保持唤醒";
-"general.statusCard.off" = "Electronic Clam — 已关闭 · 正常休眠";
+"general.statusCard.on" = "Electric Clam — 已开启 · 保持唤醒";
+"general.statusCard.off" = "Electric Clam — 已关闭 · 正常休眠";
 "general.statusCard.helper" = "辅助权限:%@";
 "general.menuBarTheme" = "菜单栏图标";
 "general.startup" = "启动";
 "general.openAtLogin" = "登录时打开";
-"general.tip.openAtLogin" = "登录时自动启动 Electronic Clam，使其始终在菜单栏中守候。你也可以在系统设置 → 通用 → 登录项中管理此项。";
-"general.openAtLogin.needsApproval" = "Electronic Clam 在系统设置 → 通用 → 登录项中已关闭。在那里开启后即可在登录时启动。";
+"general.tip.openAtLogin" = "登录时自动启动 Electric Clam，使其始终在菜单栏中守候。你也可以在系统设置 → 通用 → 登录项中管理此项。";
+"general.openAtLogin.needsApproval" = "Electric Clam 在系统设置 → 通用 → 登录项中已关闭。在那里开启后即可在登录时启动。";
 "general.updates" = "更新";
 "general.checkForUpdates" = "检查更新…";
 "general.autoCheckUpdates" = "自动检查";
@@ -82,7 +82,7 @@
 "update.later" = "稍后";
 "update.failed" = "无法检查更新";
 "update.failed.body" = "请检查网络连接后重试。";
-"update.notify.body" = "Electronic Clam %@ 可用 — 在设置中更新。";
+"update.notify.body" = "Electric Clam %@ 可用 — 在设置中更新。";
 "theme.system" = "跟随系统";
 "theme.light" = "浅色";
 "theme.dark" = "深色";
@@ -94,7 +94,7 @@
 "agents.section.watched" = "监视的代理";
 "agents.section.hooks" = "安装挂钩";
 "agents.section.hooksAdvanced" = "代理挂钩（可选）";
-"agents.hooks.caption" = "Electronic Clam 通过监视每个代理的会话日志自动检测 — 无需挂钩。挂钩只会让检测即时生效，并在文件访问受限时提供后备方案。";
+"agents.hooks.caption" = "Electric Clam 通过监视每个代理的会话日志自动检测 — 无需挂钩。挂钩只会让检测即时生效，并在文件访问受限时提供后备方案。";
 "agents.watched.caption" = "通过监视每个代理的会话日志自动检测。";
 "agents.pollNote" = "检测约每 5 秒刷新一次(锁屏时为 30 秒),因此刚启动的代理可能需要几秒才会显示。已安装挂钩的代理会即时注册。";
 "agents.col.agent" = "代理";
@@ -111,8 +111,8 @@
 "agents.uninstallAll" = "卸载所有挂钩";
 "agents.uninstall" = "卸载";
 "agents.add" = "添加";
-"agents.uninstallAll.title" = "卸载所有 Electronic Clam 挂钩？";
-"agents.uninstallAll.body" = "将从 ~/.claude/settings.json、~/.codex/config.toml 和 ~/.hermes/config.yaml 中移除 Electronic Clam 挂钩条目。您的其他设置将保留。";
+"agents.uninstallAll.title" = "卸载所有 Electric Clam 挂钩？";
+"agents.uninstallAll.body" = "将从 ~/.claude/settings.json、~/.codex/config.toml 和 ~/.hermes/config.yaml 中移除 Electric Clam 挂钩条目。您的其他设置将保留。";
 "agents.uninstallFail" = "部分挂钩无法卸载";
 "agents.couldNotInstall" = "无法安装 %@ 挂钩";
 "agents.couldNotUninstall" = "无法卸载 %@ 挂钩";
@@ -121,14 +121,14 @@
 "agents.ph.id" = "id（例如 my-agent）";
 "agents.ph.label" = "标签（例如 My Agent）";
 "agents.ph.glob" = "Glob（例如 ~/.my-agent/logs/*.log）";
-"agents.codexTrust" = "安装后，在 Codex CLI 中运行 /hooks 以信任此挂钩。\n当 Electronic Clam 更新挂钩代码时需重新信任。";
+"agents.codexTrust" = "安装后，在 Codex CLI 中运行 /hooks 以信任此挂钩。\n当 Electric Clam 更新挂钩代码时需重新信任。";
 "agents.hermesTrust" = "安装后，下次运行 Hermes 时批准挂钩提示\n（或在 ~/.hermes/config.yaml 中设置 hooks_auto_accept: true）。";
 
 /* Remote pane (2-tier UI: master checkbox + radios) */
 "remote.master" = "将远程会话视为活动";
 "remote.optNeverIdle" = "空闲时也保持唤醒（维持连接）";
 "remote.optIdleSleep" = "空闲达到以下时长后允许睡眠:";
-"remote.help" = "当您通过 SSH、VNC 或屏幕共享连接到此 Mac 时，Electronic Clam 会保持其唤醒以免会话中断。";
+"remote.help" = "当您通过 SSH、VNC 或屏幕共享连接到此 Mac 时，Electric Clam 会保持其唤醒以免会话中断。";
 "remote.channels" = "检测到的通道";
 "remote.noneDetected" = "（当前未检测到）";
 "remote.tip.master" = "远程会话通过 pmset 断言、who(1)、Tailscale CLI、Claude Code 与 Codex remote-control 及已知远程控制守护进程检测。关闭后将完全忽略远程连接。";
@@ -204,7 +204,7 @@
 "reason.watchdog" = "Helper 看门狗";
 
 /* Notifications */
-"notify.release.title" = "Electronic Clam 已自动解除睡眠";
+"notify.release.title" = "Electric Clam 已自动解除睡眠";
 "notify.batteryLow" = "电量低";
 "notify.thermalSerious" = "温度偏高";
 "notify.thermalCritical" = "温度严重";
@@ -261,33 +261,33 @@
 "end.unknown" = "已结束";
 
 /* ADR-0038 — 安装位置门控（被隔离/转移的程序包无法注册帮助程序） */
-"installgate.title" = "请将 Electronic Clam 移到「应用程序」文件夹";
-"installgate.message.quarantined" = "Electronic Clam 正从下载位置运行，所以 macOS 不允许其后台帮助程序启动。请将它移到「应用程序」文件夹，并从那里打开。";
-"installgate.message.translocated" = "macOS 正从临时的只读位置运行 Electronic Clam。请将它移到「应用程序」文件夹并重新打开，帮助程序才能启动。";
+"installgate.title" = "请将 Electric Clam 移到「应用程序」文件夹";
+"installgate.message.quarantined" = "Electric Clam 正从下载位置运行，所以 macOS 不允许其后台帮助程序启动。请将它移到「应用程序」文件夹，并从那里打开。";
+"installgate.message.translocated" = "macOS 正从临时的只读位置运行 Electric Clam。请将它移到「应用程序」文件夹并重新打开，帮助程序才能启动。";
 "installgate.openApps" = "打开「应用程序」文件夹";
 "installgate.later" = "稍后";
 
 /* ADR-0040 — quarantine-in-place 안내 + 메뉴바 상태아이템 미배치 폴백 */
-"installgate.title.quarantinedInPlace" = "Electronic Clam 被 macOS 隔离(quarantine)";
-"installgate.message.quarantinedInPlace" = "Electronic Clam 已经在「应用程序」文件夹中,但仍带着下载隔离标记,因此 macOS 拒绝启动它的后台 helper。请在终端中运行下面这行,然后重新打开 Electronic Clam:\n\nxattr -dr com.apple.quarantine \"%@\"";
+"installgate.title.quarantinedInPlace" = "Electric Clam 被 macOS 隔离(quarantine)";
+"installgate.message.quarantinedInPlace" = "Electric Clam 已经在「应用程序」文件夹中,但仍带着下载隔离标记,因此 macOS 拒绝启动它的后台 helper。请在终端中运行下面这行,然后重新打开 Electric Clam:\n\nxattr -dr com.apple.quarantine \"%@\"";
 "installgate.copyCommand" = "拷贝命令";
-"menubar.missing.title" = "无法显示 Electronic Clam 的菜单栏图标";
-"menubar.missing.body" = "macOS 没有把图标放到菜单栏中。在 macOS 26 上,这通常是菜单栏允许列表(系统设置 → 菜单栏)的问题;菜单栏整理工具(Bartender、Ice、Thaw…)重排图标后,该状态可能一直是坏的。在那里把 App 打开为「允许」并不总能修好,重启 Mac 往往可以。设置窗口已经打开,你仍可控制 Electronic Clam,而 `eclam` 命令(`eclam off`、`eclam on`、`eclam status`)始终可用。";
+"menubar.missing.title" = "无法显示 Electric Clam 的菜单栏图标";
+"menubar.missing.body" = "macOS 没有把图标放到菜单栏中。在 macOS 26 上,这通常是菜单栏允许列表(系统设置 → 菜单栏)的问题;菜单栏整理工具(Bartender、Ice、Thaw…)重排图标后,该状态可能一直是坏的。在那里把 App 打开为「允许」并不总能修好,重启 Mac 往往可以。设置窗口已经打开,你仍可控制 Electric Clam,而 `eclam` 命令(`eclam off`、`eclam on`、`eclam status`)始终可用。";
 
 /* ADR-0039 — 设置 → 通用中的安装健康提示（脑裂 / 位置 / 版本不一致） */
-"installhealth.quarantined" = "Electronic Clam 正从下载位置运行，所以 macOS 不允许其帮助程序启动。请将它移到「应用程序」文件夹并重新打开。";
-"installhealth.translocated" = "macOS 正从临时的只读位置运行 Electronic Clam。请将它移到「应用程序」文件夹并重新打开。";
-"installhealth.outside" = "Electronic Clam 正在「应用程序」文件夹之外运行，这可能导致其帮助程序无法可靠地启动。请将它移到「应用程序」并重新打开。";
-"installhealth.copies" = "发现了多个 Electronic Clam 副本。请只保留「应用程序」中的那一个，并删除其余副本:";
+"installhealth.quarantined" = "Electric Clam 正从下载位置运行，所以 macOS 不允许其帮助程序启动。请将它移到「应用程序」文件夹并重新打开。";
+"installhealth.translocated" = "macOS 正从临时的只读位置运行 Electric Clam。请将它移到「应用程序」文件夹并重新打开。";
+"installhealth.outside" = "Electric Clam 正在「应用程序」文件夹之外运行，这可能导致其帮助程序无法可靠地启动。请将它移到「应用程序」并重新打开。";
+"installhealth.copies" = "发现了多个 Electric Clam 副本。请只保留「应用程序」中的那一个，并删除其余副本:";
 "installhealth.skew" = "正在运行的应用（%1$@）与已注册的帮助程序（%2$@）不一致 — 很可能是残留的副本。请使用「重新安装助手」，或删除上方多余的副本。";
 "installhealth.spawnFailed" = "后台帮助程序启动失败（配置错误）。请尝试「重新安装助手」；如果仍然如此，请重启 Mac。";
 
 /* ADR-0039 — 当「重新安装助手」仍失败时显示的 resetbtm 最后手段 */
-"resetbtm.note" = "帮助程序仍无响应。可能有一条过时的后台记录绑定到了已删除或重复的副本。作为最后手段，请打开终端运行「sudo sfltool resetbtm」，然后重启 Mac 并重新打开 Electronic Clam。这会重置所有应用的登录项。";
+"resetbtm.note" = "帮助程序仍无响应。可能有一条过时的后台记录绑定到了已删除或重复的副本。作为最后手段，请打开终端运行「sudo sfltool resetbtm」，然后重启 Mac 并重新打开 Electric Clam。这会重置所有应用的登录项。";
 
 /* ADR-0018 — 首次启动授权引导 */
 "onboarding.title" = "需要授权才能让 Mac 保持唤醒";
-"onboarding.message" = "请在「系统设置 → 通用 → 登录项」中允许 Electronic Clam 的后台帮助程序。立即打开并开启 Electronic Clam。";
+"onboarding.message" = "请在「系统设置 → 通用 → 登录项」中允许 Electric Clam 的后台帮助程序。立即打开并开启 Electric Clam。";
 "onboarding.openSettings" = "打开系统设置";
 "onboarding.later" = "稍后";
 
@@ -327,7 +327,7 @@
 "safety.tip.cooldown" = "“冷却”是防护让 Mac 休眠后的 5 分钟暂停,避免立即重新生效。“—”表示本次会话中防护从未触发。";
 "safety.tip.currentState" = "实时显示防护当前看到的数值。";
 "safety.tip.lastRelease" = "本次会话中防护最近一次让 Mac 休眠的原因。“(无)”表示防护从未介入。";
-"safety.tip.master" = "下方所有防护的总开关。开启时,电池、温度或连续唤醒时长任一超限,Electronic Clam 就会让 Mac 重新休眠。";
+"safety.tip.master" = "下方所有防护的总开关。开启时,电池、温度或连续唤醒时长任一超限,Electric Clam 就会让 Mac 重新休眠。";
 "safety.tip.maxDuration" = "从开始保持唤醒起,连续唤醒达到此时长后让 Mac 休眠。“无限制”不设上限。在 Desktop 模式下(接通电源 + 开盖 + 外接显示器)不适用。";
 "safety.tip.thermalCutoff" = "达到此发热等级时让 Mac 休眠。等级越低越早、越安全地休眠;实际温度显示在下方“当前状态”。";
 
@@ -335,7 +335,7 @@
 "general.helperUnavailable.note" = "升级后，macOS 可能拒绝重新启动旧的 helper（ad-hoc 签名限制）。请点击「重新安装助手」；如果仍然无效，请重启 Mac。";
 
 /* Hover tooltips — General pane (permission section) */
-"general.tip.permissionStatus" = "macOS 是否允许 Electronic Clam 的后台助手运行。实际的睡眠控制由助手执行。";
+"general.tip.permissionStatus" = "macOS 是否允许 Electric Clam 的后台助手运行。实际的睡眠控制由助手执行。";
 "general.tip.permissionButton" = "管理或修复助手权限 — 根据上方状态打开系统设置或重试注册。";
 "general.tip.reinstallHelper" = "注销并重新注册后台助手。当升级后助手无响应或权限状态异常时使用。macOS 可能会要求您重新批准。";
 "general.tip.exportDiagnostics" = "将包含最近日志、设置和助手状态的诊断包保存到桌面 — 提交错误报告时很有用。";
@@ -355,14 +355,14 @@
 "agents.tip.detectNow" = "执行一次检测,并展示每个代理匹配到了哪个文件(或为何没有匹配)。与 `eclam debug agents` 输出相同。";
 
 /* proposal §5 — 첫 승인 후 1회 안내 */
-"onboarding.enabled.title" = "Electronic Clam 已就绪";
+"onboarding.enabled.title" = "Electric Clam 已就绪";
 "onboarding.enabled.body" = "运行一个编码代理(Claude Code、Codex…)— 工作时菜单圆点会变绿,Mac 保持唤醒。随时点击贝壳即可切换。";
 
 /* ADR-0028 — Telegram 通知 (标签页 + 面板) */
 "tab.notifications" = "通知";
 "telegram.privacy" = "默认关闭。启用后,状态消息仅通过你自己创建并拥有的机器人令牌发送到 Telegram 的 API — 不会向开发者或任何其他服务器发送任何数据。令牌仅保存在这台 Mac 上,使用仅限用户读取的文件权限。";
 "telegram.master" = "向我的 Telegram 机器人发送状态";
-"telegram.tip.master" = "总开关。关闭时 Electronic Clam 不会通过网络发送任何内容。下方的设置字段和测试按钮在关闭时仍可使用,方便先确认连接。";
+"telegram.tip.master" = "总开关。关闭时 Electric Clam 不会通过网络发送任何内容。下方的设置字段和测试按钮在关闭时仍可使用,方便先确认连接。";
 "telegram.setup.help" = "设置: ① 在 Telegram 中向 @BotFather 发送 /newbot 创建机器人并复制令牌。② 给新机器人发送任意一条消息。③ 在下方粘贴令牌并点击检测。";
 "telegram.tokenLabel" = "机器人令牌";
 "telegram.tip.token" = "@BotFather 发给你的令牌。它用于认证你的机器人 — 请保密。仅保存在这台 Mac 上(仅限用户读取的文件),不会写入日志。";
@@ -385,7 +385,7 @@
 "telegram.error.notConfigured" = "请先输入机器人令牌和聊天 ID。";
 "telegram.error.badToken" = "这看起来不像机器人令牌 (应为 123456:ABC…)。";
 "telegram.error.noUpdates" = "未找到消息。请先在 Telegram 中给机器人发送任意消息,然后重试。";
-"telegram.test" = "🐚 Electronic Clam — 测试消息。通知已连接成功。";
+"telegram.test" = "🐚 Electric Clam — 测试消息。通知已连接成功。";
 "telegram.start.agent" = "🟢 唤醒 — %@ 正在工作";
 "telegram.start.remote" = "🟢 唤醒 — 远程会话 (%@)";
 "telegram.start.generic" = "🟢 唤醒 — 保持 Mac 唤醒";
@@ -406,11 +406,11 @@
 /* ADR-0037 — 合盖锁定防护 · VPN 监视 · 熄屏模式 (vdisplay) */
 "general.sessions" = "会话";
 "general.clamshellGuard" = "合盖时防止锁定（保持 VPN 在线）";
-"general.tip.clamshellGuard" = "当 Mac 合上盖子且没有外接显示器仍保持唤醒时，Electronic Clam 会维持一个不可见的虚拟显示器，让 macOS 不锁定屏幕 — 一旦锁定就会断开 FortiClient 之类的 VPN 会话。不会出现任何窗口，几乎不耗电。默认关闭。";
+"general.tip.clamshellGuard" = "当 Mac 合上盖子且没有外接显示器仍保持唤醒时，Electric Clam 会维持一个不可见的虚拟显示器，让 macOS 不锁定屏幕 — 一旦锁定就会断开 FortiClient 之类的 VPN 会话。不会出现任何窗口，几乎不耗电。默认关闭。";
 "general.vpnNotify" = "VPN 断开时通知";
 "general.tip.vpnNotify" = "独立于保持唤醒功能监测 VPN 断开。唤醒时可发送本地通知及已配置的 Telegram/Slack 通知。睡眠期间暂停检查，唤醒后重新检查。不自动重连。";
 "general.vpnService" = "VPN 服务";
-"general.tip.vpnService" = "选择你的 VPN 服务（即 macOS 在系统设置 → 网络中显示的名称）。FortiClient 通常是「VPN」。Electronic Clam 用 scutil 监视它，一旦断开就提醒你重新认证 — 绝不会自动重连（需要 SAML 登录）。如果还没列出你的 VPN，请点击「刷新」。";
+"general.tip.vpnService" = "选择你的 VPN 服务（即 macOS 在系统设置 → 网络中显示的名称）。FortiClient 通常是「VPN」。Electric Clam 用 scutil 监视它，一旦断开就提醒你重新认证 — 绝不会自动重连（需要 SAML 登录）。如果还没列出你的 VPN，请点击「刷新」。";
 "general.vpnRefresh" = "刷新";
 "general.tip.vpnRefresh" = "重新扫描 VPN 服务 — 如果打开此处时 VPN 应用是关着的，会很有用。";
 "general.vpnServiceNote" = "选择 VPN 并启用通知。聊天通知需要网络连接；FortiClient 可能需要重新登录。";
@@ -427,7 +427,7 @@
 
 /* ADR-0037 — VPN 断开通知 (本地 + Telegram) */
 "notify.vpnDropped.title" = "VPN 已断开";
-"notify.vpnDropped.body" = "%@ 需要重新认证（SAML/SSO）。Electronic Clam 不会自动重连 — 请打开 FortiClient 重新登录。";
+"notify.vpnDropped.body" = "%@ 需要重新认证（SAML/SSO）。Electric Clam 不会自动重连 — 请打开 FortiClient 重新登录。";
 "telegram.vpn.dropped" = "🔌 VPN 已断开（%@）— FortiClient 需要重新认证（SAML）。不会自动重连。";
 
 /* Slack 通知 — Telegram 后端的兄弟 (相同事件,Slack Web API) */
@@ -435,7 +435,7 @@
 "notifications.backend.slack" = "Slack";
 "slack.privacy" = "默认关闭。启用后,状态消息仅通过你自己创建并拥有的 Slack 应用的机器人令牌或 incoming webhook 发送到 Slack — 不会向开发者或任何其他服务器发送任何数据。凭据仅保存在这台 Mac 上,使用仅限用户读取的文件权限。";
 "slack.master" = "向我的 Slack 机器人发送状态";
-"slack.tip.master" = "总开关。关闭时 Electronic Clam 不会向 Slack 发送任何内容。下方的设置字段和测试按钮在关闭时仍可使用,方便先确认连接。";
+"slack.tip.master" = "总开关。关闭时 Electric Clam 不会向 Slack 发送任何内容。下方的设置字段和测试按钮在关闭时仍可使用,方便先确认连接。";
 "slack.setup.help" = "设置(二选一): ① 在 api.slack.com/apps 创建应用。② 用机器人令牌:添加 chat:write 权限(按频道名查找还需 channels:read),安装到工作区,复制 Bot User OAuth Token,并用 /invite @你的机器人 邀请。用 incoming webhook:启用 Incoming Webhooks,为某个频道添加一个 webhook 并复制其 URL。③ 粘贴到下方 — webhook 不需要填频道,机器人令牌需要。";
 "slack.tokenLabel" = "令牌或 webhook";
 "slack.tip.token" = "Slack 应用的 Bot User OAuth Token(以 xoxb- 开头),或 incoming webhook URL(https://hooks.slack.com/services/…)。webhook 不需要权限范围,也不用邀请机器人,但只会发到创建时指定的那个频道。两者都用于认证你的应用 — 请保密。仅保存在这台 Mac 上(仅限用户读取的文件),不会写入日志。";
@@ -467,7 +467,7 @@
 "slack.error.missingScope" = "令牌缺少权限。请添加 chat:write(按频道名查找还需 channels:read),然后把应用重新安装到工作区。";
 "slack.error.notInChannel" = "机器人无法在该频道发言。请用 /invite @你的机器人 邀请后重试。";
 "slack.error.rateLimited" = "Slack 正在限制请求频率。请一分钟后重试。";
-"slack.test" = "🐚 Electronic Clam — 测试消息。通知已连接成功。";
+"slack.test" = "🐚 Electric Clam — 测试消息。通知已连接成功。";
 "slack.digest" = "📊 仍在唤醒中 — %@";
 "slack.start.agent" = "🟢 唤醒 — %@ 正在工作";
 "slack.start.remote" = "🟢 唤醒 — 远程会话 (%@)";

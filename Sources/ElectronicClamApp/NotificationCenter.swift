@@ -82,7 +82,7 @@ final class ReleaseNotifier {
         guard !Task.isCancelled, await ensureAuthorized(), !Task.isCancelled else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = NSL("notify.release.title", "Electronic Clam auto-released sleep")
+        content.title = NSL("notify.release.title", "Electric Clam auto-released sleep")
         content.body = humanBody(reason: reason, detail: detail)
         content.sound = .default
 

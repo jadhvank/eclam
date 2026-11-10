@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/assets/eclam-icon.png" width="120" alt="Electronic Clam" />
+<img src="docs/assets/eclam-icon.png" width="120" alt="Electric Clam" />
 
-# Electronic Clam
+# Electric Clam
 
 **Agents must keep working. Your Mac shouldn't cook trying.**
 에이전트는 쉬지 않게, Mac은 타지 않게.
@@ -16,6 +16,8 @@
 [English](README.md) · **한국어** · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
 
 </div>
+
+> 프로젝트 이름을 **Electric Clam**으로 바꿨습니다. 앱에는 다음 배포부터 반영되며, 현재 배포본과 설치 경로는 Electronic Clam / ElectronicClam.app을 사용합니다.
 
 ---
 
@@ -82,7 +84,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 ![Safety guard demo](docs/assets/eclam-demo-safety.gif)
 
-클램쉘 모드로 가방에 넣고 무거운 작업을 돌리면 발열이 위험할 수 있습니다. Electronic Clam은 온도와 배터리를 지켜보다가, 위험해지면 깨우는 걸 멈추고 Mac을 sleep 모드로 보냅니다:
+클램쉘 모드로 가방에 넣고 무거운 작업을 돌리면 발열이 위험할 수 있습니다. Electric Clam은 온도와 배터리를 지켜보다가, 위험해지면 깨우는 걸 멈추고 Mac을 sleep 모드로 보냅니다:
 
 - **배터리**: 상황에 따라 기준이 다릅니다. 외장 화면 없이 덮개를 닫으면 30%, 아니면 10% (조정 가능). AC 연결이 약하거나 불안정하면 배터리로 봅니다.
 - **발열**: macOS 신호에 더 민감한 내부 신호를 더해 빨리 반응합니다.
@@ -118,7 +120,7 @@ brew install --cask jadhvank/tap/eclam
 open /Applications/ElectronicClam.app
 ```
 
-**System Settings → General → Login Items & Extensions**에서 **Electronic Clam Helper**를 On 하세요.
+**System Settings → General → Login Items & Extensions**에서 **Electric Clam Helper**를 On 하세요.
 
 ## Usage
 
@@ -183,7 +185,7 @@ eclam help
 
 - **hook 없으면 감지에 몇 초 지연이 있을 수 있습니다.** hook을 설치하지 않은 에이전트는 세션 로그 폴링으로 잡습니다(~5초, 잠금 시 ~30초). Claude · Codex · Hermes는 hook을 설치하면 즉시 잡힙니다.
 - **CLI만 쓰면 안전 가드가 없습니다.**
-- **Applications에서 실행하세요.** Downloads나 아직 검역된 복사본에서 열면 macOS가 백그라운드 도우미를 실행하지 못합니다, Electronic Clam을 Applications 폴더로 옮긴 뒤 다시 열어 주세요.
+- **Applications에서 실행하세요.** Downloads나 아직 검역된 복사본에서 열면 macOS가 백그라운드 도우미를 실행하지 못합니다, Electric Clam을 Applications 폴더로 옮긴 뒤 다시 열어 주세요.
 - **VS Code 안에서 도는 에이전트**(Cline · Roo Code)는 독립 프로세스가 없어 Lax 모드 감지가 제한적입니다.
 - **Apple Silicon 전용**, macOS 13+ (Ventura).
 
@@ -223,7 +225,7 @@ open build/ElectronicClam.app
 
 ## 후원
 
-Electronic Clam은 무료 오픈 소스입니다. 에이전트는 Electronic Clam이 깨워두고, 개발자는 여러분의 커피가 깨워두고. ☕
+Electric Clam은 무료 오픈 소스입니다. 에이전트는 Electric Clam이 깨워두고, 개발자는 여러분의 커피가 깨워두고. ☕
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-%E2%98%95-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/jadhvank)
 

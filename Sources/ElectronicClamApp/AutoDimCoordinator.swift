@@ -53,7 +53,7 @@ final class AutoDimCoordinator {
          },
          lidState: @escaping () -> LidState = { LidStateReader.read() },
          beginActivity: @escaping (ProcessInfo.ActivityOptions) -> NSObjectProtocol = {
-             ProcessInfo.processInfo.beginActivity(options: $0, reason: "Electronic Clam - automatic dim observation")
+             ProcessInfo.processInfo.beginActivity(options: $0, reason: "Electric Clam - automatic dim observation")
          },
          endActivity: @escaping (NSObjectProtocol) -> Void = { ProcessInfo.processInfo.endActivity($0) }) {
         self.dimmer = dimmer

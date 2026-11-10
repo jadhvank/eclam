@@ -198,7 +198,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let alert = NSAlert()
         alert.messageText = NSL("onboarding.title", "Approval needed to keep your Mac awake")
         alert.informativeText = NSL("onboarding.message",
-            "Electronic Clam needs you to allow its background helper in System Settings → General → Login Items. Open it now and switch Electronic Clam on.")
+            "Electric Clam needs you to allow its background helper in System Settings → General → Login Items. Open it now and switch Electric Clam on.")
         alert.alertStyle = .informational
         alert.addButton(withTitle: NSL("onboarding.openSettings", "Open System Settings"))
         alert.addButton(withTitle: NSL("onboarding.later", "Later"))
@@ -225,12 +225,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         alert.alertStyle = .warning
         if quarantinedInPlace {
             alert.messageText = NSL("installgate.title.quarantinedInPlace",
-                "Electronic Clam is quarantined by macOS")
+                "Electric Clam is quarantined by macOS")
             alert.informativeText = String(
                 format: NSL("installgate.message.quarantinedInPlace",
-                    "Electronic Clam is already in your Applications folder, but it still carries the "
+                    "Electric Clam is already in your Applications folder, but it still carries the "
                     + "download quarantine flag, so macOS refuses to start its background helper. "
-                    + "Run this in Terminal, then reopen Electronic Clam:\n\n"
+                    + "Run this in Terminal, then reopen Electric Clam:\n\n"
                     + "xattr -dr com.apple.quarantine \"%@\""),
                 path)
             alert.addButton(withTitle: NSL("installgate.copyCommand", "Copy Command"))
@@ -243,10 +243,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             return true
         }
-        alert.messageText = NSL("installgate.title", "Move Electronic Clam to your Applications folder")
+        alert.messageText = NSL("installgate.title", "Move Electric Clam to your Applications folder")
         alert.informativeText = (block.kind == .quarantined)
-            ? NSL("installgate.message.quarantined", "Electronic Clam is running from a download location, so macOS won’t let its background helper start. Move it to the Applications folder and open it from there.")
-            : NSL("installgate.message.translocated", "macOS is running Electronic Clam from a temporary read-only location. Move it to the Applications folder and reopen it so its helper can start.")
+            ? NSL("installgate.message.quarantined", "Electric Clam is running from a download location, so macOS won’t let its background helper start. Move it to the Applications folder and open it from there.")
+            : NSL("installgate.message.translocated", "macOS is running Electric Clam from a temporary read-only location. Move it to the Applications folder and reopen it so its helper can start.")
         alert.addButton(withTitle: NSL("installgate.openApps", "Open Applications Folder"))
         alert.addButton(withTitle: NSL("installgate.later", "Later"))
         NSApp.activate(ignoringOtherApps: true)
@@ -396,7 +396,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if sawUnapprovedThisRun,
            !UserDefaults.standard.bool(forKey: Self.onboardingCelebratedKey) {
             UserDefaults.standard.set(true, forKey: Self.onboardingCelebratedKey)
-            let title = NSL("onboarding.enabled.title", "Electronic Clam is ready")
+            let title = NSL("onboarding.enabled.title", "Electric Clam is ready")
             let body = NSL("onboarding.enabled.body",
                 "Run a coding agent (Claude Code, Codex…) — the menu dot turns "
                 + "green while it works, and your Mac stays awake. Click the "

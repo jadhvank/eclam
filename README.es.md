@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/assets/eclam-icon.png" width="120" alt="Electronic Clam" />
+<img src="docs/assets/eclam-icon.png" width="120" alt="Electric Clam" />
 
-# Electronic Clam
+# Electric Clam
 
 **Agents must keep working. Your Mac shouldn't cook trying.**
 Detecta el *trabajo*, no solo un proceso en ejecución.
@@ -16,6 +16,8 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · **Español**
 
 </div>
+
+> El proyecto ahora se llama **Electric Clam**. El nuevo nombre aparecerá en la próxima versión de la app; las descargas actuales y las rutas de instalación siguen usando Electronic Clam / ElectronicClam.app.
 
 ---
 
@@ -82,7 +84,7 @@ Por defecto, los agentes se detectan sondeando sus registros de sesión (~5 s, ~
 
 ![Demostración de las protecciones](docs/assets/eclam-demo-safety.gif)
 
-Ejecutar una carga pesada en modo clamshell dentro de una mochila es un riesgo térmico. Electronic Clam vigila la temperatura y la batería, y deja dormir el Mac cuando la cosa se pone peligrosa:
+Ejecutar una carga pesada en modo clamshell dentro de una mochila es un riesgo térmico. Electric Clam vigila la temperatura y la batería, y deja dormir el Mac cuando la cosa se pone peligrosa:
 
 - **Batería**: el umbral depende de tu configuración: 30 % con la tapa cerrada y sin pantalla externa, 10 % en los demás casos (ajustable). Una conexión de corriente débil o inestable cuenta como batería.
 - **Térmico**: combina la señal de macOS con otra interna más sensible para reaccionar antes.
@@ -95,7 +97,7 @@ Con la corriente desconectada y la tapa cerrada en una mochila, juzga con más c
 
 ![Demostración de la consciencia remota](docs/assets/eclam-demo-remote.gif)
 
-En modo automático, Electronic Clam mantiene despierto el Mac durante el uso remoto, sujeto a las protecciones de seguridad. Detecta SSH, compartir pantalla, Tailscale y apps de control remoto conocidas. Por defecto es simple: permanece despierto mientras estés conectado.
+En modo automático, Electric Clam mantiene despierto el Mac durante el uso remoto, sujeto a las protecciones de seguridad. Detecta SSH, compartir pantalla, Tailscale y apps de control remoto conocidas. Por defecto es simple: permanece despierto mientras estés conectado.
 
 ### Notificaciones de chat: Telegram y Slack (desactivadas por defecto)
 
@@ -118,7 +120,7 @@ brew install --cask jadhvank/tap/eclam
 open /Applications/ElectronicClam.app
 ```
 
-Activa **Electronic Clam Helper** en **System Settings → General → Login Items & Extensions**.
+Activa **Electric Clam Helper** en **System Settings → General → Login Items & Extensions**.
 
 ## Usage
 
@@ -183,7 +185,7 @@ Consulta [Seguridad y privacidad](docs/security.md) para más detalles.
 
 - **La detección puede tardar unos segundos sin un hook.** Los agentes sin un hook instalado se detectan sondeando sus registros de sesión (~5 s, ~30 s con la pantalla bloqueada). Claude / Codex / Hermes son instantáneos en cuanto instalas sus hooks.
 - **Sin protecciones de seguridad usando solo la CLI.**
-- **Ejecútalo desde Applications.** Si lo abres desde Downloads o una copia aún en cuarentena, macOS no dejará que arranque el helper en segundo plano, mueve Electronic Clam a la carpeta Applications y vuelve a abrirlo.
+- **Ejecútalo desde Applications.** Si lo abres desde Downloads o una copia aún en cuarentena, macOS no dejará que arranque el helper en segundo plano, mueve Electric Clam a la carpeta Applications y vuelve a abrirlo.
 - **Agentes integrados en VS Code** (Cline / Roo Code) no tienen un proceso independiente, así que la detección en modo Lax es limitada.
 - **Solo Apple Silicon**, macOS 13+ (Ventura).
 
@@ -223,7 +225,7 @@ Anteriormente: detección de agentes y los comandos `watch` / `session` (0.5.x),
 
 ## Apóyanos
 
-Electronic Clam es gratis y de código abierto. Él mantiene despierto a tu agente; tu café mantiene despierto al desarrollador. ☕
+Electric Clam es gratis y de código abierto. Él mantiene despierto a tu agente; tu café mantiene despierto al desarrollador. ☕
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-%E2%98%95-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/jadhvank)
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Electronic Clam — REAL menu-bar screen capture → animated GIF.
+# Electric Clam — REAL menu-bar screen capture → animated GIF.
 #
 # Unlike the mockup (docs/assets/demo/make-mockup-gif.sh), this records the live
 # app. It therefore needs the terminal app to hold macOS **Screen Recording**

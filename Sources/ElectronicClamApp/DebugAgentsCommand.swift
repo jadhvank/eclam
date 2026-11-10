@@ -30,7 +30,7 @@ enum DebugAgentsCommand {
         let fmt = ISO8601DateFormatter()
         fmt.formatOptions = [.withInternetDateTime]
 
-        print("Electronic Clam agent-detector debug snapshot")
+        print("Electric Clam agent-detector debug snapshot")
         print("  generated: \(fmt.string(from: snap.generatedAt))")
         let activeList = snap.active.sorted().joined(separator: ", ")
         print("  active   : \(activeList.isEmpty ? "(none)" : activeList)")

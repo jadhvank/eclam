@@ -3,7 +3,7 @@ cask "eclam" do
   sha256 "467242aba02f424e2fe0118455264f3caf6062600bb23b8401eeaff0bf089f61"
 
   url "https://github.com/jadhvank/eclam/releases/download/v#{version}/ElectronicClam-#{version}.zip"
-  name "ElectronicClam"
+  name "Electric Clam"
   desc "Keep the system awake while agents work, with safety guards"
   homepage "https://github.com/jadhvank/eclam"
 

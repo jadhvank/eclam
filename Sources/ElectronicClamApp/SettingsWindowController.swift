@@ -42,7 +42,7 @@ final class SettingsWindowController: NSWindowController {
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false)
-        window.title = NSL("settings.title", "Electronic Clam Settings")
+        window.title = NSL("settings.title", "Electric Clam Settings")
         window.isReleasedWhenClosed = false
         // Accessory (menu-bar) apps easily lose active status, and AppKit
         // suppresses tooltips in windows of inactive apps by default — so the
@@ -181,7 +181,7 @@ final class SettingsWindowController: NSWindowController {
             tabSelector.setLabel(label, forSegment: i)
         }
         tabSelector.invalidateIntrinsicContentSize()
-        window?.title = NSL("settings.title", "Electronic Clam Settings")
+        window?.title = NSL("settings.title", "Electric Clam Settings")
         selectPane(at: selectedIndex)
         generalViewController.refresh()
     }

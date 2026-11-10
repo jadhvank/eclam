@@ -1,4 +1,4 @@
-/* Electronic Clam — 한국어. ADR-0011. */
+/* Electric Clam — 한국어. ADR-0011. */
 
 /* Common */
 "common.ok" = "확인";
@@ -49,7 +49,7 @@
 
 
 /* Settings + tabs */
-"settings.title" = "Electronic Clam 설정";
+"settings.title" = "Electric Clam 설정";
 "tab.general" = "일반";
 "tab.agents" = "에이전트";
 "tab.remote" = "원격";
@@ -60,14 +60,14 @@
 "general.version" = "버전 %@";
 "general.support" = "☕ 커피 한 잔 후원하기";
 "general.language" = "언어";
-"general.statusCard.on" = "Electronic Clam — 켜짐 · 잠들지 않음";
-"general.statusCard.off" = "Electronic Clam — 꺼짐 · 평소처럼 잠듦";
+"general.statusCard.on" = "Electric Clam — 켜짐 · 잠들지 않음";
+"general.statusCard.off" = "Electric Clam — 꺼짐 · 평소처럼 잠듦";
 "general.statusCard.helper" = "헬퍼 권한: %@";
 "general.menuBarTheme" = "메뉴 막대 아이콘";
 "general.startup" = "시작";
 "general.openAtLogin" = "로그인 시 실행";
-"general.tip.openAtLogin" = "로그인하면 Electronic Clam을 자동으로 실행해 메뉴 막대에서 항상 지켜보게 합니다. 시스템 설정 → 일반 → 로그인 항목에서도 관리할 수 있어요.";
-"general.openAtLogin.needsApproval" = "시스템 설정 → 일반 → 로그인 항목에서 Electronic Clam이 꺼져 있어요. 거기서 켜야 로그인 시 실행됩니다.";
+"general.tip.openAtLogin" = "로그인하면 Electric Clam을 자동으로 실행해 메뉴 막대에서 항상 지켜보게 합니다. 시스템 설정 → 일반 → 로그인 항목에서도 관리할 수 있어요.";
+"general.openAtLogin.needsApproval" = "시스템 설정 → 일반 → 로그인 항목에서 Electric Clam이 꺼져 있어요. 거기서 켜야 로그인 시 실행됩니다.";
 "general.updates" = "업데이트";
 "general.checkForUpdates" = "업데이트 확인…";
 "general.autoCheckUpdates" = "자동으로 확인";
@@ -81,7 +81,7 @@
 "update.later" = "나중에";
 "update.failed" = "업데이트를 확인하지 못했어요";
 "update.failed.body" = "인터넷 연결을 확인하고 다시 시도해 주세요.";
-"update.notify.body" = "Electronic Clam %@ 사용 가능 — 설정에서 업데이트하세요.";
+"update.notify.body" = "Electric Clam %@ 사용 가능 — 설정에서 업데이트하세요.";
 "theme.system" = "시스템";
 "theme.light" = "밝게";
 "theme.dark" = "어둡게";
@@ -93,7 +93,7 @@
 "agents.section.watched" = "감시 중인 에이전트";
 "agents.section.hooks" = "훅 설치";
 "agents.section.hooksAdvanced" = "에이전트 훅 (선택)";
-"agents.hooks.caption" = "Electronic Clam은 각 에이전트의 세션 로그를 감시해 자동으로 감지합니다 — 훅은 필요 없습니다. 훅은 감지를 즉시로 만들고, 파일 접근이 제한된 환경에서 폴백을 더할 뿐입니다.";
+"agents.hooks.caption" = "Electric Clam은 각 에이전트의 세션 로그를 감시해 자동으로 감지합니다 — 훅은 필요 없습니다. 훅은 감지를 즉시로 만들고, 파일 접근이 제한된 환경에서 폴백을 더할 뿐입니다.";
 "agents.watched.caption" = "각 에이전트의 세션 로그를 감시해 자동으로 감지합니다.";
 "agents.pollNote" = "탐지는 약 5초마다 갱신됩니다(화면 잠금 시 30초). 그래서 막 시작한 에이전트는 표시되기까지 몇 초 걸릴 수 있습니다. 훅이 설치된 에이전트는 즉시 반영됩니다.";
 "agents.col.agent" = "에이전트";
@@ -110,8 +110,8 @@
 "agents.uninstallAll" = "모든 훅 제거";
 "agents.uninstall" = "제거";
 "agents.add" = "추가";
-"agents.uninstallAll.title" = "모든 Electronic Clam 훅을 제거할까요?";
-"agents.uninstallAll.body" = "~/.claude/settings.json, ~/.codex/config.toml, ~/.hermes/config.yaml 에서 Electronic Clam 훅 항목을 제거합니다. 다른 설정은 유지됩니다.";
+"agents.uninstallAll.title" = "모든 Electric Clam 훅을 제거할까요?";
+"agents.uninstallAll.body" = "~/.claude/settings.json, ~/.codex/config.toml, ~/.hermes/config.yaml 에서 Electric Clam 훅 항목을 제거합니다. 다른 설정은 유지됩니다.";
 "agents.uninstallFail" = "일부 훅을 제거하지 못했습니다";
 "agents.couldNotInstall" = "%@ 훅을 설치할 수 없습니다";
 "agents.couldNotUninstall" = "%@ 훅을 제거할 수 없습니다";
@@ -120,14 +120,14 @@
 "agents.ph.id" = "id (예: my-agent)";
 "agents.ph.label" = "레이블 (예: My Agent)";
 "agents.ph.glob" = "Glob (예: ~/.my-agent/logs/*.log)";
-"agents.codexTrust" = "설치 후 Codex CLI에서 /hooks 를 실행해 이 훅을 신뢰하세요.\nElectronic Clam이 훅 코드를 업데이트하면 다시 신뢰해야 합니다.";
+"agents.codexTrust" = "설치 후 Codex CLI에서 /hooks 를 실행해 이 훅을 신뢰하세요.\nElectric Clam이 훅 코드를 업데이트하면 다시 신뢰해야 합니다.";
 "agents.hermesTrust" = "설치 후 다음에 Hermes를 실행할 때 훅 프롬프트를 승인하세요\n(또는 ~/.hermes/config.yaml 에 hooks_auto_accept: true 설정).";
 
 /* Remote pane (2-tier UI: master checkbox + radios) */
 "remote.master" = "원격 세션을 활동으로 간주";
 "remote.optNeverIdle" = "유휴여도 깨워둠 (계속 연결 유지)";
 "remote.optIdleSleep" = "유휴 상태가 다음 시간 지속되면 잠자기 허용:";
-"remote.help" = "이 Mac에 SSH, VNC, 화면 공유로 접속하면 세션이 끊기지 않도록 Electronic Clam이 깨워둡니다.";
+"remote.help" = "이 Mac에 SSH, VNC, 화면 공유로 접속하면 세션이 끊기지 않도록 Electric Clam이 깨워둡니다.";
 "remote.channels" = "감지된 채널";
 "remote.noneDetected" = "(현재 감지된 항목 없음)";
 "remote.tip.master" = "원격 세션은 pmset assertion, who(1), Tailscale CLI, Claude Code·Codex remote-control, 알려진 원격 제어 데몬으로 감지합니다. 끄면 원격 접속을 완전히 무시합니다.";
@@ -203,7 +203,7 @@
 "reason.watchdog" = "헬퍼 워치독";
 
 /* Notifications */
-"notify.release.title" = "Electronic Clam이 절전을 자동 해제했습니다";
+"notify.release.title" = "Electric Clam이 절전을 자동 해제했습니다";
 "notify.batteryLow" = "배터리 부족";
 "notify.thermalSerious" = "온도 심각";
 "notify.thermalCritical" = "온도 위험";
@@ -260,33 +260,33 @@
 "end.unknown" = "종료됨";
 
 /* ADR-0038 — 설치 위치 게이트 (quarantine/translocation 번들은 헬퍼 등록 불가) */
-"installgate.title" = "Electronic Clam을 응용 프로그램 폴더로 옮기세요";
-"installgate.message.quarantined" = "Electronic Clam이 다운로드한 위치에서 실행되고 있어 macOS가 백그라운드 도우미 실행을 막고 있습니다. 응용 프로그램 폴더로 옮긴 뒤 거기서 열어 주세요.";
-"installgate.message.translocated" = "macOS가 Electronic Clam을 임시 읽기 전용 위치에서 실행하고 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어야 도우미가 실행됩니다.";
+"installgate.title" = "Electric Clam을 응용 프로그램 폴더로 옮기세요";
+"installgate.message.quarantined" = "Electric Clam이 다운로드한 위치에서 실행되고 있어 macOS가 백그라운드 도우미 실행을 막고 있습니다. 응용 프로그램 폴더로 옮긴 뒤 거기서 열어 주세요.";
+"installgate.message.translocated" = "macOS가 Electric Clam을 임시 읽기 전용 위치에서 실행하고 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어야 도우미가 실행됩니다.";
 "installgate.openApps" = "응용 프로그램 폴더 열기";
 "installgate.later" = "나중에";
 
 /* ADR-0040 — quarantine-in-place 안내 + 메뉴바 상태아이템 미배치 폴백 */
-"installgate.title.quarantinedInPlace" = "Electronic Clam이 macOS 검역(quarantine) 상태입니다";
-"installgate.message.quarantinedInPlace" = "Electronic Clam이 이미 응용 프로그램 폴더에 있지만 다운로드 검역 플래그가 남아 있어, macOS가 백그라운드 도우미 실행을 거부합니다. 터미널에서 아래를 실행한 뒤 Electronic Clam을 다시 열어 주세요:\n\nxattr -dr com.apple.quarantine \"%@\"";
+"installgate.title.quarantinedInPlace" = "Electric Clam이 macOS 검역(quarantine) 상태입니다";
+"installgate.message.quarantinedInPlace" = "Electric Clam이 이미 응용 프로그램 폴더에 있지만 다운로드 검역 플래그가 남아 있어, macOS가 백그라운드 도우미 실행을 거부합니다. 터미널에서 아래를 실행한 뒤 Electric Clam을 다시 열어 주세요:\n\nxattr -dr com.apple.quarantine \"%@\"";
 "installgate.copyCommand" = "명령 복사";
-"menubar.missing.title" = "Electronic Clam 메뉴바 아이콘을 표시할 수 없습니다";
-"menubar.missing.body" = "macOS가 아이콘을 메뉴바에 배치하지 않고 있습니다. macOS 26에서는 대개 메뉴바 허용목록(시스템 설정 → 메뉴 막대) 문제이고, 메뉴바 정리 앱(Bartender, Ice, Thaw…)이 아이콘을 재배치한 뒤 그대로 깨져 있는 경우가 많습니다. 거기서 앱을 “허용”으로 켜도 항상 고쳐지지는 않으며, 맥을 재시동하면 대개 해결됩니다. 설정 창을 열어 두었으니 Electronic Clam은 계속 제어할 수 있고, `eclam` 명령(`eclam off`, `eclam on`, `eclam status`)은 언제나 동작합니다.";
+"menubar.missing.title" = "Electric Clam 메뉴바 아이콘을 표시할 수 없습니다";
+"menubar.missing.body" = "macOS가 아이콘을 메뉴바에 배치하지 않고 있습니다. macOS 26에서는 대개 메뉴바 허용목록(시스템 설정 → 메뉴 막대) 문제이고, 메뉴바 정리 앱(Bartender, Ice, Thaw…)이 아이콘을 재배치한 뒤 그대로 깨져 있는 경우가 많습니다. 거기서 앱을 “허용”으로 켜도 항상 고쳐지지는 않으며, 맥을 재시동하면 대개 해결됩니다. 설정 창을 열어 두었으니 Electric Clam은 계속 제어할 수 있고, `eclam` 명령(`eclam off`, `eclam on`, `eclam status`)은 언제나 동작합니다.";
 
 /* ADR-0039 — 설정 → 일반의 설치 상태 노트 (중복본 / 위치 / 버전 스큐) */
-"installhealth.quarantined" = "Electronic Clam이 다운로드한 위치에서 실행되고 있어 macOS가 도우미 실행을 막고 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어 주세요.";
-"installhealth.translocated" = "macOS가 Electronic Clam을 임시 읽기 전용 위치에서 실행하고 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어 주세요.";
-"installhealth.outside" = "Electronic Clam이 응용 프로그램 폴더 밖에서 실행되고 있어 도우미가 안정적으로 시작되지 않을 수 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어 주세요.";
-"installhealth.copies" = "Electronic Clam 복사본이 여러 개 발견됐습니다. 응용 프로그램 폴더의 것 하나만 남기고 나머지는 삭제하세요:";
+"installhealth.quarantined" = "Electric Clam이 다운로드한 위치에서 실행되고 있어 macOS가 도우미 실행을 막고 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어 주세요.";
+"installhealth.translocated" = "macOS가 Electric Clam을 임시 읽기 전용 위치에서 실행하고 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어 주세요.";
+"installhealth.outside" = "Electric Clam이 응용 프로그램 폴더 밖에서 실행되고 있어 도우미가 안정적으로 시작되지 않을 수 있습니다. 응용 프로그램 폴더로 옮기고 다시 열어 주세요.";
+"installhealth.copies" = "Electric Clam 복사본이 여러 개 발견됐습니다. 응용 프로그램 폴더의 것 하나만 남기고 나머지는 삭제하세요:";
 "installhealth.skew" = "실행 중인 앱(%1$@)이 등록된 도우미(%2$@)와 일치하지 않습니다 — 남은 복사본 때문일 수 있습니다. ‘도우미 재설치’를 쓰거나 위의 여분 복사본을 삭제하세요.";
 "installhealth.spawnFailed" = "백그라운드 도우미가 시작에 실패했습니다(구성 오류). ‘도우미 재설치’를 시도하고, 계속되면 Mac을 재시작하세요.";
 
 /* ADR-0039 — ‘도우미 재설치’도 실패할 때 보여 주는 resetbtm 최후수단 */
-"resetbtm.note" = "도우미가 여전히 응답하지 않습니다. 제거됐거나 중복된 복사본에 묶인 오래된 백그라운드 레코드 때문일 수 있습니다. 최후수단으로 터미널에서 “sudo sfltool resetbtm”을 실행한 뒤, Mac을 재시작하고 Electronic Clam을 다시 열어 주세요. 이 명령은 모든 앱의 로그인 항목을 초기화합니다.";
+"resetbtm.note" = "도우미가 여전히 응답하지 않습니다. 제거됐거나 중복된 복사본에 묶인 오래된 백그라운드 레코드 때문일 수 있습니다. 최후수단으로 터미널에서 “sudo sfltool resetbtm”을 실행한 뒤, Mac을 재시작하고 Electric Clam을 다시 열어 주세요. 이 명령은 모든 앱의 로그인 항목을 초기화합니다.";
 
 /* ADR-0018 — 첫 실행 승인 온보딩 */
 "onboarding.title" = "Mac을 깨어있게 하려면 승인이 필요합니다";
-"onboarding.message" = "시스템 설정 → 일반 → 로그인 항목에서 Electronic Clam 백그라운드 도우미를 허용해야 합니다. 지금 열어 Electronic Clam을 켜 주세요.";
+"onboarding.message" = "시스템 설정 → 일반 → 로그인 항목에서 Electric Clam 백그라운드 도우미를 허용해야 합니다. 지금 열어 Electric Clam을 켜 주세요.";
 "onboarding.openSettings" = "시스템 설정 열기";
 "onboarding.later" = "나중에";
 
@@ -334,7 +334,7 @@
 "general.helperUnavailable.note" = "업그레이드 후 macOS가 이전 helper의 재실행을 거부할 수 있습니다(ad-hoc 서명 한계). Reinstall Helper를 누르고, 그래도 안 되면 Mac을 재부팅하세요.";
 
 /* Hover tooltips — General pane (permission section) */
-"general.tip.permissionStatus" = "macOS가 Electronic Clam의 백그라운드 도우미 실행을 허용했는지 여부입니다. 실제 잠자기 제어는 도우미가 수행합니다.";
+"general.tip.permissionStatus" = "macOS가 Electric Clam의 백그라운드 도우미 실행을 허용했는지 여부입니다. 실제 잠자기 제어는 도우미가 수행합니다.";
 "general.tip.permissionButton" = "도우미 권한을 관리·복구합니다 — 위 상태에 따라 시스템 설정을 열거나 등록을 다시 시도합니다.";
 "general.tip.reinstallHelper" = "백그라운드 도우미를 등록 해제 후 다시 등록합니다. 업그레이드 후 도우미가 응답하지 않거나 권한 상태가 꼬였을 때 사용하세요. macOS가 다시 승인을 요청할 수 있습니다.";
 "general.tip.exportDiagnostics" = "최근 로그·설정·도우미 상태를 담은 진단 번들을 데스크탑에 저장합니다 — 버그 신고할 때 유용합니다.";
@@ -354,14 +354,14 @@
 "agents.tip.detectNow" = "감지를 1회 실행해 각 에이전트가 어떤 파일에 매칭됐는지(또는 왜 안 됐는지)를 그대로 보여줍니다. `eclam debug agents`와 같은 출력입니다.";
 
 /* proposal §5 — 첫 승인 후 1회 안내 */
-"onboarding.enabled.title" = "Electronic Clam 준비 완료";
+"onboarding.enabled.title" = "Electric Clam 준비 완료";
 "onboarding.enabled.body" = "코딩 에이전트(Claude Code, Codex…)를 돌려보세요 — 작업 중엔 메뉴의 점이 초록색이 되고 Mac이 깨어있습니다. 조개를 클릭하면 언제든 토글됩니다.";
 
 /* ADR-0028 — 텔레그램 알림 (탭 + 패널) */
 "tab.notifications" = "알림";
 "telegram.privacy" = "기본값은 꺼짐입니다. 켜면 상태 메시지가 사용자가 직접 만들고 소유한 봇 토큰으로 Telegram API에만 전송됩니다 — 개발자나 다른 어떤 서버로도 데이터가 가지 않습니다. 토큰은 이 Mac에만, 사용자 전용 파일 권한으로 저장됩니다.";
 "telegram.master" = "내 텔레그램 봇으로 상태 보내기";
-"telegram.tip.master" = "마스터 스위치입니다. 끄면 Electronic Clam은 네트워크로 아무것도 보내지 않습니다. 아래 설정 필드와 테스트 버튼은 꺼진 상태에서도 동작해 먼저 연결을 확인할 수 있습니다.";
+"telegram.tip.master" = "마스터 스위치입니다. 끄면 Electric Clam은 네트워크로 아무것도 보내지 않습니다. 아래 설정 필드와 테스트 버튼은 꺼진 상태에서도 동작해 먼저 연결을 확인할 수 있습니다.";
 "telegram.setup.help" = "설정: ① 텔레그램에서 @BotFather에게 /newbot을 보내 봇을 만들고 토큰을 복사하세요. ② 새 봇에게 아무 메시지나 보내세요. ③ 아래에 토큰을 붙여넣고 자동 감지를 누르세요.";
 "telegram.tokenLabel" = "봇 토큰";
 "telegram.tip.token" = "@BotFather가 발급한 토큰입니다. 당신의 봇을 인증하는 비밀값이니 외부에 노출하지 마세요. 이 Mac에만 저장되며(사용자 전용 파일), 로그에 남지 않습니다.";
@@ -384,7 +384,7 @@
 "telegram.error.notConfigured" = "봇 토큰과 채팅 ID를 먼저 입력하세요.";
 "telegram.error.badToken" = "봇 토큰 형식이 아닌 것 같습니다 (예: 123456:ABC…).";
 "telegram.error.noUpdates" = "메시지를 찾지 못했습니다. 텔레그램에서 봇에게 아무 메시지나 보낸 뒤 다시 시도하세요.";
-"telegram.test" = "🐚 Electronic Clam — 테스트 메시지. 알림 연결이 완료됐습니다.";
+"telegram.test" = "🐚 Electric Clam — 테스트 메시지. 알림 연결이 완료됐습니다.";
 "telegram.start.agent" = "🟢 깨어있음 — %@ 작업 중";
 "telegram.start.remote" = "🟢 깨어있음 — 원격 세션 (%@)";
 "telegram.start.generic" = "🟢 깨어있음 — Mac을 깨워 둡니다";
@@ -405,11 +405,11 @@
 /* ADR-0037 — 클램쉘 잠금 방지 · VPN 감시 · 화면 끄기 모드 (vdisplay) */
 "general.sessions" = "세션";
 "general.clamshellGuard" = "클램쉘에서 잠금 방지 (VPN 유지)";
-"general.tip.clamshellGuard" = "덮개를 닫고 외부 디스플레이도 없이 Mac이 깨어있을 때, Electronic Clam이 보이지 않는 가상 디스플레이를 띄워 macOS가 화면을 잠그지 않게 합니다 — 화면이 잠기면 FortiClient 같은 VPN 세션이 끊깁니다. 창은 뜨지 않고 전력도 거의 쓰지 않습니다. 기본값은 꺼짐.";
+"general.tip.clamshellGuard" = "덮개를 닫고 외부 디스플레이도 없이 Mac이 깨어있을 때, Electric Clam이 보이지 않는 가상 디스플레이를 띄워 macOS가 화면을 잠그지 않게 합니다 — 화면이 잠기면 FortiClient 같은 VPN 세션이 끊깁니다. 창은 뜨지 않고 전력도 거의 쓰지 않습니다. 기본값은 꺼짐.";
 "general.vpnNotify" = "VPN이 끊기면 알림";
 "general.tip.vpnNotify" = "깨어 있기와 별개로 VPN 끊김을 감시합니다. 깨어 있을 때 로컬 알림과 설정된 Telegram/Slack으로 알립니다. 잠자기 중에는 감시가 쉬고, 깨어나면 다시 확인합니다. 자동 재연결은 하지 않습니다.";
 "general.vpnService" = "VPN 서비스";
-"general.tip.vpnService" = "VPN 서비스를 고르세요(macOS가 시스템 설정 → 네트워크에서 보는 이름 그대로). FortiClient는 보통 \"VPN\"입니다. Electronic Clam이 scutil로 지켜보다가 끊기면 재인증하라고 알려줍니다 — 자동으로 재연결하지는 않습니다(SAML 로그인 필요). VPN이 아직 목록에 없으면 새로고침을 누르세요.";
+"general.tip.vpnService" = "VPN 서비스를 고르세요(macOS가 시스템 설정 → 네트워크에서 보는 이름 그대로). FortiClient는 보통 \"VPN\"입니다. Electric Clam이 scutil로 지켜보다가 끊기면 재인증하라고 알려줍니다 — 자동으로 재연결하지는 않습니다(SAML 로그인 필요). VPN이 아직 목록에 없으면 새로고침을 누르세요.";
 "general.vpnRefresh" = "새로고침";
 "general.tip.vpnRefresh" = "VPN 서비스를 다시 검색합니다 — 이 화면을 열 때 VPN 앱이 꺼져 있었다면 유용합니다.";
 "general.vpnServiceNote" = "감시할 VPN을 고르고 알림을 켜세요. 채팅 알림은 네트워크 연결이 필요하며, FortiClient는 다시 로그인해야 할 수 있습니다.";
@@ -426,7 +426,7 @@
 
 /* ADR-0037 — VPN 끊김 알림 (로컬 + Telegram) */
 "notify.vpnDropped.title" = "VPN 끊김";
-"notify.vpnDropped.body" = "%@ 재인증이 필요합니다(SAML/SSO). Electronic Clam은 자동 재연결하지 않습니다 — FortiClient를 열어 다시 로그인하세요.";
+"notify.vpnDropped.body" = "%@ 재인증이 필요합니다(SAML/SSO). Electric Clam은 자동 재연결하지 않습니다 — FortiClient를 열어 다시 로그인하세요.";
 "telegram.vpn.dropped" = "🔌 VPN 끊김 (%@) — FortiClient 재인증 필요(SAML). 자동 재연결 없음.";
 
 /* Slack 알림 — Telegram 백엔드의 형제 (같은 이벤트, Slack Web API) */
@@ -434,7 +434,7 @@
 "notifications.backend.slack" = "Slack";
 "slack.privacy" = "기본값은 꺼짐입니다. 켜면 상태 메시지가 사용자가 직접 만들고 소유한 Slack 앱의 봇 토큰이나 incoming webhook을 통해 Slack으로만 전송됩니다 — 개발자나 다른 어떤 서버로도 데이터가 가지 않습니다. 자격 정보는 이 Mac에만, 사용자 전용 파일 권한으로 저장됩니다.";
 "slack.master" = "내 Slack 봇으로 상태 보내기";
-"slack.tip.master" = "마스터 스위치입니다. 끄면 Electronic Clam은 Slack으로 아무것도 보내지 않습니다. 아래 설정 필드와 테스트 버튼은 꺼진 상태에서도 동작해 먼저 연결을 확인할 수 있습니다.";
+"slack.tip.master" = "마스터 스위치입니다. 끄면 Electric Clam은 Slack으로 아무것도 보내지 않습니다. 아래 설정 필드와 테스트 버튼은 꺼진 상태에서도 동작해 먼저 연결을 확인할 수 있습니다.";
 "slack.setup.help" = "설정(둘 중 하나): ① api.slack.com/apps에서 앱을 만드세요. ② 봇 토큰을 쓰려면 chat:write 스코프를 추가하고(채널 이름 조회에는 channels:read), 워크스페이스에 설치해 Bot User OAuth Token을 복사한 뒤 /invite @봇이름으로 초대하세요. incoming webhook을 쓰려면 Incoming Webhooks를 켜고 채널 하나에 webhook을 추가한 뒤 URL을 복사하세요. ③ 아래에 붙여넣으세요 — webhook은 채널이 필요 없고, 봇 토큰은 필요합니다.";
 "slack.tokenLabel" = "토큰 또는 webhook";
 "slack.tip.token" = "Slack 앱의 Bot User OAuth Token(xoxb-로 시작) 또는 incoming webhook URL(https://hooks.slack.com/services/…)입니다. webhook은 스코프도 봇 초대도 필요 없지만, 만들 때 정한 채널 한 곳으로만 전송됩니다. 어느 쪽이든 당신의 앱을 인증하는 비밀값이니 외부에 노출하지 마세요. 이 Mac에만 저장되며(사용자 전용 파일), 로그에 남지 않습니다.";
@@ -466,7 +466,7 @@
 "slack.error.missingScope" = "토큰에 스코프가 부족합니다. chat:write를 추가하고(채널 이름 조회에는 channels:read도 필요), 워크스페이스에 앱을 다시 설치하세요.";
 "slack.error.notInChannel" = "봇이 그 채널에 글을 쓸 수 없습니다. /invite @봇이름으로 초대한 뒤 다시 시도하세요.";
 "slack.error.rateLimited" = "Slack이 요청 빈도를 제한하고 있습니다. 1분 뒤에 다시 시도하세요.";
-"slack.test" = "🐚 Electronic Clam — 테스트 메시지. 알림 연결이 완료됐습니다.";
+"slack.test" = "🐚 Electric Clam — 테스트 메시지. 알림 연결이 완료됐습니다.";
 "slack.digest" = "📊 아직 깨어있음 — %@";
 "slack.start.agent" = "🟢 깨어있음 — %@ 작업 중";
 "slack.start.remote" = "🟢 깨어있음 — 원격 세션 (%@)";

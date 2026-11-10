@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# power-cost.sh — Electronic Clam 자체 자원 비용 측정 (proposal §7).
+# power-cost.sh — Electric Clam 자체 자원 비용 측정 (proposal §7).
 #
 # 비-sudo 근사: ps 샘플링으로 앱+helper의 평균/최대 CPU%와 RSS를 잰다.
 # 진짜 에너지(전력 임팩트)는 sudo가 필요하다:

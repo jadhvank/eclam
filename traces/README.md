@@ -1,6 +1,6 @@
 # Community agent traces
 
-Electronic Clam detects "an agent is working" by watching files the agent
+Electric Clam detects "an agent is working" by watching files the agent
 writes during a session (ADR-0006). Built-in traces live in
 `Sources/Shared/AgentTrace.swift`; **you can add new agents without touching
 code** by dropping a JSON file into:
