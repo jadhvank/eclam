@@ -6,6 +6,7 @@ build/
 xcuserdata/
 .swiftpm/
 DerivedData/
+__pycache__/
 .claude/worktrees/
 
 # 개인 홍보 초안 (비공개)

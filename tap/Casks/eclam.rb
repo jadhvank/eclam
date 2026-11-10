@@ -1,11 +1,12 @@
 cask "eclam" do
-  version "0.8.0"
-  sha256 "f2a1dfe33cbb43cf7433549560a13f262f97e9181a1a2c0df7edb1727488a6e8"
+  version "0.8.1"
+  sha256 "80bc729156bde8a213084f07eecfcd7698a3c720e749fbe921dc08ac330bc8ae"
 
   url "https://github.com/jadhvank/eclam/releases/download/v#{version}/ElectronicClam-#{version}.zip"
   name "ElectronicClam"
   desc "Keep the system awake while agents work, with safety guards"
   homepage "https://github.com/jadhvank/eclam"
+  auto_updates true
 
   # build.sh is arm64-only (no universal binary yet — docs/TODO.md). Without
   # this gate an Intel brew install succeeds and the app crashes at launch.

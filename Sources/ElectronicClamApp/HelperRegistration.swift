@@ -2,10 +2,41 @@ import AppKit
 import Foundation
 import OSLog
 import ServiceManagement
+import CryptoKit
 
 enum HelperRegistration {
     static let plistName = "com.jadhvank.eclam.helper.plist"
     private static let log = Logger(subsystem: "com.jadhvank.eclam", category: "app")
+    private static let fingerprintKey = "VerifiedHelperBundleFingerprint"
+    private static let pendingFingerprintKey = "PendingHelperBundleFingerprint"
+    private static let upgradeFailureKey = "HelperUpgradeVerificationFailed"
+    static var upgradeVerificationFailed: Bool { UserDefaults.standard.bool(forKey: upgradeFailureKey) }
+
+    private static func saveVerifiedFingerprint(_ fingerprint: String) {
+        UserDefaults.standard.set(fingerprint, forKey: fingerprintKey)
+        UserDefaults.standard.removeObject(forKey: pendingFingerprintKey)
+        UserDefaults.standard.set(false, forKey: upgradeFailureKey)
+    }
+
+    static func completePendingApproval() {
+        guard let pending = UserDefaults.standard.string(forKey: pendingFingerprintKey),
+              let fingerprint = bundledFingerprint else { return }
+        _ = HelperUpgrade.finishApproval(fingerprint: fingerprint, pending: pending,
+            enabled: status() == .enabled, reachable: { isHelperReachableWithRetry() },
+            save: saveVerifiedFingerprint)
+    }
+
+    private static var bundledFingerprint: String? {
+        let bundle = Bundle.main.bundleURL.resolvingSymlinksInPath()
+        let helper = bundle.appendingPathComponent("Contents/MacOS/ElectronicClamHelper")
+        let daemonPlist = bundle.appendingPathComponent("Contents/Library/LaunchDaemons/" + plistName)
+        guard let data = try? Data(contentsOf: helper),
+              let config = try? Data(contentsOf: daemonPlist) else { return nil }
+        func hash(_ data: Data) -> String {
+            SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        }
+        return bundle.path + ":" + hash(data) + ":" + hash(config)
+    }
 
     /// ADR-0038 — why the gate refused to register (nil ⇒ not blocked). AppDelegate reads it
     /// to show the relocation alert instead of the normal approval onboarding.
@@ -23,6 +54,24 @@ enum HelperRegistration {
         installBlock = nil
         let service = SMAppService.daemon(plistName: plistName)
         if service.status == .enabled {
+            completePendingApproval()
+            // A live old daemon can survive a bundle replacement. Refresh once
+            // on migration, binary change or relocation; never on every launch.
+            if let fingerprint = bundledFingerprint {
+                let verified = HelperUpgrade.ensureCurrent(fingerprint: fingerprint,
+                    previous: UserDefaults.standard.string(forKey: fingerprintKey),
+                    reachable: { isHelperReachableWithRetry() },
+                    reinstall: {
+                        let (status, error) = forceReregister(timeout: 10)
+                        return status == .enabled && error == nil
+                    },
+                    save: saveVerifiedFingerprint)
+                UserDefaults.standard.set(!verified, forKey: upgradeFailureKey)
+                if !verified {
+                    log.error("helper upgrade was not verified; receipt unchanged")
+                }
+                return service.status
+            }
             // P0-b (handoff 2026-06-24) — `.enabled` is registration *intent*,
             // not launchd reachability (ADR-0033). A registered-but-dead daemon
             // stays `.enabled` forever, and the old unconditional short-circuit
@@ -43,6 +92,13 @@ enum HelperRegistration {
         }
         do {
             try service.register()
+            if service.status == .requiresApproval, let fingerprint = bundledFingerprint {
+                UserDefaults.standard.set(fingerprint, forKey: pendingFingerprintKey)
+            }
+            if service.status == .enabled, isHelperReachableWithRetry(),
+               let fingerprint = bundledFingerprint {
+                saveVerifiedFingerprint(fingerprint)
+            }
         } catch {
             log.error("SMAppService.register failed: \(error.localizedDescription, privacy: .public)")
         }
@@ -94,6 +150,12 @@ enum HelperRegistration {
             do {
                 try service.register()
                 let s = service.status
+                if s == .requiresApproval, let fingerprint = bundledFingerprint {
+                    UserDefaults.standard.set(fingerprint, forKey: pendingFingerprintKey)
+                }
+                if s == .enabled, isHelperReachableWithRetry(), let fingerprint = bundledFingerprint {
+                    saveVerifiedFingerprint(fingerprint)
+                }
                 if s == .enabled || s == .requiresApproval { return (s, nil) }
             } catch {
                 lastErr = error   // expected EPERM until BTM settles; keep retrying

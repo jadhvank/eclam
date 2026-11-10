@@ -180,9 +180,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if !self.presentInstallLocationAlertIfNeeded() { self.presentApprovalOnboardingIfNeeded() }
         }
 
-        // ADR-0035 — notify-only update check (throttled to once/24h, opt-out).
-        // Deferred so launch completes first; never blocks, downloads, or installs.
-        DispatchQueue.main.async { UpdateChecker.checkInBackgroundIfDue() }
+        // ADR-0041 — checks may run automatically; installation requires user action.
+        DispatchQueue.main.async { UpdateController.shared.start() }
     }
 
     /// Persisted gate so the first-run approval alert shows once per unapproved
@@ -275,6 +274,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Re-read the daemon status, push it into the store, and live-refresh the
     /// Settings permission row if that window is open.
     private func reconcileRegistration() {
+        HelperRegistration.completePendingApproval()
         store.update(registrationStatus: HelperRegistration.status(), registrationError: nil)
         settingsWindow?.refreshGeneralPane()
     }
