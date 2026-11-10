@@ -4,7 +4,7 @@
 
 # Electronic Clam
 
-**Agents must keep working — your Mac shouldn't cook trying.**
+**Agents must keep working. Your Mac shouldn't cook trying.**
 It detects *work*, not just a running process.
 
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
@@ -19,7 +19,7 @@ It detects *work*, not just a running process.
 
 ---
 
-## New in v0.8.0 — screen-on mode in the menu bar
+## New in v0.8.0: screen-on mode in the menu bar
 
 - **Click to cycle:** Off → Awake → Awake + screen → Auto detection. The new **ring-sun icon** identifies screen-on mode without opening a menu.
 - **Enabled by default:** Settings → General → **Include screen-on mode in the icon cycle**. Turn it off to keep the original on/off click and three icons. An explicitly saved OFF preference stays off after upgrading.
@@ -31,9 +31,9 @@ It detects *work*, not just a running process.
 
 ## Highlights
 
-- **Lid-closed keep-awake.** Awake mode stops your Mac from sleeping even with the lid shut — no terminal commands, no password per toggle.
+- **Lid-closed keep-awake.** Awake mode stops your Mac from sleeping even with the lid shut, without terminal commands or a password per toggle.
 - **Detects work, not processes.** Auto mode stays awake only while a coding agent is *actively producing output*; once the agent stops, your Mac can sleep again.
-- **5 agents out of the box** — Claude Code, Codex, Cursor, opencode, Antigravity — plus any others you add yourself.
+- **5 agents out of the box**: Claude Code, Codex, Cursor, opencode, Antigravity, plus any others you add yourself.
 - **Safety guards that adapt.** Auto-sleeps when battery or temperature crosses a danger line.
 - **Remote-activity aware.** Auto mode recognizes SSH, screen sharing, and Tailscale activity to keep remote work running, subject to safety guards.
 - **Never reads your conversations or code.** Agent detection only looks at transcript timestamps, never their contents.
@@ -42,7 +42,7 @@ It detects *work*, not just a running process.
 
 ## Features
 
-The goal is to keep your agent working — **safely** — without interruption. Everything below serves that. Demo clips show earlier menu layouts; the current controls are described in [Usage](#usage).
+The goal is to keep your agent working **safely**, without interruption. Everything below serves that. Demo clips show earlier menu layouts; the current controls are described in [Usage](#usage).
 
 ### Agent-aware keep-awake
 
@@ -56,7 +56,7 @@ Auto mode tracks whether the agent is *working right now*, not whether a process
 
 **Opt-in via Customize (off by default):** Aider · Cline · Roo Code · OpenHands · Hermes · Openclaw.
 
-Agents not listed here can be added too — give a glob pattern, or drop a single declaration file into `~/.config/eclam/traces.d/*.json`.
+To add other agents, give a glob pattern or drop a single declaration file into `~/.config/eclam/traces.d/*.json`.
 
 By default agents are detected by polling their session logs (~5 s, ~30 s while the screen is locked), so a just-started agent can take a few seconds to appear. Claude, Codex, and Hermes can be detected instantly by installing their (optional) hooks.
 
@@ -66,10 +66,10 @@ By default agents are detected by polling their session logs (~5 s, ~30 s while 
 
 Running a heavy workload in clamshell mode inside a bag is a thermal risk. Electronic Clam watches temperature and battery, and lets the Mac sleep when things get risky:
 
-- **Battery** — the threshold depends on your setup: 30% with the lid closed and no external display, 10% otherwise (adjustable). A weak or unstable AC connection counts as battery.
-- **Thermal** — combines the macOS signal with a more sensitive internal one to react faster.
-- **Max duration** — Desktop mode (AC + lid open + external display) skips the cap entirely.
-- **Low Power Mode** — tightens both by one step (+10pp battery, one thermal notch).
+- **Battery**: the threshold depends on your setup: 30% with the lid closed and no external display, 10% otherwise (adjustable). A weak or unstable AC connection counts as battery.
+- **Thermal**: combines the macOS signal with a more sensitive internal one to react faster.
+- **Max duration**: Desktop mode (AC + lid open + external display) skips the cap entirely.
+- **Low Power Mode**: tightens both by one step (+10pp battery, one thermal notch).
 
 With AC unplugged and the lid closed in a bag it judges more conservatively, then clears automatically once things are safe again. You can opt into a notification when it puts the Mac to sleep.
 
@@ -79,19 +79,19 @@ With AC unplugged and the lid closed in a bag it judges more conservatively, the
 
 In Auto mode, Electronic Clam keeps the Mac awake while you use it remotely, subject to safety guards. It detects SSH, screen sharing, Tailscale, and known remote-control apps. The default is simple: stay awake as long as you're connected.
 
-### Chat notifications — Telegram and Slack (off by default)
+### Chat notifications: Telegram and Slack (off by default)
 
-Connect your own Telegram bot or your own Slack app and you'll get a ping when an agent stops or your Mac goes to sleep — with battery %, temperature, and host name attached.
+Connect your own Telegram bot or your own Slack app and you'll get a ping when an agent stops or your Mac goes to sleep, with battery %, temperature, and host name attached.
 
-Both backends live in **Settings → Notifications** and are independent: enable either one, or both. Messages go only to the service you configured, using a token you create and own; the token stays on this Mac in a user-only file. For Slack you need an app with the `chat:write` bot scope (add `channels:read` to look up a channel by name), installed to your workspace and invited to the channel. Slack has no silent delivery, so the periodic status message arrives like any other — mute the channel if you want it quiet.
+Both backends live in **Settings → Notifications** and are independent: enable either one, or both. Messages go only to the service you configured, using a token you create and own; the token stays on this Mac in a user-only file. For Slack you need an app with the `chat:write` bot scope (add `channels:read` to look up a channel by name), installed to your workspace and invited to the channel. Slack has no silent delivery, so the periodic status message arrives like any other. Mute the channel if you want it quiet.
 
 ### Other
 
-- **CLI + named sessions** — drive it straight from the terminal (see [Usage](#usage)).
-- **Optional agent hooks** — installing injects an activity-signal hook into Claude / Codex / Hermes configs; uninstalling restores them.
-- **Sleep restoration on exit** — normal quit and SIGTERM release power holds, with a 20-second helper watchdog for crash recovery.
-- **Clamshell VPN lock guard (opt-in).** With no external display on battery, closing the lid normally *locks* the screen — which drops a FortiClient SSL VPN (it needs a SAML re-login to reconnect). An invisible virtual display anchors the session so the screen doesn't lock and the tunnel survives. The **Blank screen** action also splits into **Dim** (dark but VPN-safe, default) vs **Sleep**, with an optional VPN-disconnect notification.
-- **Resilient helper setup** — won't register the background helper from a quarantined download or a temporary (translocated) location, where macOS blocks it; it guides you to move the app to Applications instead. Settings → General flags duplicate copies and version mismatches, and `eclam repair` / **Reinstall Helper** recover a wedged registration.
+- **CLI + named sessions**: drive it straight from the terminal (see [Usage](#usage)).
+- **Optional agent hooks**: installing injects an activity-signal hook into Claude / Codex / Hermes configs; uninstalling restores them.
+- **Sleep restoration on exit**: normal quit and SIGTERM release power holds, with a 20-second helper watchdog for crash recovery.
+- **Clamshell VPN lock guard (opt-in).** With no external display on battery, closing the lid normally *locks* the screen, which drops a FortiClient SSL VPN (it needs a SAML re-login to reconnect). An invisible virtual display anchors the session so the screen doesn't lock and the tunnel survives. The **Blank screen** action also splits into **Dim** (dark but VPN-safe, default) vs **Sleep**, with an optional VPN-disconnect notification.
+- **Resilient helper setup**: won't register the background helper from a quarantined download or a temporary (translocated) location, where macOS blocks it; it guides you to move the app to Applications instead. Settings → General flags duplicate copies and version mismatches, and `eclam repair` / **Reinstall Helper** recover a wedged registration.
 
 ## Install
 
@@ -123,11 +123,11 @@ Settings → General → **Include screen-on mode in the icon cycle** is ON by d
 
 | Item | Action |
 |---|---|
-| Status header | Current state at a glance (e.g., "Asleep when idle", "Awake — until I quit", "Awake — remote session") |
+| Status header | Current state at a glance (e.g., "Asleep when idle", "Awake: until I quit", "Awake: remote session") |
 | **Keep Mac Awake** (⌘K) | Toggle keep-awake directly; this remains an on/off shortcut |
 | **Mode** ▸ | Select one of the four modes directly; shown when screen-on mode is enabled |
 | **Watch Agents** ▸ | Enable/disable the agents to detect (shows " • active" when one is); **Customize…** at the bottom |
-| **Blank screen — keep working** | Dim the built-in screen without locking (default), or sleep the displays; keep work running |
+| **Blank screen: keep working** | Dim the built-in screen without locking (default), or sleep the displays; keep work running |
 | **Settings…** (⌘,) | Open settings |
 | **Quit** (⌘Q) | Quit (restores sleep first) |
 
@@ -165,14 +165,14 @@ See [Security & privacy](docs/security.md) for details.
 
 - **Detection can lag a few seconds without a hook.** Agents without an installed hook are detected by polling their session logs (~5 s, ~30 s while locked). Claude / Codex / Hermes are instant once you install their hooks.
 - **No safety guards in CLI-only use.**
-- **Run it from Applications.** Launched from Downloads or a still-quarantined copy, macOS won't let the background helper start — move Electronic Clam to your Applications folder and reopen it.
-- **VS Code–embedded agents** (Cline / Roo Code) have no standalone process, so Lax-mode detection is limited.
+- **Run it from Applications.** Launched from Downloads or a still-quarantined copy, macOS won't let the background helper start. Move Electronic Clam to your Applications folder and reopen it.
+- **VS Code-embedded agents** (Cline / Roo Code) have no standalone process, so Lax-mode detection is limited.
 - **Apple Silicon only**, macOS 13+ (Ventura).
 
 ## Tech stack
 
-- **Language / UI:** Swift + AppKit (`NSStatusItem`, `LSUIElement` menu bar app — no Dock).
-- **Power control:** IOKit SPI — `IOPMSetSystemPowerSetting("SleepDisabled")` via an `@_silgen_name` binding.
+- **Language / UI:** Swift + AppKit (`NSStatusItem`, `LSUIElement` menu bar app, no Dock).
+- **Power control:** IOKit SPI, `IOPMSetSystemPowerSetting("SleepDisabled")` via an `@_silgen_name` binding.
 - **Privilege separation:** an `SMAppService` daemon talking to the app over `NSXPCConnection` (mach service).
 - **Build:** direct `swiftc` (no SwiftPM), **no external dependencies**.
 - **Targets:** arm64, macOS 13+ (Ventura).
@@ -186,20 +186,20 @@ open build/ElectronicClam.app
 
 - Direct `swiftc` invocation, `arm64-apple-macos13.0` target. Set `ECLAM_SIGN_ID=-` for fast ad-hoc local builds.
 - Bundle layout: `Contents/MacOS/{ElectronicClam, ElectronicClamHelper, eclam-hook}` + `Contents/Library/LaunchDaemons/com.jadhvank.eclam.helper.plist`.
-- Release builds are Developer ID–signed and notarized (stapled by `release.sh`).
+- Release builds are Developer ID-signed and notarized (stapled by `release.sh`).
 
 ## Release history
 
-Recent releases — full history in [CHANGELOG.md](CHANGELOG.md):
+Recent releases. Full history in [CHANGELOG.md](CHANGELOG.md):
 
-- **0.8.0** — Four-mode icon cycle, the ring-sun screen-on indicator, default-on mode availability with existing OFF preferences preserved, and direct mode selection. See [release notes](https://github.com/jadhvank/eclam/releases/tag/v0.8.0).
-- **0.7.0** — Optional display keep-awake, automatic Dim with brightness restoration, Slack notifications, a safer local installer, and current Homebrew cleanup. VPN observation no longer prevents sleep by itself. See [release notes](https://github.com/jadhvank/eclam/releases/tag/v0.7.0).
-- **0.6.5** — Fix: with the clamshell lock guard enabled, connecting a TV via **screen mirroring** now works. Mirrored displays (a mirrored TV, AirPlay) were invisible to the guard — macOS drops a mirror-set member from the active display list and reports the whole mirror set as a single screen — so the invisible anchor kept re-mirroring and re-creating itself while macOS was negotiating the mirror session. Extended (side-by-side) displays were never affected. The guard also no longer creates its anchor while a mirror set is active, which used to leave an unreclaimable virtual display behind and disable the guard for the rest of the login session.
-- **0.6.4** — Fixes for the clamshell VPN lock guard: the VPN-disconnect notification now actually fires (it was stopped by the very event it reports, and by App Nap), the invisible anchor is released when you quit the app, the virtual display is named clearly, and brightness is restored when you reopen the lid after **Dim**. Also: the menu-bar item no longer shows a dead-end "move to Applications" prompt when only a quarantine attribute is left, and the thermal cutoff default moved from `fair` to `serious` (the old default could end a keep-awake session within minutes).
-- **0.6.3** — Fix: with the clamshell lock guard enabled, attaching a real external display no longer disturbs your saved built-in + external arrangement. The invisible anchor now steps aside immediately (no re-mirror) when a real display appears, letting macOS restore your saved layout; it returns automatically when the external is removed. Headless clamshell lock protection is unchanged.
-- **0.6.2** — Clamshell VPN lock guard (opt-in): with no external display on battery, closing the lid no longer locks the screen, so a FortiClient SSL VPN survives instead of dropping — an invisible virtual display anchors the session. The "Blank screen" action now lets you choose **Dim** (VPN-safe, default) or **Sleep**, with an optional VPN-disconnect notification.
-- **0.6.1** — Honest helper status: a dead-but-registered helper no longer shows a false "enabled". `eclam status` reports it as `unreachable` (exit 2), the app self-repairs on relaunch, a new `eclam repair` command and a menu-bar warning surface it, and `eclam status` now also reports the Open-at-Login state.
-- **0.6.0** — Open at Login, in-app update notifications, awake history, internationalization (English · 한국어 · 中文 · 日本語 · Español), single-click toggle, menu-bar icon themes, remote idle policy, Telegram status notifications, Developer ID signing + notarization.
+- **0.8.0**: Four-mode icon cycle, the ring-sun screen-on indicator, default-on mode availability with existing OFF preferences preserved, and direct mode selection. See [release notes](https://github.com/jadhvank/eclam/releases/tag/v0.8.0).
+- **0.7.0**: Optional display keep-awake, automatic Dim with brightness restoration, Slack notifications, a safer local installer, and current Homebrew cleanup. VPN observation no longer prevents sleep by itself. See [release notes](https://github.com/jadhvank/eclam/releases/tag/v0.7.0).
+- **0.6.5**: Fix: with the clamshell lock guard enabled, connecting a TV via **screen mirroring** now works. Mirrored displays (a mirrored TV, AirPlay) were invisible to the guard because macOS drops a mirror-set member from the active display list and reports the whole mirror set as a single screen, so the invisible anchor kept re-mirroring and re-creating itself while macOS was negotiating the mirror session. Extended (side-by-side) displays were never affected. The guard also no longer creates its anchor while a mirror set is active, which used to leave an unreclaimable virtual display behind and disable the guard for the rest of the login session.
+- **0.6.4**: Fixes for the clamshell VPN lock guard: the VPN-disconnect notification now actually fires (it was stopped by the very event it reports, and by App Nap), the invisible anchor is released when you quit the app, the virtual display is named clearly, and brightness is restored when you reopen the lid after **Dim**. Also: the menu-bar item no longer shows a dead-end "move to Applications" prompt when only a quarantine attribute is left, and the thermal cutoff default moved from `fair` to `serious` (the old default could end a keep-awake session within minutes).
+- **0.6.3**: Fix: with the clamshell lock guard enabled, attaching a real external display no longer disturbs your saved built-in + external arrangement. The invisible anchor now steps aside immediately (no re-mirror) when a real display appears, letting macOS restore your saved layout; it returns automatically when the external is removed. Headless clamshell lock protection is unchanged.
+- **0.6.2**: Clamshell VPN lock guard (opt-in): with no external display on battery, closing the lid no longer locks the screen, so a FortiClient SSL VPN survives instead of dropping. An invisible virtual display anchors the session. The "Blank screen" action now lets you choose **Dim** (VPN-safe, default) or **Sleep**, with an optional VPN-disconnect notification.
+- **0.6.1**: Honest helper status: a dead-but-registered helper no longer shows a false "enabled". `eclam status` reports it as `unreachable` (exit 2), the app self-repairs on relaunch, a new `eclam repair` command and a menu-bar warning surface it, and `eclam status` now also reports the Open-at-Login state.
+- **0.6.0**: Open at Login, in-app update notifications, awake history, internationalization (English · 한국어 · 中文 · 日本語 · Español), single-click toggle, menu-bar icon themes, remote idle policy, Telegram status notifications, Developer ID signing + notarization.
 
 Earlier: agent-aware detection and the `watch` / `session` CLI (0.5.x), state-conditioned battery / thermal / timer safety guards (0.4.x), remote-activity awareness and the first CLI (0.3.x).
 
@@ -215,4 +215,4 @@ Electronic Clam is free and open source. It keeps your agent awake; your coffee 
 
 ---
 
-<sub>`README.zh-CN.md`, `README.ja.md`, and `README.es.md` are generated from this file via the `/translate` command — don't edit them by hand. `README.ko.md` is maintained by hand.</sub>
+<sub>`README.zh-CN.md`, `README.ja.md`, and `README.es.md` are generated from this file via the `/translate` command. Do not edit them by hand. `README.ko.md` is maintained by hand.</sub>

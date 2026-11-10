@@ -4,7 +4,7 @@
 
 # Electronic Clam
 
-**Agents must keep working — your Mac shouldn't cook trying.**
+**Agents must keep working. Your Mac shouldn't cook trying.**
 Detecta el *trabajo*, no solo un proceso en ejecución.
 
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
@@ -19,7 +19,7 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 
 ---
 
-## Novedades de v0.8.0 — pantalla encendida desde la barra de menús
+## Novedades de v0.8.0: pantalla encendida desde la barra de menús
 
 - **Clic para alternar:** Desactivado → Mac despierto → Mac y pantalla → Detección automática. El nuevo **icono de sol con anillo** identifica el modo de pantalla encendida sin abrir el menú.
 - **Activado por defecto:** Ajustes → General → **Incluir pantalla encendida en el ciclo del icono**. Desactívalo para conservar el clic de encendido/apagado y los tres iconos originales. Se respeta cualquier preferencia de desactivación guardada antes de actualizar.
@@ -31,9 +31,9 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 
 ## Lo más destacado
 
-- **Despierto con la tapa cerrada.** El modo Mac despierto evita que tu Mac duerma incluso con la tapa cerrada — sin comandos de terminal ni contraseña en cada cambio.
+- **Despierto con la tapa cerrada.** El modo Mac despierto evita que tu Mac duerma incluso con la tapa cerrada, sin comandos de terminal ni contraseña en cada cambio.
 - **Detecta el trabajo, no los procesos.** El modo automático permanece despierto solo mientras un agente de programación *produce salida de verdad*; cuando el agente se detiene, tu Mac puede volver a dormir.
-- **5 agentes listos para usar** — Claude Code, Codex, Cursor, opencode, Antigravity — y puedes añadir los que quieras.
+- **5 agentes listos para usar**: Claude Code, Codex, Cursor, opencode, Antigravity, y puedes añadir los que quieras.
 - **Protecciones que se adaptan.** Duerme automáticamente cuando la batería o la temperatura cruzan un límite peligroso.
 - **Consciente de la actividad remota.** El modo automático reconoce SSH, compartir pantalla y Tailscale para mantener el trabajo remoto, sujeto a las protecciones de seguridad.
 - **Nunca lee tus conversaciones ni tu código.** La detección de agentes solo mira las marcas de tiempo del transcript, nunca su contenido.
@@ -42,7 +42,7 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 
 ## Funciones
 
-El objetivo es que tu agente siga trabajando — de forma **segura** — sin interrupciones. Todo lo de abajo está al servicio de eso. Los vídeos muestran menús anteriores; los controles actuales se describen en [Usage](#usage).
+El objetivo es que tu agente siga trabajando de forma **segura**, sin interrupciones. Todo lo de abajo está al servicio de eso. Los vídeos muestran menús anteriores; los controles actuales se describen en [Usage](#usage).
 
 ### Mantener despierto según el agente
 
@@ -56,7 +56,7 @@ El modo automático sigue si el agente *está trabajando ahora mismo*, no si exi
 
 **Activar en Customize (desactivado por defecto):** Aider · Cline · Roo Code · OpenHands · Hermes · Openclaw.
 
-También puedes añadir agentes que no estén aquí — da un patrón glob o deja un único archivo de declaración en `~/.config/eclam/traces.d/*.json`.
+También puedes añadir agentes que no estén aquí, da un patrón glob o deja un único archivo de declaración en `~/.config/eclam/traces.d/*.json`.
 
 Por defecto, los agentes se detectan sondeando sus registros de sesión (~5 s, ~30 s con la pantalla bloqueada), así que un agente recién iniciado puede tardar unos segundos en aparecer. Claude, Codex y Hermes se detectan al instante si instalas sus hooks (opcionales).
 
@@ -66,10 +66,10 @@ Por defecto, los agentes se detectan sondeando sus registros de sesión (~5 s, ~
 
 Ejecutar una carga pesada en modo clamshell dentro de una mochila es un riesgo térmico. Electronic Clam vigila la temperatura y la batería, y deja dormir el Mac cuando la cosa se pone peligrosa:
 
-- **Batería** — el umbral depende de tu configuración: 30 % con la tapa cerrada y sin pantalla externa, 10 % en los demás casos (ajustable). Una conexión de corriente débil o inestable cuenta como batería.
-- **Térmico** — combina la señal de macOS con otra interna más sensible para reaccionar antes.
-- **Duración máxima** — el modo Desktop (corriente + tapa abierta + pantalla externa) se salta el tope por completo.
-- **Modo de Bajo Consumo** — aprieta ambos un paso (+10 puntos de batería, un nivel térmico).
+- **Batería**: el umbral depende de tu configuración: 30 % con la tapa cerrada y sin pantalla externa, 10 % en los demás casos (ajustable). Una conexión de corriente débil o inestable cuenta como batería.
+- **Térmico**: combina la señal de macOS con otra interna más sensible para reaccionar antes.
+- **Duración máxima**: el modo Desktop (corriente + tapa abierta + pantalla externa) se salta el tope por completo.
+- **Modo de Bajo Consumo**: aprieta ambos un paso (+10 puntos de batería, un nivel térmico).
 
 Con la corriente desconectada y la tapa cerrada en una mochila, juzga con más cautela y se libera solo cuando todo vuelve a ser seguro. Puedes optar por recibir una notificación cuando ponga el Mac a dormir.
 
@@ -79,7 +79,7 @@ Con la corriente desconectada y la tapa cerrada en una mochila, juzga con más c
 
 En modo automático, Electronic Clam mantiene despierto el Mac durante el uso remoto, sujeto a las protecciones de seguridad. Detecta SSH, compartir pantalla, Tailscale y apps de control remoto conocidas. Por defecto es simple: permanece despierto mientras estés conectado.
 
-### Notificaciones de chat — Telegram y Slack (desactivadas por defecto)
+### Notificaciones de chat: Telegram y Slack (desactivadas por defecto)
 
 Conecta tu propio bot de Telegram o aplicación de Slack y recibirás un aviso cuando un agente se detenga o el Mac se duerma, con el porcentaje de batería, la temperatura y el nombre del host.
 
@@ -87,11 +87,11 @@ Ambos servicios están en **Ajustes → Notificaciones** y son independientes: p
 
 ### Otros
 
-- **CLI + sesiones con nombre** — manéjalo directamente desde la terminal (ver [Usage](#usage)).
-- **Hooks de agente opcionales** — al instalarlos se inyecta un hook de señal de actividad en la configuración de Claude / Codex / Hermes; al desinstalarlos se restauran.
-- **Restauración del reposo al salir** — la salida normal y SIGTERM liberan las solicitudes de energía, con un watchdog de 20 segundos en el helper para recuperar tras un fallo.
-- **Protección de la VPN frente al bloqueo en clamshell (opcional).** Sin pantalla externa y con batería, cerrar la tapa normalmente *bloquea* la pantalla — lo que tira una VPN SSL de FortiClient (necesita volver a iniciar sesión por SAML para reconectar). Una pantalla virtual invisible ancla la sesión, así que la pantalla no se bloquea y el túnel sobrevive. La acción **Apagar pantalla** también se divide en **Dim** (oscura pero segura para la VPN, por defecto) y **Sleep**, con una notificación opcional de desconexión de la VPN.
-- **Registro del helper resiliente** — no registra el helper en segundo plano desde una descarga en cuarentena ni desde una ubicación temporal (translocated), donde macOS lo bloquea; en su lugar te guía para mover la app a Applications. Ajustes → General señala copias duplicadas y discrepancias de versión, y `eclam repair` / **Reinstall Helper** recuperan un registro atascado.
+- **CLI + sesiones con nombre**: manéjalo directamente desde la terminal (ver [Usage](#usage)).
+- **Hooks de agente opcionales**: al instalarlos se inyecta un hook de señal de actividad en la configuración de Claude / Codex / Hermes; al desinstalarlos se restauran.
+- **Restauración del reposo al salir**: la salida normal y SIGTERM liberan las solicitudes de energía, con un watchdog de 20 segundos en el helper para recuperar tras un fallo.
+- **Protección de la VPN frente al bloqueo en clamshell (opcional).** Sin pantalla externa y con batería, cerrar la tapa normalmente *bloquea* la pantalla, lo que tira una VPN SSL de FortiClient (necesita volver a iniciar sesión por SAML para reconectar). Una pantalla virtual invisible ancla la sesión, así que la pantalla no se bloquea y el túnel sobrevive. La acción **Apagar pantalla** también se divide en **Dim** (oscura pero segura para la VPN, por defecto) y **Sleep**, con una notificación opcional de desconexión de la VPN.
+- **Registro del helper resiliente**: no registra el helper en segundo plano desde una descarga en cuarentena ni desde una ubicación temporal (translocated), donde macOS lo bloquea; en su lugar te guía para mover la app a Applications. Ajustes → General señala copias duplicadas y discrepancias de versión, y `eclam repair` / **Reinstall Helper** recuperan un registro atascado.
 
 ## Instalación
 
@@ -123,11 +123,11 @@ Ajustes → General → **Incluir pantalla encendida en el ciclo del icono** est
 
 | Elemento | Acción |
 |---|---|
-| Encabezado de estado | El estado actual de un vistazo (p. ej. «Dormir al estar inactivo», «Despierto — hasta que salga», «Despierto — sesión remota») |
+| Encabezado de estado | El estado actual de un vistazo (p. ej. «Dormir al estar inactivo», «Despierto, hasta que salga», «Despierto, sesión remota») |
 | **Mantener el Mac despierto** (⌘K) | Alternar directamente; conserva el atajo de encendido/apagado |
 | **Modo** ▸ | Selecciona directamente uno de los cuatro modos; aparece si el modo de pantalla está habilitado |
 | **Vigilar agentes** ▸ | Activar/desactivar los agentes a detectar (muestra « • activo» cuando lo está); **Personalizar…** al final |
-| **Apagar pantalla — seguir trabajando** | Atenúa la pantalla integrada sin bloquear (por defecto) o pone las pantallas en reposo mientras continúa el trabajo |
+| **Apagar pantalla, seguir trabajando** | Atenúa la pantalla integrada sin bloquear (por defecto) o pone las pantallas en reposo mientras continúa el trabajo |
 | **Ajustes…** (⌘,) | Abrir ajustes |
 | **Salir** (⌘Q) | Salir (restaura el sueño antes) |
 
@@ -165,14 +165,14 @@ Consulta [Seguridad y privacidad](docs/security.md) para más detalles.
 
 - **La detección puede tardar unos segundos sin un hook.** Los agentes sin un hook instalado se detectan sondeando sus registros de sesión (~5 s, ~30 s con la pantalla bloqueada). Claude / Codex / Hermes son instantáneos en cuanto instalas sus hooks.
 - **Sin protecciones de seguridad usando solo la CLI.**
-- **Ejecútalo desde Applications.** Si lo abres desde Downloads o una copia aún en cuarentena, macOS no dejará que arranque el helper en segundo plano — mueve Electronic Clam a la carpeta Applications y vuelve a abrirlo.
+- **Ejecútalo desde Applications.** Si lo abres desde Downloads o una copia aún en cuarentena, macOS no dejará que arranque el helper en segundo plano, mueve Electronic Clam a la carpeta Applications y vuelve a abrirlo.
 - **Agentes integrados en VS Code** (Cline / Roo Code) no tienen un proceso independiente, así que la detección en modo Lax es limitada.
 - **Solo Apple Silicon**, macOS 13+ (Ventura).
 
 ## Tecnologías
 
-- **Lenguaje / UI:** Swift + AppKit (`NSStatusItem`, app de barra de menús `LSUIElement` — sin Dock).
-- **Control de energía:** IOKit SPI — `IOPMSetSystemPowerSetting("SleepDisabled")` mediante un binding `@_silgen_name`.
+- **Lenguaje / UI:** Swift + AppKit (`NSStatusItem`, app de barra de menús `LSUIElement`, sin Dock).
+- **Control de energía:** IOKit SPI, `IOPMSetSystemPowerSetting("SleepDisabled")` mediante un binding `@_silgen_name`.
 - **Separación de privilegios:** un daemon `SMAppService` que habla con la app por `NSXPCConnection` (mach service).
 - **Compilación:** `swiftc` directo (sin SwiftPM), **sin dependencias externas**.
 - **Objetivos:** arm64, macOS 13+ (Ventura).
@@ -190,16 +190,16 @@ open build/ElectronicClam.app
 
 ## Historial de versiones
 
-Lanzamientos recientes — historial completo en [CHANGELOG.md](CHANGELOG.md):
+Lanzamientos recientes, historial completo en [CHANGELOG.md](CHANGELOG.md):
 
-- **0.8.0** — Ciclo de cuatro modos, indicador de sol con anillo, disponibilidad del modo de pantalla activada por defecto respetando ajustes desactivados existentes y selección directa. [Notas de la versión](https://github.com/jadhvank/eclam/releases/tag/v0.8.0).
-- **0.7.0** — Opción para mantener la pantalla encendida, atenuación automática con restauración del brillo, notificaciones de Slack e instalación y limpieza de Homebrew mejoradas. La vigilancia de la VPN ya no impide por sí sola el reposo. [Notas de la versión](https://github.com/jadhvank/eclam/releases/tag/v0.7.0).
-- **0.6.5** — Corrección: con la protección de bloqueo en clamshell activada, conectar un televisor mediante **duplicado de pantalla** ya funciona. Las pantallas conectadas en modo espejo (un televisor duplicado, AirPlay) eran invisibles para la protección: macOS excluye a los miembros de un conjunto de espejo de la lista de pantallas activas y reporta todo el conjunto como una sola pantalla. Por eso el ancla invisible seguía volviendo a espejar y a recrearse justo mientras macOS negociaba la sesión de duplicado. Las pantallas extendidas (una al lado de otra) nunca se vieron afectadas. Además, el ancla ya no se crea mientras hay un conjunto de espejo activo: en ese caso quedaba una pantalla virtual imposible de recuperar y la protección dejaba de funcionar hasta cerrar la sesión.
-- **0.6.4** — Correcciones de la protección de la VPN frente al bloqueo en clamshell: la notificación de desconexión de la VPN ahora sí se dispara (la vigilancia se detenía por el propio evento que debía notificar y por App Nap), el ancla invisible se libera al salir de la app, la pantalla virtual tiene un nombre claro y el brillo se restaura al volver a abrir la tapa después de **Dim**. Además, la barra de menús ya no repite el callejón sin salida «muévela a Aplicaciones» cuando solo queda un atributo de cuarentena, y el corte térmico por defecto pasa de `fair` a `serious` (el valor anterior podía terminar un keep-awake en pocos minutos).
-- **0.6.3** — Corrección: con la protección de bloqueo en clamshell activada, conectar una pantalla externa real ya no altera tu disposición guardada de «interna + externa». El ancla invisible ahora se aparta de inmediato (sin volver a espejar) en cuanto aparece una pantalla real, dejando que macOS restaure la disposición que guardaste; vuelve automáticamente cuando quitas la externa. La protección de bloqueo en clamshell sin pantalla no cambia.
-- **0.6.2** — Protección de la VPN frente al bloqueo en clamshell (opcional): sin pantalla externa y con batería, cerrar la tapa ya no bloquea la pantalla, así que una VPN SSL de FortiClient sobrevive en vez de caerse — una pantalla virtual invisible ancla la sesión. La acción **Apagar pantalla** ahora te deja elegir **Dim** (segura para la VPN, por defecto) o **Sleep**, con una notificación opcional de desconexión de la VPN.
-- **0.6.1** — Estado honesto del helper: un helper muerto pero registrado ya no aparece como falso «activado». `eclam status` lo informa como `unreachable` (código de salida 2), la app se autorrepara al reiniciarse, un nuevo comando `eclam repair` y un aviso en la barra de menús lo muestran, y `eclam status` ahora también informa del estado de inicio al arrancar sesión.
-- **0.6.0** — Inicio al arrancar sesión, notificaciones de actualización en la app, historial de actividad, internacionalización (English · 한국어 · 中文 · 日本語 · Español), interruptor de un clic, temas de icono en la barra de menús, política de inactividad remota, notificaciones de estado por Telegram, firma con Developer ID + notarización.
+- **0.8.0**: Ciclo de cuatro modos, indicador de sol con anillo, disponibilidad del modo de pantalla activada por defecto respetando ajustes desactivados existentes y selección directa. [Notas de la versión](https://github.com/jadhvank/eclam/releases/tag/v0.8.0).
+- **0.7.0**: Opción para mantener la pantalla encendida, atenuación automática con restauración del brillo, notificaciones de Slack e instalación y limpieza de Homebrew mejoradas. La vigilancia de la VPN ya no impide por sí sola el reposo. [Notas de la versión](https://github.com/jadhvank/eclam/releases/tag/v0.7.0).
+- **0.6.5**: Corrección: con la protección de bloqueo en clamshell activada, conectar un televisor mediante **duplicado de pantalla** ya funciona. Las pantallas conectadas en modo espejo (un televisor duplicado, AirPlay) eran invisibles para la protección: macOS excluye a los miembros de un conjunto de espejo de la lista de pantallas activas y reporta todo el conjunto como una sola pantalla. Por eso el ancla invisible seguía volviendo a espejar y a recrearse justo mientras macOS negociaba la sesión de duplicado. Las pantallas extendidas (una al lado de otra) nunca se vieron afectadas. Además, el ancla ya no se crea mientras hay un conjunto de espejo activo: en ese caso quedaba una pantalla virtual imposible de recuperar y la protección dejaba de funcionar hasta cerrar la sesión.
+- **0.6.4**: Correcciones de la protección de la VPN frente al bloqueo en clamshell: la notificación de desconexión de la VPN ahora sí se dispara (la vigilancia se detenía por el propio evento que debía notificar y por App Nap), el ancla invisible se libera al salir de la app, la pantalla virtual tiene un nombre claro y el brillo se restaura al volver a abrir la tapa después de **Dim**. Además, la barra de menús ya no repite el callejón sin salida «muévela a Aplicaciones» cuando solo queda un atributo de cuarentena, y el corte térmico por defecto pasa de `fair` a `serious` (el valor anterior podía terminar un keep-awake en pocos minutos).
+- **0.6.3**: Corrección: con la protección de bloqueo en clamshell activada, conectar una pantalla externa real ya no altera tu disposición guardada de «interna + externa». El ancla invisible ahora se aparta de inmediato (sin volver a espejar) en cuanto aparece una pantalla real, dejando que macOS restaure la disposición que guardaste; vuelve automáticamente cuando quitas la externa. La protección de bloqueo en clamshell sin pantalla no cambia.
+- **0.6.2**: Protección de la VPN frente al bloqueo en clamshell (opcional): sin pantalla externa y con batería, cerrar la tapa ya no bloquea la pantalla, así que una VPN SSL de FortiClient sobrevive en vez de caerse, una pantalla virtual invisible ancla la sesión. La acción **Apagar pantalla** ahora te deja elegir **Dim** (segura para la VPN, por defecto) o **Sleep**, con una notificación opcional de desconexión de la VPN.
+- **0.6.1**: Estado honesto del helper: un helper muerto pero registrado ya no aparece como falso «activado». `eclam status` lo informa como `unreachable` (código de salida 2), la app se autorrepara al reiniciarse, un nuevo comando `eclam repair` y un aviso en la barra de menús lo muestran, y `eclam status` ahora también informa del estado de inicio al arrancar sesión.
+- **0.6.0**: Inicio al arrancar sesión, notificaciones de actualización en la app, historial de actividad, internacionalización (English · 한국어 · 中文 · 日本語 · Español), interruptor de un clic, temas de icono en la barra de menús, política de inactividad remota, notificaciones de estado por Telegram, firma con Developer ID + notarización.
 
 Anteriormente: detección de agentes y los comandos `watch` / `session` (0.5.x), protecciones de batería / temperatura / temporizador según el estado (0.4.x), detección de actividad remota y la primera CLI (0.3.x).
 
@@ -215,4 +215,4 @@ Electronic Clam es gratis y de código abierto. Él mantiene despierto a tu agen
 
 ---
 
-<sub>`README.zh-CN.md`, `README.ja.md` y `README.es.md` se generan a partir de este archivo con el comando `/translate` — no los edites a mano. `README.ko.md` se mantiene a mano.</sub>
+<sub>`README.zh-CN.md`, `README.ja.md` y `README.es.md` se generan a partir de este archivo con el comando `/translate`, no los edites a mano. `README.ko.md` se mantiene a mano.</sub>
