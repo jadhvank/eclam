@@ -16,6 +16,8 @@ SIGN_ID="${ECLAM_SIGN_ID:-Developer ID Application: Changwook Jung (GBQ3DN529X)}
 # A secure timestamp is required for notarization; ad-hoc signing rejects it.
 TS_FLAG=(--timestamp)
 [[ "$SIGN_ID" == "-" ]] && TS_FLAG=()
+APP_ENTITLEMENTS=()
+[[ "$SIGN_ID" == "-" ]] && APP_ENTITLEMENTS=(--entitlements "$ROOT/Resources/Debug.entitlements.plist")
 
 # ADR-0023 — the helper enforces an XPC caller code-signing requirement (Team ID
 # + app/hook identifiers). Ad-hoc builds have no Team ID and a churning cdhash, so
@@ -36,6 +38,7 @@ HELPER_SRC=("$ROOT/Sources/ElectronicClamHelper"/*.swift)
 HOOK_SRC=("$ROOT/Sources/ElectronicClamHook"/*.swift)
 
 TARGET="arm64-apple-macos13.0"   # TODO universal: add x86_64-apple-macos13.0 and lipo
+SPARKLE_DIR="$("$ROOT/scripts/fetch-sparkle.sh")"
 
 echo "==> Cleaning"
 rm -rf "$ROOT/build"
@@ -76,6 +79,8 @@ echo "==> Compiling app"
 swiftc -O -target "$TARGET" \
     -framework AppKit -framework Foundation -framework ServiceManagement -framework IOKit \
     -framework CoreGraphics -framework ColorSync \
+    -F "$SPARKLE_DIR" -framework Sparkle \
+    -Xlinker -rpath -Xlinker @executable_path/../Frameworks \
     -import-objc-header "$ROOT/Sources/ElectronicClamApp/VirtualDisplayShim.h" \
     -o "$MACOS_DIR/ElectronicClam" \
     "${APP_SRC[@]}" "${SHARED_SRC[@]}" \
@@ -86,6 +91,9 @@ rm -f "$VD_SHIM_O"
 
 echo "==> Assembling bundle"
 cp "$ROOT/Resources/App-Info.plist" "$APP/Contents/Info.plist"
+mkdir -p "$APP/Contents/Frameworks"
+ditto "$SPARKLE_DIR/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
+cp "$SPARKLE_DIR/LICENSE" "$RES_DIR/Sparkle-LICENSE.txt"
 cp "$ROOT/Resources/com.jadhvank.eclam.helper.plist" \
     "$LD_DIR/com.jadhvank.eclam.helper.plist"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
@@ -140,12 +148,27 @@ codesign --force --sign "$SIGN_ID" ${TS_FLAG[@]+"${TS_FLAG[@]}"} \
     --identifier com.jadhvank.eclam.hook --options runtime \
     "$MACOS_DIR/eclam-hook"
 
+# Sparkle's nested executables must share our Team ID for library validation.
+# Preserve the upstream helper entitlements, sign from the inside out, and do
+# not use --deep signing (which can silently discard nested signing options).
+SPARKLE_FRAMEWORK="$APP/Contents/Frameworks/Sparkle.framework"
+for nested in \
+    "$SPARKLE_FRAMEWORK/Versions/B/XPCServices/Downloader.xpc" \
+    "$SPARKLE_FRAMEWORK/Versions/B/XPCServices/Installer.xpc" \
+    "$SPARKLE_FRAMEWORK/Versions/B/Autoupdate" \
+    "$SPARKLE_FRAMEWORK/Versions/B/Updater.app" \
+    "$SPARKLE_FRAMEWORK"; do
+    codesign --force --sign "$SIGN_ID" ${TS_FLAG[@]+"${TS_FLAG[@]}"} \
+        --preserve-metadata=identifier,entitlements --options runtime "$nested"
+done
+
 # Seal the bundle WITHOUT --deep: a deep re-sign would re-sign the helper/hook
 # above with default (hash-suffixed) identifiers, undoing the pinning. Signing
 # the bundle non-deep signs the main executable (it inherits com.jadhvank.eclam
 # from Info.plist) and seals the already-signed nested binaries as-is. ADR-0020.
 echo "==> Sealing app bundle (main exe = com.jadhvank.eclam, nested ids preserved)"
-codesign --force --sign "$SIGN_ID" ${TS_FLAG[@]+"${TS_FLAG[@]}"} --options runtime "$APP"
+codesign --force --sign "$SIGN_ID" ${TS_FLAG[@]+"${TS_FLAG[@]}"} \
+    ${APP_ENTITLEMENTS[@]+"${APP_ENTITLEMENTS[@]}"} --options runtime "$APP"
 
 echo "==> Verifying signature"
 codesign --verify --deep --strict --verbose=2 "$APP"

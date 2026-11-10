@@ -4,6 +4,14 @@ All notable changes to Electronic Clam are documented here.
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-10
+
+- **Sparkle in-app updates:** check, download, install and relaunch from Settings. Downloads and installation require user action; existing automatic-check preferences are migrated.
+- **Signed update feed:** the release includes an Ed25519-signed appcast for the final Developer ID signed, notarized and stapled ZIP. Updates are verified before extraction; unattended installation and system profiling are disabled.
+- **Helper upgrade recovery:** refresh changed helper bundles, verify XPC reachability before recording success, and preserve approval-pending recovery across launches.
+- **Upgrade path:** 0.8.0 and earlier need one manual or Homebrew upgrade to 0.8.1 before future in-app updates are available. Homebrew declares `auto_updates true`.
+- **Release documentation:** English is the default release-note language. READMEs explain the first-install requirement in all five languages.
+
 ## [0.8.0] — 2026-11-09
 
 - **Four-mode menu-bar cycle** — left-click cycles Off → Awake → Awake + screen → Auto detection. Right-click and Control-click still open the menu; the existing Keep Mac Awake shortcut stays binary. A Mode submenu offers direct selection.

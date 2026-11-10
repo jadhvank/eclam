@@ -412,4 +412,17 @@ swiftc -target "$TARGET" -o "$TMP/eclam_menubarmodetests" \
     "$ROOT/Tests/MenuBarWakeStateTests.swift"
 "$TMP/eclam_menubarmodetests"
 
+
+# Sparkle migration and Helper replacement orchestration (no system mutation).
+for suite in HelperUpgrade UpdatePreferences; do
+    echo "==> Testing $suite"
+    swiftc -target "$TARGET" -framework Foundation -o "$TMP/$suite" \
+        "$ROOT/Sources/ElectronicClamApp/$suite.swift" "$ROOT/Tests/${suite}Tests.swift"
+    "$TMP/$suite"
+done
+python3 "$ROOT/Tests/test_appcast.py"
+swiftc "$ROOT/scripts/verify-update.swift" -o "$TMP/verify-update"
+swiftc -parse-as-library "$ROOT/Tests/UpdateSignatureTests.swift" -o "$TMP/signature-tests"
+"$TMP/signature-tests" "$TMP/verify-update"
+
 echo "==> All tests passed"

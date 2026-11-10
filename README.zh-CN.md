@@ -10,12 +10,26 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · **中文** · [日本語](README.ja.md) · [Español](README.es.md)
 
 </div>
+
+---
+
+## v0.8.1 新功能: 应用内更新
+
+- **Sparkle 更新:** 在设置 → 通用 → **检查更新…**中完成下载、安装和重新启动。只有你选择安装时才会开始。
+- **保留现有设置:** 自动检查设置会迁移保留。自动下载和无人值守安装均已禁用。
+- **升级后刷新辅助程序:** 后台辅助程序发生变化时，应用会重新注册并确认其可响应。同一版本再次启动时不会进行不必要的重新注册。
+- **从 0.8.0 或更早版本升级:** 先通过 [GitHub Releases](https://github.com/jadhvank/eclam/releases/tag/v0.8.1) 或 Homebrew 安装一次 0.8.1。旧版本没有 Sparkle，之后的版本才可通过应用内更新安装。
+
+```sh
+brew update
+brew upgrade --cask --greedy jadhvank/tap/eclam
+```
 
 ---
 

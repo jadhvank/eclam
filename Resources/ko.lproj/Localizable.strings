@@ -71,7 +71,7 @@
 "general.updates" = "업데이트";
 "general.checkForUpdates" = "업데이트 확인…";
 "general.autoCheckUpdates" = "자동으로 확인";
-"general.tip.updates" = "GitHub에 새 릴리스가 있는지 확인해 알려줍니다 — 자동으로 내려받거나 설치하지는 않아요. 체크를 끄면 하루 한 번 하는 백그라운드 확인을 멈춥니다.";
+"general.tip.updates" = "업데이트를 자동으로 확인합니다. 다운로드·설치·재시작은 직접 선택합니다. 재시작 중에는 절전 방지가 잠시 중단됩니다.";
 "update.checking" = "확인 중…";
 "update.upToDate" = "최신 버전이에요";
 "update.upToDate.body" = "이미 최신 버전이에요 (%@).";
@@ -505,6 +505,7 @@
 
 "notification.error.saveSettings" = "설정을 저장하지 못했습니다. 변경은 현재 세션에만 적용되며, 재시작하면 이전 설정으로 돌아갈 수 있습니다. 다시 저장해 주세요.";
 
+"permission.upgradeFailed" = "업데이트 후 백그라운드 도우미를 확인하지 못했습니다. Helper 재설치를 눌러 다시 시도하세요.";
 // Four-mode menu-bar cycle (display mode availability defaults on).
 "mode.off" = "끄기";
 "mode.awake" = "Mac 유지";

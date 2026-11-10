@@ -59,9 +59,9 @@ final class GeneralPaneViewController: NSViewController {
     private let blankModeOrder: [StateStore.BlankDisplaysMode] = [.dim, .sleep]
     /// ADR-0037 §#8 — Sleep 선택 시에만 보이는 경고(화면 잠금→VPN 끊김). `.dim` 일 땐 숨김.
     private let blankModeNote = NSTextField(wrappingLabelWithString: "")
-    /// ADR-0035 — notify-only update controls. The link button runs a manual
+    /// ADR-0041 — Sparkle update controls. The link button runs a manual
     /// check; the checkbox is an opt-out for the daily background check
-    /// (`renderUpdatesRow()` syncs it from `UpdateChecker.autoCheckEnabled`).
+    /// (`renderUpdatesRow()` syncs it from `UpdateController.shared.automaticallyChecks`).
     private let checkUpdatesButton = NSButton(title: "", target: nil, action: nil)
     private let autoCheckUpdatesCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
     /// Called after the language is changed so the app can re-render live.
@@ -288,11 +288,11 @@ final class GeneralPaneViewController: NSViewController {
             "Sleep fully turns displays off but may lock the screen and disconnect VPN.")
         blankModeNote.isHidden = (store.blankDisplaysMode != .sleep)  // refresh() 가 동기화
 
-        // ADR-0035 — notify-only "Check for Updates" (no Sparkle/auto-install).
+        // ADR-0041 — Sparkle standard UI; user chooses installation.
         // A link-style action + an opt-out auto-check toggle, stacked under the
         // "Updates" form label.
         let updatesTip = NSL("general.tip.updates",
-            "Checks GitHub for a newer release and tells you if one is available — it never downloads or installs automatically. Turn off the checkbox to stop the daily background check.")
+            "Checks for updates automatically. You choose when to download, install and restart. Restarting briefly pauses keep-awake protection.")
         checkUpdatesButton.title = NSL("general.checkForUpdates", "Check for Updates…")
         checkUpdatesButton.translatesAutoresizingMaskIntoConstraints = false
         checkUpdatesButton.bezelStyle = .inline
@@ -711,8 +711,11 @@ final class GeneralPaneViewController: NSViewController {
         // v0.5 P1 — 버전 핸드셰이크 불일치 (살아있는 구버전 daemon 잔존).
         // 핸드셰이크가 liveness 까지 확인한 경우에만 true 이므로 등록 상태와
         // 무관하게 플래그만 본다.
-        versionMismatchNote.isHidden = !store.helperVersionMismatch
-        if store.helperVersionMismatch {
+        versionMismatchNote.isHidden = !store.helperVersionMismatch && !HelperRegistration.upgradeVerificationFailed
+        if HelperRegistration.upgradeVerificationFailed {
+            versionMismatchNote.stringValue = "⚠\u{FE0E} " + NSL("permission.upgradeFailed",
+                "The background helper could not be verified after updating. Click Reinstall Helper to try again.")
+        } else if store.helperVersionMismatch {
             versionMismatchNote.stringValue = "⚠\u{FE0E} "
                 + NSL("permission.versionMismatch.warning",
                     "The helper that is running speaks an older protocol than this app — likely left over from an upgrade.")
@@ -754,7 +757,7 @@ final class GeneralPaneViewController: NSViewController {
 
     /// ADR-0035 — sync the auto-check toggle to the persisted opt-out flag.
     private func renderUpdatesRow() {
-        autoCheckUpdatesCheckbox.state = UpdateChecker.autoCheckEnabled ? .on : .off
+        autoCheckUpdatesCheckbox.state = UpdateController.shared.automaticallyChecks ? .on : .off
     }
 
     private static func themeTitle(_ theme: StateStore.MenuBarTheme) -> String {
@@ -984,49 +987,12 @@ final class GeneralPaneViewController: NSViewController {
         blankModeNote.isHidden = (mode != .sleep)
     }
 
-    /// ADR-0035 — manual update check. Notify-only: shows the result in an alert;
-    /// "Download" opens the releases page in the browser (never auto-installs).
     @objc private func checkForUpdatesTapped() {
-        let original = NSL("general.checkForUpdates", "Check for Updates…")
-        checkUpdatesButton.isEnabled = false
-        checkUpdatesButton.title = NSL("update.checking", "Checking…")
-        UpdateChecker.checkManually { [weak self] result in
-            guard let self = self else { return }
-            self.checkUpdatesButton.isEnabled = true
-            self.checkUpdatesButton.title = original
-            let alert = NSAlert()
-            switch result {
-            case .upToDate(let current):
-                alert.alertStyle = .informational
-                alert.messageText = NSL("update.upToDate", "You're up to date")
-                alert.informativeText = NSLf("update.upToDate.body",
-                                             "You have the latest version (%@).", current)
-                alert.addButton(withTitle: NSL("common.ok", "OK"))
-            case .updateAvailable(let latest, let current, let page):
-                alert.alertStyle = .informational
-                alert.messageText = NSL("update.available", "Update available")
-                alert.informativeText = NSLf("update.available.body",
-                                             "Version %@ is available — you have %@.", latest, current)
-                alert.addButton(withTitle: NSL("update.download", "Download"))
-                alert.addButton(withTitle: NSL("update.later", "Later"))
-                if alert.runModal() == .alertFirstButtonReturn {
-                    NSWorkspace.shared.open(page)
-                }
-                return
-            case .failed:
-                alert.alertStyle = .warning
-                alert.messageText = NSL("update.failed", "Couldn't check for updates")
-                alert.informativeText = NSL("update.failed.body",
-                                            "Check your internet connection and try again.")
-                alert.addButton(withTitle: NSL("common.ok", "OK"))
-            }
-            alert.runModal()
-        }
+        UpdateController.shared.checkForUpdates()
     }
 
-    /// ADR-0035 — opt-out toggle for the daily background update check.
     @objc private func autoCheckUpdatesToggled() {
-        UpdateChecker.autoCheckEnabled = (autoCheckUpdatesCheckbox.state == .on)
+        UpdateController.shared.automaticallyChecks = (autoCheckUpdatesCheckbox.state == .on)
     }
 
     // MARK: - Layout helpers

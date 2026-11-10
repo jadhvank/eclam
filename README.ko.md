@@ -10,12 +10,26 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · **한국어** · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
 
 </div>
+
+---
+
+## v0.8.1 업데이트: 앱 안에서 업데이트
+
+- **Sparkle 업데이트:** 설정 → 일반 → **업데이트 확인…**에서 다운로드, 설치, 재실행까지 진행합니다. 설치는 사용자가 선택할 때만 시작합니다.
+- **기존 설정 보존:** 자동 확인 설정을 그대로 이전합니다. 자동 다운로드와 무인 설치는 비활성화되어 있습니다.
+- **업데이트 후 도우미 갱신:** 변경된 백그라운드 도우미를 다시 등록하고 통신을 확인합니다. 같은 버전을 다시 실행할 때는 불필요하게 재등록하지 않습니다.
+- **0.8.0 이하에서 업그레이드:** [GitHub Releases](https://github.com/jadhvank/eclam/releases/tag/v0.8.1) 또는 Homebrew로 0.8.1을 한 번 설치하세요. 이전 버전에는 Sparkle이 없으며, 이후 릴리스부터 앱 안에서 업데이트할 수 있습니다.
+
+```sh
+brew update
+brew upgrade --cask --greedy jadhvank/tap/eclam
+```
 
 ---
 

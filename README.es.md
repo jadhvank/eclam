@@ -10,12 +10,26 @@ Detecta el *trabajo*, no solo un proceso en ejecución.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · **Español**
 
 </div>
+
+---
+
+## Novedades de v0.8.1: actualizaciones dentro de la app
+
+- **Actualizaciones con Sparkle:** Ajustes → General → **Buscar actualizaciones…** permite descargar, instalar y reiniciar desde la app. La instalación solo comienza cuando la eliges.
+- **Preferencias conservadas:** se mantiene tu ajuste de comprobación automática. Las descargas automáticas y la instalación sin intervención están desactivadas.
+- **Renovación del asistente tras actualizar:** la app vuelve a registrar el asistente si ha cambiado y comprueba que responde. No repite el registro innecesariamente al abrir la misma versión.
+- **Desde 0.8.0 o anterior:** instala 0.8.1 una vez desde [GitHub Releases](https://github.com/jadhvank/eclam/releases/tag/v0.8.1) o Homebrew. Las versiones anteriores no incluyen Sparkle; las siguientes podrán actualizarse desde la app.
+
+```sh
+brew update
+brew upgrade --cask --greedy jadhvank/tap/eclam
+```
 
 ---
 

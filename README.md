@@ -10,12 +10,26 @@ It detects *work*, not just a running process.
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 **English** · [한국어](README.ko.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
 
 </div>
+
+---
+
+## New in v0.8.1: in-app updates
+
+- **Sparkle updates:** Settings → General → **Check for Updates…** now offers download, installation and relaunch inside the app. Installation starts only when you choose it.
+- **Existing preferences are preserved:** your automatic-check setting is carried over. Automatic downloads and unattended installation are disabled.
+- **Helper refresh after an upgrade:** the app refreshes a changed background helper and verifies it is reachable, avoiding unnecessary re-registration on subsequent launches.
+- **Upgrading from 0.8.0 or earlier:** install 0.8.1 once from [GitHub Releases](https://github.com/jadhvank/eclam/releases/tag/v0.8.1) or Homebrew. Those older versions cannot use Sparkle; subsequent releases can update in-app.
+
+```sh
+brew update
+brew upgrade --cask --greedy jadhvank/tap/eclam
+```
 
 ---
 

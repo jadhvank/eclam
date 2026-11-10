@@ -27,8 +27,23 @@ VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ROOT
 APP="$ROOT/build/ElectronicClam.app"
 ZIP="$ROOT/build/ElectronicClam-$VERSION.zip"
 TAG="v$VERSION"
+BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$ROOT/Resources/App-Info.plist")"
+# A failed network/auth query must fail closed, not be interpreted as no release.
+LATEST="$(gh api "repos/$REPO/releases/latest" --jq .tag_name)"
+python3 "$ROOT/scripts/validate-release-version.py" "$VERSION" "$BUILD" "$LATEST"
 
 echo "==> Releasing Electronic Clam $VERSION ($TAG) to $REPO"
+
+# Never mutate a published release: clients may have cached its signed feed.
+if EXISTING="$(gh release view "$TAG" --repo "$REPO" --json isDraft --jq .isDraft 2>/dev/null)"; then
+    [[ "$EXISTING" == "true" ]] || {
+        echo "ERROR: $TAG is already public. Increment both bundle versions." >&2
+        exit 1
+    }
+fi
+[[ "${ECLAM_SIGN_ID:-Developer ID}" != "-" ]] || {
+    echo "ERROR: ad-hoc builds cannot be released" >&2; exit 1;
+}
 
 echo "==> Building"
 "$ROOT/scripts/build.sh"
@@ -54,14 +69,9 @@ ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
 SHA="$(shasum -a 256 "$ZIP" | awk '{print $1}')"
 echo "==> sha256: $SHA"
 
-echo "==> GitHub release $TAG"
-if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
-  gh release upload "$TAG" "$ZIP" --repo "$REPO" --clobber
-else
-  gh release create "$TAG" "$ZIP" --repo "$REPO" \
-    --title "Electronic Clam $VERSION" \
-    --notes "See CHANGELOG.md. Menu-bar app: keep macOS awake while agents work; sleep safely when conditions degrade."
-fi
+# Stage the signed appcast from the final, stapled ZIP before any upload.
+UPDATE_DIR="$ROOT/build/update-release"
+"$ROOT/scripts/prepare-update.sh" "$APP" "$ZIP" "$UPDATE_DIR"
 
 echo "==> Patching cask $CASK (version + sha256)"
 # Replaces the whole sha256 line whether it is currently `:no_check` or quoted.
@@ -83,6 +93,21 @@ if ! grep -q "sha256 \"$SHA\"" "$CASK"; then
   echo "ERROR: cask sha256 does not match computed digest ($SHA) after patch — aborting release" >&2
   exit 1
 fi
+
+# Upload both assets to a draft; only then make the version discoverable.
+if ! gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+    gh release create "$TAG" --repo "$REPO" --draft \
+        --title "Electronic Clam $VERSION" \
+        --notes "See CHANGELOG.md. Updates are installed only when you choose."
+fi
+[[ "$(gh release view "$TAG" --repo "$REPO" --json isDraft --jq .isDraft)" == "true" ]] || {
+    echo "ERROR: release is no longer a draft" >&2; exit 1;
+}
+# Never clobber assets, even on a draft; a concurrent publisher may have made it public.
+gh release upload "$TAG" "$ZIP" "$UPDATE_DIR/appcast.xml" --repo "$REPO"
+LATEST="$(gh api "repos/$REPO/releases/latest" --jq .tag_name)"
+python3 "$ROOT/scripts/validate-release-version.py" "$VERSION" "$BUILD" "$LATEST"
+gh release edit "$TAG" --repo "$REPO" --draft=false --latest
 
 echo "==> Done."
 echo "    Release: https://github.com/$REPO/releases/tag/$TAG"

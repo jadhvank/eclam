@@ -10,12 +10,26 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-AppKit%20%2B%20IOKit-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.8.0-yellow)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.8.1-yellow)](CHANGELOG.md)
 
 <!-- i18n-langbar -->
 [English](README.md) · [한국어](README.ko.md) · [中文](README.zh-CN.md) · **日本語** · [Español](README.es.md)
 
 </div>
+
+---
+
+## v0.8.1の新機能: アプリ内アップデート
+
+- **Sparkleアップデート:** 設定 → 一般 → **アップデートを確認…**から、アプリ内でダウンロード、インストール、再起動できます。インストールはユーザーが選んだときだけ開始します。
+- **既存の設定を維持:** 自動確認の設定を引き継ぎます。自動ダウンロードと無人インストールは無効です。
+- **更新後のヘルパー更新:** バックグラウンドヘルパーに変更がある場合は再登録して応答を確認します。同じバージョンの再起動では不要な再登録を行いません。
+- **0.8.0以前からの移行:** [GitHub Releases](https://github.com/jadhvank/eclam/releases/tag/v0.8.1)またはHomebrewで0.8.1を一度インストールしてください。旧バージョンにはSparkleがないため、その後のリリースからアプリ内更新を利用できます。
+
+```sh
+brew update
+brew upgrade --cask --greedy jadhvank/tap/eclam
+```
 
 ---
 

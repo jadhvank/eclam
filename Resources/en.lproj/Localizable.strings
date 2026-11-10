@@ -73,7 +73,7 @@
 "general.updates" = "Updates";
 "general.checkForUpdates" = "Check for Updates…";
 "general.autoCheckUpdates" = "Automatically check";
-"general.tip.updates" = "Checks GitHub for a newer release and tells you if one is available — it never downloads or installs automatically. Turn off the checkbox to stop the daily background check.";
+"general.tip.updates" = "Checks for updates automatically. You choose when to download, install and restart. Restarting briefly pauses keep-awake protection.";
 "update.checking" = "Checking…";
 "update.upToDate" = "You're up to date";
 "update.upToDate.body" = "You have the latest version (%@).";
@@ -508,6 +508,7 @@
 
 "notification.error.saveSettings" = "Settings could not be saved. Changes apply for this session; restart may restore previous settings. Try saving again.";
 
+"permission.upgradeFailed" = "The background helper could not be verified after updating. Click Reinstall Helper to try again.";
 // Four-mode menu-bar cycle (display mode availability defaults on).
 "mode.off" = "Off";
 "mode.awake" = "Awake";

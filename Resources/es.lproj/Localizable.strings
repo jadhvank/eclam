@@ -72,7 +72,7 @@
 "general.updates" = "Actualizaciones";
 "general.checkForUpdates" = "Buscar actualizaciones…";
 "general.autoCheckUpdates" = "Buscar automáticamente";
-"general.tip.updates" = "Comprueba en GitHub si hay una versión más reciente y te avisa — nunca descarga ni instala automáticamente. Desactiva la casilla para detener la comprobación diaria en segundo plano.";
+"general.tip.updates" = "Busca actualizaciones automáticamente. Tú decides cuándo descargar, instalar y reiniciar. Al reiniciar, la protección contra el reposo se pausa brevemente.";
 "update.checking" = "Comprobando…";
 "update.upToDate" = "Estás al día";
 "update.upToDate.body" = "Tienes la última versión (%@).";
@@ -506,6 +506,7 @@
 
 "notification.error.saveSettings" = "No se pudo guardar la configuración. Los cambios solo se aplican a esta sesión; al reiniciar puede volver la configuración anterior. Intenta guardar otra vez.";
 
+"permission.upgradeFailed" = "No se pudo verificar el asistente en segundo plano tras actualizar. Haz clic en Reinstalar asistente para volver a intentarlo.";
 // Four-mode menu-bar cycle (display mode availability defaults on).
 "mode.off" = "Desactivado";
 "mode.awake" = "Mac despierto";

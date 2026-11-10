@@ -72,7 +72,7 @@
 "general.updates" = "アップデート";
 "general.checkForUpdates" = "アップデートを確認…";
 "general.autoCheckUpdates" = "自動的に確認";
-"general.tip.updates" = "GitHub に新しいリリースがあるか確認してお知らせします — 自動でダウンロードやインストールはしません。チェックを外すと毎日のバックグラウンド確認を停止します。";
+"general.tip.updates" = "アップデートを自動確認します。ダウンロード・インストール・再起動は自分で選択します。再起動中はスリープ防止が一時停止します。";
 "update.checking" = "確認中…";
 "update.upToDate" = "最新の状態です";
 "update.upToDate.body" = "すでに最新バージョンです (%@)。";
@@ -506,6 +506,7 @@
 
 "notification.error.saveSettings" = "設定を保存できませんでした。変更は現在のセッションのみ有効です。再起動すると以前の設定に戻る可能性があります。保存を再試行してください。";
 
+"permission.upgradeFailed" = "アップデート後にバックグラウンドヘルパーを確認できませんでした。「ヘルパーを再インストール」で再試行してください。";
 // Four-mode menu-bar cycle (display mode availability defaults on).
 "mode.off" = "オフ";
 "mode.awake" = "Macを維持";

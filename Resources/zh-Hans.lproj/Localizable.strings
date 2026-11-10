@@ -72,7 +72,7 @@
 "general.updates" = "更新";
 "general.checkForUpdates" = "检查更新…";
 "general.autoCheckUpdates" = "自动检查";
-"general.tip.updates" = "在 GitHub 上检查是否有新版本并告知你 — 绝不会自动下载或安装。取消勾选可停止每天的后台检查。";
+"general.tip.updates" = "自动检查更新。由你选择何时下载、安装和重新启动。重新启动期间，防止睡眠功能会短暂暂停。";
 "update.checking" = "检查中…";
 "update.upToDate" = "已是最新版本";
 "update.upToDate.body" = "你已是最新版本 (%@)。";
@@ -506,6 +506,7 @@
 
 "notification.error.saveSettings" = "无法保存设置。更改仅适用于当前会话，重启后可能恢复以前的设置。请重新保存。";
 
+"permission.upgradeFailed" = "更新后无法确认后台辅助程序。请点击重新安装辅助程序再试一次。";
 // Four-mode menu-bar cycle (display mode availability defaults on).
 "mode.off" = "关闭";
 "mode.awake" = "Mac 保持唤醒";
