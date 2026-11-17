@@ -135,8 +135,8 @@ public extension AgentTrace {
         // Subagent transcripts live next to the parent as `<session>/<AgentId>.jsonl`,
         // "recursively for nested spawns"
         // (`docs/session-operations-export-share-fork-resume.md`). The parent is
-        // idle inside the `task` tool call while children write: live-measured
-        // (omp 18.22.0, 2026-11-17) parent idle 127s while two children wrote.
+        // idle inside the `task` tool call while children write (live-measured,
+        // omp 18.22.0, 2026-11-17).
         // glob(3) has no `**`, so one entry per depth: direct subagents and one
         // level of nesting. Deeper nesting is not covered. Union.
         AgentTrace(
