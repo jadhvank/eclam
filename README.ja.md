@@ -53,7 +53,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 - **フタを閉じても起きたまま。** Mac維持モードで、フタを閉じても Mac がスリープしません, ターミナルコマンドも、トグルのたびのパスワードも要りません。
 - **プロセスではなく作業を検知。** 自動検出モードでは、コーディングエージェントが*実際に出力を出している間だけ*起きていて、エージェントが止まれば Mac はまたスリープできます。
-- **標準で 5 つのエージェントに対応**: Claude Code、Codex、Cursor、opencode、Antigravity, さらに好きなエージェントを自分で追加できます。
+- **標準で 6 つのエージェントに対応**: Claude Code、Codex、Cursor、opencode、Antigravity、omp, さらに好きなエージェントを自分で追加できます。
 - **状況に合わせて動く安全ガード。** バッテリーや温度が危険ラインを越えると自動でスリープします。
 - **リモート作業も察知。** 自動検出は SSH・画面共有・Tailscale の活動を認識し、安全ガードの範囲内でリモート作業を維持します。
 - **会話やコードは決して読みません。** エージェント検知は transcript のタイムスタンプだけを見て、中身は読みません。
@@ -72,7 +72,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 自動検出モードは、プロセスが存在するかではなく、エージェントが*いま働いているか*を見ます。働いている間は Mac を起こしておき、止まれば保持を解除します(**Strict** モード)。プロセスが生きている限り起こしておくだけの **Lax** モードもあります。
 
-**標準で検知(5 つ):** Claude Code · Codex · Cursor · opencode · Antigravity。
+**標準で検知(6 つ):** Claude Code · Codex · Cursor · opencode · Antigravity · omp。
 
 **Customize で有効化(デフォルトはオフ):** Aider · Cline · Roo Code · OpenHands · Hermes · Openclaw。
 

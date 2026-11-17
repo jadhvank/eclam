@@ -117,6 +117,30 @@ public extension AgentTrace {
             hookKey: nil,
             comm: "agy"
         ),
+        // omp (oh-my-pi) appends each session entry to
+        // `~/.omp/agent/sessions/<encoded-cwd>/<timestamp>_<sessionId>.jsonl`
+        // (can1357/oh-my-pi `docs/session.md`). freshness 90: a single >60s tool
+        // call or model turn can leave a no-signal gap, as with Cursor.
+        AgentTrace(
+            id: "omp",
+            label: "omp",
+            globPattern: "~/.omp/agent/sessions/*/*.jsonl",
+            freshness: 90,
+            hookKey: nil,
+            comm: "omp"
+        ),
+        // sister entry: while subagents run, the parent transcript is idle inside
+        // the `task` tool call; child transcripts live next to it as
+        // `<session>/<AgentId>.jsonl`
+        // (`docs/session-operations-export-share-fork-resume.md`). Union.
+        AgentTrace(
+            id: "omp-subagents",
+            label: "omp (subagents)",
+            globPattern: "~/.omp/agent/sessions/*/*/*.jsonl",
+            freshness: 90,
+            hookKey: nil,
+            comm: "omp"  // subagents run inside the parent omp process
+        ),
     ]
 
     /// Customize-only entries (no default check). ADR-0006 §B.

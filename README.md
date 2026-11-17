@@ -53,7 +53,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 - **Lid-closed keep-awake.** Awake mode stops your Mac from sleeping even with the lid shut, without terminal commands or a password per toggle.
 - **Detects work, not processes.** Auto mode stays awake only while a coding agent is *actively producing output*; once the agent stops, your Mac can sleep again.
-- **5 agents out of the box**: Claude Code, Codex, Cursor, opencode, Antigravity, plus any others you add yourself.
+- **6 agents out of the box**: Claude Code, Codex, Cursor, opencode, Antigravity, omp, plus any others you add yourself.
 - **Safety guards that adapt.** Auto-sleeps when battery or temperature crosses a danger line.
 - **Remote-activity aware.** Auto mode recognizes SSH, screen sharing, and Tailscale activity to keep remote work running, subject to safety guards.
 - **Never reads your conversations or code.** Agent detection only looks at transcript timestamps, never their contents.
@@ -72,7 +72,7 @@ The point is simple: let your agent keep working, uninterrupted.
 
 Auto mode tracks whether the agent is *working right now*, not whether a process exists. While it works, the Mac stays awake; when it stops, the hold releases (**Strict** mode). A **Lax** mode that simply stays awake while the process is alive is also available.
 
-**Detected by default (5):** Claude Code · Codex · Cursor · opencode · Antigravity.
+**Detected by default (6):** Claude Code · Codex · Cursor · opencode · Antigravity · omp.
 
 **Opt-in via Customize (off by default):** Aider · Cline · Roo Code · OpenHands · Hermes · Openclaw.
 
