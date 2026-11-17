@@ -290,7 +290,7 @@ final class StateStore {
     private static let remoteIdleTimeoutKey     = "RemoteIdleTimeoutMin"
     private static let remoteCountsLegacyKey    = "RemoteCountsAsActivity"  // pre-ADR-0016
     private static let safetySettingsKey        = "SafetySettings"
-    /// v0.5 ADR-0006 §B — the documented "Default (5)" detection set. This was
+    /// v0.5 ADR-0006 §B — the documented default detection set. This was
     /// left at `["claude"]` when the v0.5 agent trim landed, so codex / cursor /
     /// opencode were never watched unless the user opened Settings → Agents.
     private static let defaultWatchedAgents: Set<String> = Set(AgentTrace.M1Defaults.map(\.id))
@@ -307,7 +307,7 @@ final class StateStore {
             // Migration: installs that persisted the old single-agent default
             // (exactly `["claude"]`, the only way to get that set without a
             // deliberate choice was the stale default) are upgraded once to the
-            // documented 5-agent default. The marker makes a later deliberate
+            // documented default set. The marker makes a later deliberate
             // claude-only choice stick.
             if set == ["claude"],
                !UserDefaults.standard.bool(forKey: Self.watchedAgentsMigratedKey) {

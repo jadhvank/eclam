@@ -179,11 +179,10 @@ enum WatchCommand: CLISubcommand {
     Block idle sleep while <agent> is actively working.
 
     <agent> may be a default id (claude, codex, cursor, opencode,
-    opencode-sessions, antigravity, omp, omp-subagents), a Customize-only id
-    (aider, cline, roo, openhands, hermes, openclaw, openclaw-legacy,
-    cursor-legacy), a
-    user-registered CustomAgentTraces id, or a literal path/glob beginning
-    with ~, /, ., or containing * / ?.
+    opencode-sessions, antigravity, omp, omp-subagents, omp-subagents-nested),
+    a Customize-only id (aider, cline, roo, openhands, hermes, openclaw,
+    openclaw-legacy, cursor-legacy), a user-registered CustomAgentTraces id,
+    or a literal path/glob beginning with ~, /, ., or containing * / ?.
 
     Options:
       --grace <seconds>      Idle grace after last activity. Default 60.

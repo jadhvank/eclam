@@ -121,6 +121,9 @@ public extension AgentTrace {
         // `~/.omp/agent/sessions/<encoded-cwd>/<timestamp>_<sessionId>.jsonl`
         // (can1357/oh-my-pi `docs/session.md`). freshness 90: a single >60s tool
         // call or model turn can leave a no-signal gap, as with Cursor.
+        // Lax mode: `comm` matches the standalone `omp` binary; a bun-installed
+        // omp shows up as `bun`, and omp's detached worker daemons also run as
+        // `omp`, so Lax can hold after the last session ends.
         AgentTrace(
             id: "omp",
             label: "omp",
@@ -129,10 +132,13 @@ public extension AgentTrace {
             hookKey: nil,
             comm: "omp"
         ),
-        // sister entry: while subagents run, the parent transcript is idle inside
-        // the `task` tool call; child transcripts live next to it as
-        // `<session>/<AgentId>.jsonl`
-        // (`docs/session-operations-export-share-fork-resume.md`). Union.
+        // Subagent transcripts live next to the parent as `<session>/<AgentId>.jsonl`,
+        // "recursively for nested spawns"
+        // (`docs/session-operations-export-share-fork-resume.md`). The parent is
+        // idle inside the `task` tool call while children write: live-measured
+        // (omp 18.22.0, 2026-11-17) parent idle 127s while two children wrote.
+        // glob(3) has no `**`, so one entry per depth: direct subagents and one
+        // level of nesting. Deeper nesting is not covered. Union.
         AgentTrace(
             id: "omp-subagents",
             label: "omp (subagents)",
@@ -140,6 +146,14 @@ public extension AgentTrace {
             freshness: 90,
             hookKey: nil,
             comm: "omp"  // subagents run inside the parent omp process
+        ),
+        AgentTrace(
+            id: "omp-subagents-nested",
+            label: "omp (nested subagents)",
+            globPattern: "~/.omp/agent/sessions/*/*/*/*.jsonl",
+            freshness: 90,
+            hookKey: nil,
+            comm: "omp"
         ),
     ]
 
