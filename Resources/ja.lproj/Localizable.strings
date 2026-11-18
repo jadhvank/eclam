@@ -94,9 +94,9 @@
 "agents.section.watched" = "監視中のエージェント";
 "agents.section.hooks" = "フックのインストール";
 "agents.section.hooksAdvanced" = "エージェントフック（任意）";
-"agents.hooks.caption" = "Electric Clam は各エージェントのセッションログを監視して自動的に検出します — フックは不要です。フックは検出を即時にし、ファイルアクセスが制限された環境でフォールバックを追加するだけです。";
+"agents.hooks.caption" = "エージェントがセッションログを書き込むと自動検出します。任意のフックは作業開始を即座に通知し、長い応答中の記録の空白を補えます。";
 "agents.watched.caption" = "各エージェントのセッションログを監視して自動的に検出します。";
-"agents.pollNote" = "検出は約5秒ごとに更新されます(画面ロック中は30秒)。そのため起動直後のエージェントは表示まで数秒かかることがあります。フックを導入したエージェントは即座に反映されます。";
+"agents.pollNote" = "約5秒ごとに更新します（画面ロック中は30秒）。ログによる検出は書き込み後に始まるため、新しいセッションや長い応答中にはファイル信号がない場合があります。";
 "agents.col.agent" = "エージェント";
 "agents.col.status" = "状態";
 "agents.col.pattern" = "パターン";
@@ -112,7 +112,7 @@
 "agents.uninstall" = "アンインストール";
 "agents.add" = "追加";
 "agents.uninstallAll.title" = "すべての Electric Clam フックをアンインストールしますか？";
-"agents.uninstallAll.body" = "~/.claude/settings.json、~/.codex/config.toml、~/.hermes/config.yaml から Electric Clam のフックエントリを削除します。他の設定は保持されます。";
+"agents.uninstallAll.body" = "Claude、Codex、Hermes、ompからElectric Clamのフックを削除します。他の設定と拡張機能は保持されます。";
 "agents.uninstallFail" = "一部のフックをアンインストールできませんでした";
 "agents.couldNotInstall" = "%@ フックをインストールできませんでした";
 "agents.couldNotUninstall" = "%@ フックをアンインストールできませんでした";
@@ -517,3 +517,5 @@
 "mode.cooldown" = "安全ガード — 再開待ち";
 "menu.nextMode" = "クリック: %@";
 "menu.wakeMode" = "モード";
+
+"agents.ompHint" = "インストール後にompを再起動してください。フックはログが書き込まれる前の最初の応答や長い処理も検出します。";

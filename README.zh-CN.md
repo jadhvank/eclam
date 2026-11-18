@@ -53,7 +53,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 - **合盖也保持唤醒。** Mac 保持唤醒模式可让 Mac 合上盖子后也不睡眠, 无需终端命令,也不必每次切换都输入密码。
 - **感知工作,而非进程。** 自动检测模式仅当编程代理*正在实际产出*时才保持唤醒;代理一停下,Mac 就能重新睡眠。
-- **开箱即用支持 5 个代理**: Claude Code、Codex、Cursor、opencode、Antigravity, 还可以自行添加其他代理。
+- **开箱即用支持 6 个代理**: Claude Code、Codex、Cursor、opencode、Antigravity、omp, 还可以自行添加其他代理。
 - **会随情况调整的安全防护。** 当电量或温度越过危险线时自动睡眠。
 - **感知远程活动。** 自动检测模式识别 SSH、屏幕共享和 Tailscale 活动，在安全防护允许的范围内保持远程工作。
 - **绝不读取你的对话或代码。** 代理检测只查看 transcript 的时间戳,从不读取其内容。
@@ -72,13 +72,15 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 自动检测模式跟踪的是代理*此刻是否在工作*,而不是进程是否存在。工作期间 Mac 保持唤醒;一旦停下,保持就会释放(**Strict** 模式)。也提供只要进程存活就保持唤醒的 **Lax** 模式。
 
-**默认检测(5 个):** Claude Code · Codex · Cursor · opencode · Antigravity。
+**默认检测(6 个):** Claude Code · Codex · Cursor · opencode · Antigravity · omp。
 
 **在 Customize 中启用(默认关闭):** Aider · Cline · Roo Code · OpenHands · Hermes · Openclaw。
 
 未列出的代理也能添加, 提供一个 glob 模式,或在 `~/.config/eclam/traces.d/*.json` 中放入一个声明文件即可。
 
-默认情况下,代理通过轮询其会话日志来检测(~5 秒,锁屏时 ~30 秒),所以刚启动的代理可能要过几秒才出现。Claude、Codex 和 Hermes 在安装(可选的)hook 后可被即时检测。
+默认通过轮询会话日志检测活动（约5秒，锁屏时约30秒）。只有写入日志后才能检测，因此可能漏掉新会话的首次响应或长时间没有写入的任务。Claude、Codex、Hermes 和 omp 的可选 hook 可以在不等待日志写入的情况下报告活动。
+
+对于 **omp**，请在 **设置 → 代理 → 可选 hook** 中安装，然后重启 omp。安装仅添加默认配置的 `~/.omp/agent/extensions/electric-clam.ts`。从任务开始到结束每10秒发送信号，包括子会话。没有 hook 时，检测默认会话目录中的日志更新（主会话、子代理及一层嵌套，有效时间90秒）。自定义配置或会话路径需要自定义 trace 或单独安装扩展。空闲 worker daemon 和 Bun 进程无法可靠区分实际工作，因此 omp 在 Lax 模式下也使用日志/hook，不使用仅基于进程的检测。
 
 ### 安全防护
 
@@ -108,7 +110,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 ### 其他
 
 - **CLI + 命名会话**: 直接从终端操作(见 [Usage](#usage))。
-- **可选的代理 hook**: 安装后会在 Claude / Codex / Hermes 的配置中注入一个活动信号 hook,卸载时还原。
+- **可选的代理 hook**：在设置 → 代理中安装 Claude / Codex / Hermes / omp 的活动信号。卸载时仅移除 Electric Clam 的条目或管理的扩展，保留其他设置。
 - **退出时恢复睡眠**: 正常退出和 SIGTERM 会释放保持请求，20 秒 helper watchdog 提供崩溃恢复。
 - **合盖 VPN 锁屏防护(可选)。** 在没有外接显示器的电池供电下,合上盖子通常会*锁屏*, 这会让 FortiClient SSL VPN 掉线(重连需要重新进行 SAML 登录)。一块隐形的虚拟显示器会锚定会话,于是屏幕不再锁定,隧道得以保留。**仅熄屏**动作也拆分为 **Dim**(变暗但对 VPN 安全,默认)和 **Sleep**,并可选地发送 VPN 断开通知。
 - **稳健的 helper 设置**: 不会从被隔离(quarantine)的下载副本或临时(translocated)位置注册后台 helper(macOS 会在这些位置阻止它),而是引导你把 App 移到 Applications。设置 → 通用会标记重复副本和版本不一致,`eclam repair` / **Reinstall Helper** 可恢复卡住的注册。
@@ -183,7 +185,7 @@ eclam help
 
 ## 注意事项 / 已知限制
 
-- **没有 hook 时检测可能延迟几秒。** 未安装 hook 的代理通过轮询其会话日志来检测(~5 秒,锁屏时 ~30 秒)。Claude / Codex / Hermes 在你安装其 hook 后即时生效。
+- **仅依靠日志可能漏掉活动。** 写入日志后才能开始检测，长时间任务可能超过有效时间。可选 hook 可以减少这个空档；omp hook 支持首次响应和长时间任务。安装后请重启 omp。
 - **仅用 CLI 时没有安全防护。**
 - **请从 Applications 运行。** 若从 Downloads 或仍处于隔离(quarantine)状态的副本启动,macOS 不会让后台 helper 启动, 请把 Electric Clam 移到 Applications 文件夹后重新打开。
 - **嵌入 VS Code 的代理**(Cline / Roo Code)没有独立进程,因此 Lax 模式检测受限。

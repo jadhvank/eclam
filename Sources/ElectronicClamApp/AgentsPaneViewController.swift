@@ -19,28 +19,28 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
     private let claudeStatus = NSTextField(labelWithString: "")
     private let codexStatus  = NSTextField(labelWithString: "")
     private let hermesStatus = NSTextField(labelWithString: "")
+    private let ompStatus = NSTextField(labelWithString: "")
     private let claudeButton = NSButton(title: "Install Claude hook", target: nil, action: nil)
     private let codexButton  = NSButton(title: "Install Codex hook", target: nil, action: nil)
     private let hermesButton = NSButton(title: "Install Hermes hook", target: nil, action: nil)
-    /// One-click cleanup. Removes our entries from all three agent configs
+    private let ompButton = NSButton(title: "Install omp hook", target: nil, action: nil)
+    private let ompHint = NSTextField(labelWithString: NSL("agents.ompHint",
+        "Restart omp after installing. The hook covers the first response and long turns before session logs are written."))
+    /// One-click cleanup. Removes our entries from all supported agent configs
     /// regardless of which are currently installed. Visible only when at
     /// least one hook is installed.
     private let uninstallAllButton = NSButton(title: NSL("agents.uninstallAll", "Uninstall all hooks"), target: nil, action: nil)
     /// proposal §1 — 감지 진단 1클릭 (`eclam debug agents` 의 GUI 노출).
     private let detectNowButton = NSButton(title: NSL("agents.detectNow", "Detect Now…"), target: nil, action: nil)
 
-    /// v0.5 (ADR-0006 §E amend) — hooks DEMOTED to an opt-in "Advanced"
-    /// disclosure. File-watching already detects every agent (the glob-mtime
-    /// branch of §A); hooks are only a latency/fallback booster, so they start
-    /// collapsed and out of the main flow. `hookStack` is the collapsible body.
+    /// Optional activity hooks complement transcript polling, including first
+    /// responses and long turns with no file writes.
     private let hooksDisclosure = NSButton()
     private let hookStack = NSStackView()
     private var hooksExpanded = false
     private let hooksCaption = NSTextField(labelWithString:
         NSL("agents.hooks.caption",
-        "Electric Clam detects agents automatically by watching their "
-        + "session logs — no hook needed. Hooks only make detection instant "
-        + "and add a fallback when file access is restricted."))
+        "Session logs provide automatic detection after the agent writes them. Optional hooks signal work immediately and can cover gaps during long turns."))
 
     /// Subtitle under the watched-agents table asserting the default path.
     private let watchedCaption = NSTextField(labelWithString:
@@ -51,9 +51,7 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
     /// felt "slow" — stating the interval sets expectations).
     private let pollNote = NSTextField(labelWithString:
         NSL("agents.pollNote",
-        "Detection refreshes about every 5 seconds (30 s while the screen is "
-        + "locked), so a just-started agent can take a few seconds to show. "
-        + "Agents with a hook installed register instantly."))
+        "Detection refreshes about every 5 seconds (30 s while locked). Log-only detection starts after a matching write; a new session or long turn may have no file signal."))
 
     /// ADR-0006 §I — trust onboarding hint, shown only while the Codex hook
     /// is installed. Claude has no equivalent trust gate.
@@ -195,6 +193,8 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         codexButton.action = #selector(codexButtonTapped)
         hermesButton.target = self
         hermesButton.action = #selector(hermesButtonTapped)
+        ompButton.target = self
+        ompButton.action = #selector(ompButtonTapped)
         // Hermes has a first-use trust gate (see hermesTrustHint). Reassure the
         // user the hook is skippable. NOTE: the Codex button deliberately gets no
         // tooltip — the Codex hook may be removed (user decision 2026-06-10).
@@ -218,6 +218,12 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         codexStatus.textColor = .secondaryLabelColor
         hermesStatus.font = NSFont.systemFont(ofSize: 11)
         hermesStatus.textColor = .secondaryLabelColor
+
+        ompStatus.font = NSFont.systemFont(ofSize: 11)
+        ompStatus.textColor = .secondaryLabelColor
+        let ompRow = NSStackView(views: [ompButton, ompStatus])
+        ompRow.orientation = .horizontal
+        ompRow.spacing = 12
 
         let claudeRow = NSStackView(views: [claudeButton, claudeStatus])
         claudeRow.orientation = .horizontal
@@ -243,7 +249,7 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         hermesTrustHint.preferredMaxLayoutWidth = 420
         hermesTrustHint.isHidden = true
 
-        for caption in [hooksCaption, watchedCaption, pollNote] {
+        for caption in [hooksCaption, watchedCaption, pollNote, ompHint] {
             caption.font = NSFont.systemFont(ofSize: 11)
             caption.textColor = .secondaryLabelColor
             caption.maximumNumberOfLines = 0
@@ -264,7 +270,7 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         uninstallAllRow.orientation = .horizontal
         uninstallAllRow.edgeInsets = NSEdgeInsets(top: 6, left: 0, bottom: 0, right: 0)
 
-        for v in [hooksCaption, claudeRow, codexRow, codexHintRow, hermesRow, hermesHintRow, uninstallAllRow] {
+        for v in [hooksCaption, claudeRow, codexRow, codexHintRow, hermesRow, hermesHintRow, ompRow, ompHint, uninstallAllRow] {
             hookStack.addArrangedSubview(v)
         }
         hookStack.orientation = .vertical
@@ -307,9 +313,7 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         refresh()
         // Surface the Advanced section for users who already rely on a hook, so
         // its status/uninstall stays discoverable despite the default collapse.
-        if HookInstaller.isInstalled(.claude)
-            || HookInstaller.isInstalled(.codex)
-            || HookInstaller.isInstalled(.hermes) {
+        if HookInstaller.Target.allCases.contains(where: HookInstaller.isInstalled) {
             setHooksExpanded(true)
         }
     }
@@ -322,10 +326,7 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
     // MARK: - Refresh
 
     func refresh() {
-        // Recompute rows: defaults first, then customs sorted by label.
-        let defaultIds = Set(AgentTrace.M1Defaults.map(\.id))
-        let customs = store.customTraces.sorted { $0.label < $1.label }
-        rows = AgentTrace.M1Defaults + customs.filter { !defaultIds.contains($0.id) }
+        rows = store.allKnownTraces()
 
         switch store.agentMode {
         case .strict:
@@ -340,34 +341,25 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
     }
 
     private func refreshHookButtons() {
-        let claudeOn = HookInstaller.isInstalled(.claude)
-        let codexOn  = HookInstaller.isInstalled(.codex)
-        let hermesOn = HookInstaller.isInstalled(.hermes)
-        claudeButton.title = claudeOn ? NSLf("agents.uninstallHook", "Uninstall %@ hook", "Claude") : NSLf("agents.installHook", "Install %@ hook", "Claude")
-        codexButton.title  = codexOn  ? NSLf("agents.uninstallHook", "Uninstall %@ hook", "Codex")  : NSLf("agents.installHook", "Install %@ hook", "Codex")
-        hermesButton.title = hermesOn ? NSLf("agents.uninstallHook", "Uninstall %@ hook", "Hermes") : NSLf("agents.installHook", "Install %@ hook", "Hermes")
-        claudeStatus.stringValue = claudeOn ? NSL("agents.installed", "Installed") : NSL("agents.notInstalled", "Not installed")
-        codexStatus.stringValue  = codexOn  ? NSL("agents.installed", "Installed") : NSL("agents.notInstalled", "Not installed")
-        hermesStatus.stringValue = hermesOn ? NSL("agents.installed", "Installed") : NSL("agents.notInstalled", "Not installed")
-        // Show trust-onboarding hints only while the relevant hook is installed.
-        codexTrustHint.isHidden  = !codexOn
-        hermesTrustHint.isHidden = !hermesOn
-        // "Uninstall all hooks" only visible when at least one is installed.
-        uninstallAllButton.isHidden = !(claudeOn || codexOn || hermesOn)
-        if HookInstaller.hookBinaryPath() == nil {
-            claudeButton.isEnabled = false
-            codexButton.isEnabled = false
-            hermesButton.isEnabled = false
-            claudeStatus.stringValue = NSL("agents.hookMissing", "Hook binary missing from app bundle")
-            codexStatus.stringValue  = NSL("agents.hookMissing", "Hook binary missing from app bundle")
-            hermesStatus.stringValue = NSL("agents.hookMissing", "Hook binary missing from app bundle")
-            codexTrustHint.isHidden = true
-            hermesTrustHint.isHidden = true
-        } else {
-            claudeButton.isEnabled = true
-            codexButton.isEnabled = true
-            hermesButton.isEnabled = true
+        let available = HookInstaller.hookBinaryPath() != nil
+        let controls: [(HookInstaller.Target, NSButton, NSTextField)] = [
+            (.claude, claudeButton, claudeStatus), (.codex, codexButton, codexStatus),
+            (.hermes, hermesButton, hermesStatus), (.omp, ompButton, ompStatus),
+        ]
+        var anyInstalled = false
+        for (target, button, status) in controls {
+            let installed = HookInstaller.isInstalled(target)
+            anyInstalled = anyInstalled || installed
+            button.title = installed
+                ? NSLf("agents.uninstallHook", "Uninstall %@ hook", target.label)
+                : NSLf("agents.installHook", "Install %@ hook", target.label)
+            button.isEnabled = available
+            status.stringValue = !available ? NSL("agents.hookMissing", "Hook binary missing from app bundle")
+                : installed ? NSL("agents.installed", "Installed") : NSL("agents.notInstalled", "Not installed")
         }
+        codexTrustHint.isHidden = !available || !HookInstaller.isInstalled(.codex)
+        hermesTrustHint.isHidden = !available || !HookInstaller.isInstalled(.hermes)
+        uninstallAllButton.isHidden = !anyInstalled
     }
 
     // MARK: - NSTableViewDataSource
@@ -469,6 +461,8 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         toggleHook(.codex)
     }
 
+    @objc private func ompButtonTapped() { toggleHook(.omp) }
+
     @objc private func hermesButtonTapped() {
         toggleHook(.hermes)
     }
@@ -508,16 +502,14 @@ final class AgentsPaneViewController: NSViewController, NSTableViewDataSource, N
         let confirm = NSAlert()
         confirm.messageText = NSL("agents.uninstallAll.title", "Uninstall all Electric Clam hooks?")
         confirm.informativeText = NSL("agents.uninstallAll.body",
-            "Removes Electric Clam hook entries from "
-            + "~/.claude/settings.json, ~/.codex/config.toml, and "
-            + "~/.hermes/config.yaml. Your other settings are preserved.")
+            "Removes Electric Clam hooks from Claude, Codex, Hermes, and omp. Your other settings and extensions are preserved.")
         confirm.alertStyle = .informational
         confirm.addButton(withTitle: NSL("agents.uninstall", "Uninstall"))
         confirm.addButton(withTitle: NSL("common.cancel", "Cancel"))
         guard confirm.runModal() == .alertFirstButtonReturn else { return }
 
         var failures: [String] = []
-        for target in [HookInstaller.Target.claude, .codex, .hermes] {
+        for target in HookInstaller.Target.allCases {
             guard HookInstaller.isInstalled(target) else { continue }
             do {
                 try HookInstaller.uninstall(target)

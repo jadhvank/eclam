@@ -91,6 +91,7 @@ rm -f "$VD_SHIM_O"
 
 echo "==> Assembling bundle"
 cp "$ROOT/Resources/App-Info.plist" "$APP/Contents/Info.plist"
+cp "$ROOT/Resources/omp-hook.js" "$RES_DIR/omp-hook.js"
 mkdir -p "$APP/Contents/Frameworks"
 ditto "$SPARKLE_DIR/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
 cp "$SPARKLE_DIR/LICENSE" "$RES_DIR/Sparkle-LICENSE.txt"

@@ -40,6 +40,7 @@ final class HelperService: NSObject, ElectronicClamHelperProtocol {
     /// 주입한다 (dev-adhoc 빌드는 항상 false — 식별 불가 graceful fallback).
     private let isHook: Bool
     private let power: PowerSessionRuntime
+    private let watchOwner = UUID().uuidString
 
     init(isHook: Bool, power: PowerSessionRuntime = .shared) {
         self.isHook = isHook
@@ -67,6 +68,27 @@ final class HelperService: NSObject, ElectronicClamHelperProtocol {
         NSError(domain: "com.jadhvank.eclam.helper", code: 1,
                 userInfo: [NSLocalizedDescriptionKey:
                     "power state change failed; pending restoration will be retried"])
+    }
+
+    func beginWatch(reply: @escaping (Error?) -> Void) {
+        if let err = denyIfHook("beginWatch") { reply(err); return }
+        reply(power.beginWatch(owner: watchOwner) ? nil : powerError())
+    }
+
+    func renewWatch(reply: @escaping (Error?) -> Void) {
+        if let err = denyIfHook("renewWatch") { reply(err); return }
+        reply(power.renewWatch(owner: watchOwner) ? nil : NSError(
+            domain: "com.jadhvank.eclam.helper", code: 5,
+            userInfo: [NSLocalizedDescriptionKey: "Watch lease expired or was cancelled by off or a safety guard."]))
+    }
+
+    func endWatch(reply: @escaping (Error?) -> Void) {
+        if let err = denyIfHook("endWatch") { reply(err); return }
+        reply(power.endWatch(owner: watchOwner) ? nil : powerError())
+    }
+
+    func connectionInvalidated() {
+        _ = power.endWatch(owner: watchOwner)
     }
 
     func currentState(reply: @escaping (Bool, Error?) -> Void) {
@@ -117,7 +139,9 @@ final class HelperService: NSObject, ElectronicClamHelperProtocol {
                           userInfo: [NSLocalizedDescriptionKey: "empty source"]))
             return
         }
-        ActivityRelay.post(source: sanitized)
+        for source in HelperServiceName.activitySources(for: sanitized) {
+            ActivityRelay.post(source: source)
+        }
         log.info("pingActivity source=\(sanitized, privacy: .public)")
         reply(nil)
     }

@@ -93,9 +93,9 @@
 "agents.section.watched" = "감시 중인 에이전트";
 "agents.section.hooks" = "훅 설치";
 "agents.section.hooksAdvanced" = "에이전트 훅 (선택)";
-"agents.hooks.caption" = "Electric Clam은 각 에이전트의 세션 로그를 감시해 자동으로 감지합니다 — 훅은 필요 없습니다. 훅은 감지를 즉시로 만들고, 파일 접근이 제한된 환경에서 폴백을 더할 뿐입니다.";
+"agents.hooks.caption" = "에이전트가 세션 로그를 기록하면 자동으로 감지합니다. 선택형 훅은 작업 시작을 즉시 알리고 긴 응답 중 기록이 없는 구간을 보완할 수 있습니다.";
 "agents.watched.caption" = "각 에이전트의 세션 로그를 감시해 자동으로 감지합니다.";
-"agents.pollNote" = "탐지는 약 5초마다 갱신됩니다(화면 잠금 시 30초). 그래서 막 시작한 에이전트는 표시되기까지 몇 초 걸릴 수 있습니다. 훅이 설치된 에이전트는 즉시 반영됩니다.";
+"agents.pollNote" = "약 5초마다 갱신됩니다(화면 잠금 시 30초). 로그 감지는 파일이 기록된 뒤 시작하므로, 새 세션이나 긴 응답 중에는 파일 신호가 없을 수 있습니다.";
 "agents.col.agent" = "에이전트";
 "agents.col.status" = "상태";
 "agents.col.pattern" = "패턴";
@@ -111,7 +111,7 @@
 "agents.uninstall" = "제거";
 "agents.add" = "추가";
 "agents.uninstallAll.title" = "모든 Electric Clam 훅을 제거할까요?";
-"agents.uninstallAll.body" = "~/.claude/settings.json, ~/.codex/config.toml, ~/.hermes/config.yaml 에서 Electric Clam 훅 항목을 제거합니다. 다른 설정은 유지됩니다.";
+"agents.uninstallAll.body" = "Claude, Codex, Hermes, omp에서 Electric Clam 훅을 제거합니다. 다른 설정과 확장은 유지됩니다.";
 "agents.uninstallFail" = "일부 훅을 제거하지 못했습니다";
 "agents.couldNotInstall" = "%@ 훅을 설치할 수 없습니다";
 "agents.couldNotUninstall" = "%@ 훅을 제거할 수 없습니다";
@@ -516,3 +516,5 @@
 "mode.cooldown" = "안전 가드 — 재개 대기 중";
 "menu.nextMode" = "클릭: %@";
 "menu.wakeMode" = "모드";
+
+"agents.ompHint" = "설치 후 omp를 다시 시작하세요. 훅은 세션 로그가 기록되기 전의 첫 응답과 긴 작업도 감지합니다.";

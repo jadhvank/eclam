@@ -53,7 +53,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 - **Lid-closed keep-awake.** Awake mode stops your Mac from sleeping even with the lid shut, without terminal commands or a password per toggle.
 - **Detects work, not processes.** Auto mode stays awake only while a coding agent is *actively producing output*; once the agent stops, your Mac can sleep again.
-- **5 agents out of the box**: Claude Code, Codex, Cursor, opencode, Antigravity, plus any others you add yourself.
+- **6 agents out of the box**: Claude Code, Codex, Cursor, opencode, Antigravity, omp, plus any others you add yourself.
 - **Safety guards that adapt.** Auto-sleeps when battery or temperature crosses a danger line.
 - **Remote-activity aware.** Auto mode recognizes SSH, screen sharing, and Tailscale activity to keep remote work running, subject to safety guards.
 - **Never reads your conversations or code.** Agent detection only looks at transcript timestamps, never their contents.
@@ -72,13 +72,15 @@ The point is simple: let your agent keep working, uninterrupted.
 
 Auto mode tracks whether the agent is *working right now*, not whether a process exists. While it works, the Mac stays awake; when it stops, the hold releases (**Strict** mode). A **Lax** mode that simply stays awake while the process is alive is also available.
 
-**Detected by default (5):** Claude Code · Codex · Cursor · opencode · Antigravity.
+**Detected by default (6):** Claude Code · Codex · Cursor · opencode · Antigravity · omp.
 
 **Opt-in via Customize (off by default):** Aider · Cline · Roo Code · OpenHands · Hermes · Openclaw.
 
 To add other agents, give a glob pattern or drop a single declaration file into `~/.config/eclam/traces.d/*.json`.
 
-By default agents are detected by polling their session logs (~5 s, ~30 s while the screen is locked), so a just-started agent can take a few seconds to appear. Claude, Codex, and Hermes can be detected instantly by installing their (optional) hooks.
+By default agents are detected by polling their session logs (~5 s, ~30 s while the screen is locked). Detection starts only after a log is written; it can miss a new session’s first response or a long turn with no writes. Optional Claude, Codex, Hermes and omp hooks signal activity without waiting for a log.
+
+For **omp**, enable its hook in **Settings → Agents → Optional hooks**, then restart omp. It installs only `~/.omp/agent/extensions/electric-clam.ts` for the default profile. The hook signals at turn start and every 10 seconds until the turn ends, including child sessions. Without it, detection uses transcript writes in the default sessions directory (parent, subagent and one nested level; 90-second freshness). Custom profiles/session paths need a custom trace or extension installation. omp has no process-only Lax match: idle worker daemons and Bun processes cannot reliably identify foreground work, so both modes use logs/hooks.
 
 ### Safety guards
 
@@ -108,7 +110,7 @@ Both backends live in **Settings → Notifications** and are independent: enable
 ### Other
 
 - **CLI + named sessions**: drive it straight from the terminal (see [Usage](#usage)).
-- **Optional agent hooks**: installing injects an activity-signal hook into Claude / Codex / Hermes configs; uninstalling restores them.
+- **Optional agent hooks**: install activity signals for Claude / Codex / Hermes / omp in Settings → Agents. Uninstall removes only Electric Clam’s entries or managed extension; other settings remain.
 - **Sleep restoration on exit**: normal quit and SIGTERM release power holds, with a 20-second helper watchdog for crash recovery.
 - **Clamshell VPN lock guard (opt-in).** With no external display on battery, closing the lid normally *locks* the screen, which drops a FortiClient SSL VPN (it needs a SAML re-login to reconnect). An invisible virtual display anchors the session so the screen doesn't lock and the tunnel survives. The **Blank screen** action also splits into **Dim** (dark but VPN-safe, default) vs **Sleep**, with an optional VPN-disconnect notification.
 - **Resilient helper setup**: won't register the background helper from a quarantined download or a temporary (translocated) location, where macOS blocks it; it guides you to move the app to Applications instead. Settings → General flags duplicate copies and version mismatches, and `eclam repair` / **Reinstall Helper** recover a wedged registration.
@@ -183,7 +185,7 @@ See [Security & privacy](docs/security.md) for details.
 
 ## Cautions / Known limitations
 
-- **Detection can lag a few seconds without a hook.** Agents without an installed hook are detected by polling their session logs (~5 s, ~30 s while locked). Claude / Codex / Hermes are instant once you install their hooks.
+- **Log-only detection can miss activity.** A session must write a log before polling can detect it. Long turns may exceed the freshness window. Optional hooks reduce this gap; omp’s hook covers first responses and long turns. Restart omp after installing its hook.
 - **No safety guards in CLI-only use.**
 - **Run it from Applications.** Launched from Downloads or a still-quarantined copy, macOS won't let the background helper start. Move Electric Clam to your Applications folder and reopen it.
 - **VS Code-embedded agents** (Cline / Roo Code) have no standalone process, so Lax-mode detection is limited.

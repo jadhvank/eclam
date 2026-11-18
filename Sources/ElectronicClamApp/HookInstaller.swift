@@ -31,12 +31,14 @@ enum HookInstaller {
         case claude
         case codex
         case hermes
+        case omp
 
         var label: String {
             switch self {
             case .claude: return "Claude"
             case .codex:  return "Codex"
             case .hermes: return "Hermes"
+            case .omp:   return "omp"
             }
         }
     }
@@ -76,6 +78,8 @@ enum HookInstaller {
 
     static func isInstalled(_ target: Target) -> Bool {
         switch target {
+        case .omp:
+            return OmpHook.isInstalled(at: settingsURL(target))
         case .claude:
             guard let data = try? Data(contentsOf: settingsURL(target)),
                   let obj  = try? JSONSerialization.jsonObject(with: data),
@@ -95,6 +99,12 @@ enum HookInstaller {
         case .claude: try installClaude(hookBinary: binPath)
         case .codex:  try installCodex(hookBinary: binPath)
         case .hermes: try installHermes(hookBinary: binPath)
+        case .omp:
+            guard let url = Bundle.main.url(forResource: "omp-hook", withExtension: "js") else {
+                throw HookError.malformed("The bundled omp extension template is missing.")
+            }
+            try OmpHook.install(template: String(contentsOf: url, encoding: .utf8),
+                                hookBinary: binPath, at: settingsURL(.omp))
         }
         log.info("installed hook for \(target.rawValue, privacy: .public)")
     }
@@ -104,6 +114,7 @@ enum HookInstaller {
         case .claude: try uninstallClaude()
         case .codex:  try uninstallCodex()
         case .hermes: try uninstallHermes()
+        case .omp: try OmpHook.uninstall(at: settingsURL(.omp))
         }
         log.info("uninstalled hook for \(target.rawValue, privacy: .public)")
     }
@@ -116,6 +127,7 @@ enum HookInstaller {
         case .claude: return home.appendingPathComponent(".claude/settings.json")
         case .codex:  return home.appendingPathComponent(".codex/config.toml")
         case .hermes: return home.appendingPathComponent(".hermes/config.yaml")
+        case .omp: return home.appendingPathComponent(".omp/agent/extensions/electric-clam.ts")
         }
     }
 

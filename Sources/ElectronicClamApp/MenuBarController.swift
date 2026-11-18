@@ -767,10 +767,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     private func buildAgentsSubmenu() -> NSMenu {
         let submenu = NSMenu(title: "Watch Agents")
         submenu.autoenablesItems = false
-        // Stable display order: M1 defaults in declaration order, then customs sorted by label.
-        let defaultIds = Set(AgentTrace.M1Defaults.map(\.id))
-        let customs = store.customTraces.sorted { $0.label < $1.label }
-        let ordered: [AgentTrace] = AgentTrace.M1Defaults + customs.filter { !defaultIds.contains($0.id) }
+        let ordered = store.allKnownTraces()
 
         for trace in ordered {
             let activeDot = store.activeAgents.contains(trace.id) ? NSL("menu.agentActiveSuffix", " • active") : ""

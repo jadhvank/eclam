@@ -94,9 +94,9 @@
 "agents.section.watched" = "Agentes vigilados";
 "agents.section.hooks" = "Instalar hooks";
 "agents.section.hooksAdvanced" = "Hooks de agente (opcional)";
-"agents.hooks.caption" = "Electric Clam detecta los agentes automáticamente observando sus registros de sesión: no se necesita ningún hook. Los hooks solo hacen que la detección sea instantánea y añaden un respaldo cuando el acceso a archivos está restringido.";
+"agents.hooks.caption" = "La detección automática empieza cuando el agente escribe en su registro de sesión. Los hooks opcionales señalan el trabajo al instante y pueden cubrir las pausas del registro durante turnos largos.";
 "agents.watched.caption" = "Detectados automáticamente observando el registro de sesión de cada agente.";
-"agents.pollNote" = "La detección se actualiza cada 5 segundos aproximadamente (30 s con la pantalla bloqueada), así que un agente recién iniciado puede tardar unos segundos en aparecer. Los agentes con un hook instalado se registran al instante.";
+"agents.pollNote" = "Se actualiza cada 5 segundos aproximadamente (30 s con la pantalla bloqueada). La detección por registros comienza tras una escritura; una sesión nueva o un turno largo pueden no emitir señales de archivo.";
 "agents.col.agent" = "Agente";
 "agents.col.status" = "Estado";
 "agents.col.pattern" = "Patrón";
@@ -112,7 +112,7 @@
 "agents.uninstall" = "Desinstalar";
 "agents.add" = "Añadir";
 "agents.uninstallAll.title" = "¿Desinstalar todos los hooks de Electric Clam?";
-"agents.uninstallAll.body" = "Elimina las entradas de hook de Electric Clam de ~/.claude/settings.json, ~/.codex/config.toml y ~/.hermes/config.yaml. El resto de tus ajustes se conservan.";
+"agents.uninstallAll.body" = "Elimina los hooks de Electric Clam de Claude, Codex, Hermes y omp. Se conservan tus otros ajustes y extensiones.";
 "agents.uninstallFail" = "No se pudieron desinstalar algunos hooks";
 "agents.couldNotInstall" = "No se pudo instalar el hook de %@";
 "agents.couldNotUninstall" = "No se pudo desinstalar el hook de %@";
@@ -517,3 +517,5 @@
 "mode.cooldown" = "Protección activa — esperando reanudación";
 "menu.nextMode" = "Clic: %@";
 "menu.wakeMode" = "Modo";
+
+"agents.ompHint" = "Reinicia omp después de instalarlo. El hook cubre la primera respuesta y los turnos largos antes de que se escriban los registros.";

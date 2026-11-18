@@ -6,7 +6,7 @@ import Foundation
 /// 대조하고, 이 RPC 자체가 없는 pre-handshake daemon 은 reply 타임아웃 +
 /// liveness 프로브로 "구버전 추정" 처리된다.
 public enum HelperProtocolVersion {
-    public static let current = 2
+    public static let current = 3
 }
 
 @objc public protocol ElectronicClamHelperProtocol {
@@ -46,6 +46,12 @@ public enum HelperProtocolVersion {
     /// on the app side; reply is the XPC ack only.
     func heartbeat(reply: @escaping (Error?) -> Void)
 
+    /// v3: a foreground watch owns only its connection's 20-second lease.
+    /// Renewal never recreates a lease cancelled by explicit off or safety.
+    func beginWatch(reply: @escaping (Error?) -> Void)
+    func renewWatch(reply: @escaping (Error?) -> Void)
+    func endWatch(reply: @escaping (Error?) -> Void)
+
     /// Returns the most recent watchdog trip reason, or nil if the helper has
     /// not auto-restored sleep since launch. The string is one of:
     ///   - `"watchdog"`  — heartbeat starvation
@@ -71,6 +77,20 @@ public enum HelperProtocolVersion {
     /// /무응답으로 끝나므로, 앱은 reply 타임아웃(2.5s)을 "버전 불명(구버전
     /// 추정)" 으로 다룬다 — `HelperBridge.performVersionHandshake`.
     func protocolVersion(reply: @escaping (Int) -> Void)
+}
+
+enum WatchLeaseRPC {
+    static func begin(on proxy: ElectronicClamHelperProtocol, reply: @escaping (Error?) -> Void) {
+        proxy.protocolVersion { version in
+            guard version >= 3 else {
+                reply(NSError(domain: "com.jadhvank.eclam.helper", code: 4,
+                    userInfo: [NSLocalizedDescriptionKey:
+                        "Helper update required for safe watch. Reinstall Helper in Settings, or run eclam repair."]))
+                return
+            }
+            proxy.beginWatch(reply: reply)
+        }
+    }
 }
 
 /// Shared by GUI and CLI. An old daemon must retain its hold rather than lose
@@ -104,6 +124,19 @@ public enum HelperServiceName {
     /// of chars, so 128 is generous while bounding what the helper synthesizes.
     /// Applied on top of the charset filter (ADR-0023 input caps).
     public static let maxActivitySourceLength = 128
+
+    /// Older installers emit phase-qualified keys while built-in detectors
+    /// subscribe to the agent key. Preserve the exact event for custom traces
+    /// and also fan out the built-in alias, including for PID-file fallback.
+    public static func activitySources(for raw: String) -> Set<String> {
+        let source = sanitizeActivitySource(raw)
+        guard !source.isEmpty else { return [] }
+        switch source {
+        case "claude.pre", "claude.post", "codex.pre", "codex.post", "hermes.pre", "hermes.post":
+            return [source, String(source.split(separator: ".")[0])]
+        default: return [source]
+        }
+    }
 
     /// Lowercase, ascii-only, `[a-z0-9_-.]` only, length-capped. Used in both
     /// daemon (post) and app (subscribe) to guarantee both sides agree on the

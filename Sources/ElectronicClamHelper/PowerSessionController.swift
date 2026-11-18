@@ -14,6 +14,7 @@ final class PowerSessionController {
     private var holdDeadline: TimeInterval?
     private var appAwake = false
     private var lastHeartbeat: TimeInterval = 0
+    private var watchDeadlines: [String: TimeInterval] = [:]
     private var shuttingDown = false
     private var preserveJournalOnShutdown = false
     private(set) var restorePending = false
@@ -44,6 +45,33 @@ final class PowerSessionController {
         }
     }
 
+    /// Report live foreground watches through the existing external-hold status
+    /// channel, so GUI reconciliation does not mistake them for a rogue write.
+    var externalRemainingSeconds: Double {
+        let holdRemaining = remainingSeconds
+        if holdRemaining < 0 { return holdRemaining }
+        return max(holdRemaining, max(0, (watchDeadlines.values.max() ?? uptime()) - uptime()))
+    }
+
+    func beginWatch(owner: String) -> Bool {
+        guard !shuttingDown, !restorePending, write(true) else { return false }
+        watchDeadlines[owner] = uptime() + cutoff
+        return true
+    }
+
+    func renewWatch(owner: String) -> Bool {
+        guard !shuttingDown, !restorePending,
+              let deadline = watchDeadlines[owner], deadline > uptime() else { return false }
+        watchDeadlines[owner] = uptime() + cutoff
+        return true
+    }
+
+    func endWatch(owner: String) -> Bool {
+        guard watchDeadlines.removeValue(forKey: owner) != nil else { return !restorePending }
+        if appAwake || externalRemainingSeconds != 0 { return true }
+        return requestRestore(reason: nil)
+    }
+
     func setAppAwake(_ enabled: Bool) -> Bool {
         guard !shuttingDown else { return false }
         if enabled {
@@ -54,7 +82,7 @@ final class PowerSessionController {
         }
         appAwake = false
         // A normal GUI off/quit does not cancel an independent CLI hold.
-        if remainingSeconds != 0 { return true }
+        if externalRemainingSeconds != 0 { return true }
         return requestRestore(reason: nil)
     }
 
@@ -110,16 +138,18 @@ final class PowerSessionController {
         }
         let expiredApp = appAwake && uptime() - lastHeartbeat > cutoff
         if expiredApp { appAwake = false }
+        let expiredWatch = watchDeadlines.values.contains { $0 <= uptime() }
+        watchDeadlines = watchDeadlines.filter { $0.value > uptime() }
         let expiredHold = hold != nil && remainingSeconds == 0
         if remainingSeconds != 0 { return }
-        if appAwake {
+        if appAwake || !watchDeadlines.isEmpty {
             // An expired journal cannot revive the hold on restart. Retry its
             // cleanup on future ticks without interrupting a live GUI owner.
             if expiredHold && save(nil) { hold = nil; holdDeadline = nil }
             return
         }
-        if expiredHold || expiredApp {
-            _ = requestRestore(reason: expiredApp ? "watchdog" : "ttl")
+        if expiredHold || expiredApp || expiredWatch {
+            _ = requestRestore(reason: expiredApp || expiredWatch ? "watchdog" : "ttl")
         }
     }
 
@@ -133,6 +163,7 @@ final class PowerSessionController {
         }
         shuttingDown = true
         appAwake = false
+        watchDeadlines.removeAll()
         restorePending = true
         lastTripReason = "sigterm"
         return retryRestore()
@@ -140,6 +171,7 @@ final class PowerSessionController {
 
     private func requestRestore(reason: String?) -> Bool {
         appAwake = false
+        watchDeadlines.removeAll()
         hold = nil
         holdDeadline = nil
         restorePending = true

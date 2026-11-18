@@ -2,7 +2,8 @@ import Foundation
 
 private final class OldHelper: NSObject, ElectronicClamHelperProtocol {
     var mutations = 0
-    func protocolVersion(reply: @escaping (Int) -> Void) { reply(1) }
+    var version = 1
+    func protocolVersion(reply: @escaping (Int) -> Void) { reply(version) }
     func setSleepDisabled(_ enabled: Bool, reply: @escaping (Error?) -> Void) { mutations += 1; reply(nil) }
     func holdSleepDisabled(forSeconds: Double, reply: @escaping (Error?) -> Void) { mutations += 1; reply(nil) }
     func cancelHold(reply: @escaping (Error?) -> Void) { mutations += 1; reply(nil) }
@@ -11,6 +12,9 @@ private final class OldHelper: NSObject, ElectronicClamHelperProtocol {
     func currentStateWithHold(reply: @escaping (Bool, Double, Error?) -> Void) { reply(true, -1, nil) }
     func pingActivity(source: String, reply: @escaping (Error?) -> Void) { reply(nil) }
     func heartbeat(reply: @escaping (Error?) -> Void) { reply(nil) }
+    func beginWatch(reply: @escaping (Error?) -> Void) { mutations += 1; reply(nil) }
+    func renewWatch(reply: @escaping (Error?) -> Void) { mutations += 1; reply(nil) }
+    func endWatch(reply: @escaping (Error?) -> Void) { mutations += 1; reply(nil) }
     func lastTripReason(reply: @escaping (String?, Error?) -> Void) { reply(nil, nil) }
     func setActiveAgents(_ ids: [String], reply: @escaping (Error?) -> Void) { reply(nil) }
     func activeAgents(reply: @escaping ([String], Error?) -> Void) { reply([], nil) }
@@ -61,6 +65,21 @@ enum HelperPowerServiceTests {
         let old = OldHelper()
         AtomicOffRPC.perform(on: old) { precondition($0 != nil) }
         precondition(old.mutations == 0, "no two-call fallback against old helper")
+        WatchLeaseRPC.begin(on: old) { precondition($0 != nil) }
+        precondition(old.mutations == 0, "watch must refuse old helpers without changing power")
+        old.version = 2
+        WatchLeaseRPC.begin(on: old) { precondition($0 != nil) }
+        precondition(old.mutations == 0, "v2 has atomic off but no independent watch leases")
+        let otherWatch = HelperService(isHook: false, power: runtime)
+        WatchLeaseRPC.begin(on: service) { precondition($0 == nil) }
+        otherWatch.beginWatch { precondition($0 == nil) }
+        hook.beginWatch { precondition($0 != nil) }
+        hook.renewWatch { precondition($0 != nil) }
+        hook.endWatch { precondition($0 != nil) }
+        service.endWatch { precondition($0 == nil) }
+        precondition(disabled && runtime.state.remaining > 0)
+        otherWatch.connectionInvalidated()
+        precondition(!disabled)
 
         // Simultaneous connections serialize power writes and ownership.
         DispatchQueue.concurrentPerform(iterations: 100) { i in

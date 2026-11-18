@@ -32,6 +32,42 @@ private final class Rig {
 @main
 enum PowerSessionControllerTests {
     static func main() {
+        // Foreground watchers own independent renewable leases. GUI heartbeats
+        // cannot keep an abandoned watcher alive, and GUI off cannot cancel it.
+        let watch = Rig()
+        precondition(watch.controller.beginWatch(owner: "first"))
+        for _ in 0..<6 {
+            watch.advance(5)
+            precondition(watch.controller.renewWatch(owner: "first"))
+            watch.controller.tick()
+            precondition(watch.disabled)
+        }
+        precondition(watch.controller.setAppAwake(false) && watch.disabled)
+        precondition(watch.controller.beginWatch(owner: "second"))
+        precondition(watch.controller.endWatch(owner: "first") && watch.disabled)
+        watch.advance(21)
+        watch.controller.heartbeat()
+        watch.controller.tick()
+        precondition(!watch.disabled)
+        precondition(!watch.controller.renewWatch(owner: "second"), "expiry must not recreate ownership")
+        precondition(watch.controller.beginWatch(owner: "third"))
+        precondition(watch.controller.externalRemainingSeconds > 0)
+        precondition(watch.controller.cancelHoldAndRestore())
+        precondition(!watch.controller.renewWatch(owner: "third"), "safety/off cannot be undone by renewal")
+        precondition(!watch.disabled && watch.controller.externalRemainingSeconds == 0)
+        precondition(watch.controller.armHold(seconds: 60))
+        precondition(watch.controller.beginWatch(owner: "fourth"))
+        precondition(watch.controller.endWatch(owner: "fourth") && watch.disabled)
+        precondition(watch.controller.remainingSeconds == 60)
+        let abandoned = Rig()
+        precondition(abandoned.controller.beginWatch(owner: "abandoned"))
+        abandoned.failOff = true
+        precondition(!abandoned.controller.endWatch(owner: "abandoned"))
+        precondition(abandoned.controller.restorePending)
+        abandoned.failOff = false
+        abandoned.controller.tick()
+        precondition(!abandoned.disabled)
+
         // A failed watchdog off must survive the next ticks, even fresh beats.
         let watchdog = Rig()
         precondition(watchdog.controller.setAppAwake(true))

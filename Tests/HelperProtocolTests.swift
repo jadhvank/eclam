@@ -74,8 +74,16 @@ struct HelperProtocolTests {
         // contract (HelperBridge ↔ HelperService) hangs off this constant;
         // bumping it must be a deliberate act recorded in the same commit
         // (update this expectation alongside the protocol change).
-        check(HelperProtocolVersion.current == 2,
-              "HelperProtocolVersion.current expected 2, got \(HelperProtocolVersion.current) — bump this guard deliberately with the protocol change")
+        check(HelperProtocolVersion.current == 3,
+              "HelperProtocolVersion.current expected 3, got \(HelperProtocolVersion.current) — bump this guard deliberately with the protocol change")
+        for agent in ["claude", "codex", "hermes"] {
+            for phase in ["pre", "post"] {
+                check(HelperServiceName.activitySources(for: "\(agent).\(phase)") == [agent, "\(agent).\(phase)"],
+                      "phase-qualified installed hook must reach its built-in trace")
+            }
+        }
+        check(HelperServiceName.activitySources(for: "omp") == ["omp"], "omp heartbeat channel")
+        check(HelperServiceName.activitySources(for: "custom.pre") == ["custom.pre"], "preserve custom dotted IDs")
 
         print("OK: HelperProtocol sanitize + version guard")
     }

@@ -4,6 +4,12 @@ All notable changes to Electronic Clam are documented here.
 
 ## [Unreleased]
 
+- Detect [omp (oh-my-pi)](https://github.com/can1357/oh-my-pi) transcripts, including subagents and one nested level (public PR #12, @DdangJin). Existing saved watch lists are preserved; enable the three omp entries in Watch Agents.
+- Add an optional omp extension in Settings → Agents for immediate and periodic activity signals during first responses and long turns. Restart omp after installation. Log-only detection remains a freshness heuristic; omit unreliable process-only matching for idle omp workers/Bun.
+- Give each `eclam watch` connection its own renewable 20-second lease (helper protocol v3). Watches survive the GUI watchdog, release only their own ownership, and cannot renew after explicit Off or safety cancellation. Check cancellation and maximum duration independently of the log polling interval.
+- Restore compatibility with existing Claude/Codex/Hermes phase-qualified hook signals. Make external trace declarations selectable in Settings and the menu, and honor the documented default freshness when omitted from JSON.
+- Preserve Python cleanup strings through the Homebrew cask’s Ruby heredoc; remove only the managed omp extension on uninstall.
+
 ## [0.8.2] - 2026-11-10
 
 - Serialize helper power ownership and recovery. Failed sleep restoration remains pending and retries; explicit off and hardware safety cancellation use one atomic protocol-v2 operation, including the four-mode menu cycle.
