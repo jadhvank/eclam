@@ -53,7 +53,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 - **덮개를 닫아도 깨어있게.** Mac 유지 모드에서는 덮개를 닫아도 Mac이 잠들지 않습니다. 터미널 명령도, 토글할 때마다 비밀번호를 넣을 일도 없습니다.
 - **프로세스가 아니라 작업을 감지합니다.** 자동 감지 모드에서는 코딩 에이전트가 *실제로 결과를 뽑아내는 동안에만* 깨어있고, 작업이 끝나 에이전트가 멈추면 Mac도 다시 잠들 수 있습니다.
-- **기본 5종 에이전트 인식**: Claude Code, Codex, Cursor, opencode, Antigravity. 원하는 에이전트는 직접 추가할 수 있습니다.
+- **기본 6종 에이전트 인식**: Claude Code, Codex, Cursor, opencode, Antigravity, omp. 원하는 에이전트는 직접 추가할 수 있습니다.
 - **상황에 맞춰 움직이는 안전 가드.** 배터리나 온도가 위험선을 넘으면 알아서 잠듭니다.
 - **원격 작업도 알아챕니다.** 자동 감지 모드에서 SSH·화면 공유·Tailscale 활동을 인식해 원격 작업을 유지합니다. 안전 가드는 원격 작업 중에도 적용됩니다.
 - **대화나 코드는 절대 들여다보지 않습니다.** 에이전트 감지는 transcript 파일의 수정 시간만 확인할 뿐입니다.
@@ -72,7 +72,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 자동 감지 모드는 프로세스가 떠 있는지가 아니라, 에이전트가 *지금 일하는지*를 봅니다. 일하는 동안엔 Mac을 깨워두고, 멈추면 바로 풀립니다 (**Strict**). 프로세스가 살아있는 한 계속 깨워두는 **Lax** 모드도 있습니다.
 
-**기본 인식 (5종):** Claude Code · Codex · Cursor · opencode · Antigravity.
+**기본 인식 (6종):** Claude Code · Codex · Cursor · opencode · Antigravity · omp.
 
 **Customize에서 켜기 (기본 꺼짐):** Aider · Cline · Roo Code · OpenHands · Hermes · Openclaw.
 

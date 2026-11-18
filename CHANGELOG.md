@@ -4,6 +4,8 @@ All notable changes to Electronic Clam are documented here.
 
 ## [Unreleased]
 
+- Detect [omp (oh-my-pi)](https://github.com/can1357/oh-my-pi) by default: session transcripts plus subagent transcripts up to one level of nesting, with Lax-mode process matching on `omp`. Installs with a saved watch list keep it; enable **omp**, **omp (subagents)** and **omp (nested subagents)** under **Watch Agents**.
+
 ## [0.8.2] - 2026-11-10
 
 - Serialize helper power ownership and recovery. Failed sleep restoration remains pending and retries; explicit off and hardware safety cancellation use one atomic protocol-v2 operation, including the four-mode menu cycle.

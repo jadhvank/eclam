@@ -53,7 +53,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 - **Despierto con la tapa cerrada.** El modo Mac despierto evita que tu Mac duerma incluso con la tapa cerrada, sin comandos de terminal ni contraseña en cada cambio.
 - **Detecta el trabajo, no los procesos.** El modo automático permanece despierto solo mientras un agente de programación *produce salida de verdad*; cuando el agente se detiene, tu Mac puede volver a dormir.
-- **5 agentes listos para usar**: Claude Code, Codex, Cursor, opencode, Antigravity, y puedes añadir los que quieras.
+- **6 agentes listos para usar**: Claude Code, Codex, Cursor, opencode, Antigravity, omp, y puedes añadir los que quieras.
 - **Protecciones que se adaptan.** Duerme automáticamente cuando la batería o la temperatura cruzan un límite peligroso.
 - **Consciente de la actividad remota.** El modo automático reconoce SSH, compartir pantalla y Tailscale para mantener el trabajo remoto, sujeto a las protecciones de seguridad.
 - **Nunca lee tus conversaciones ni tu código.** La detección de agentes solo mira las marcas de tiempo del transcript, nunca su contenido.
@@ -72,7 +72,7 @@ Es simple: deja que tu agente siga trabajando sin interrupciones.
 
 El modo automático sigue si el agente *está trabajando ahora mismo*, no si existe un proceso. Mientras trabaja, el Mac permanece despierto; cuando se detiene, se libera (modo **Strict**). También hay un modo **Lax** que simplemente mantiene despierto mientras el proceso esté vivo.
 
-**Detectados por defecto (5):** Claude Code · Codex · Cursor · opencode · Antigravity.
+**Detectados por defecto (6):** Claude Code · Codex · Cursor · opencode · Antigravity · omp.
 
 **Activar en Customize (desactivado por defecto):** Aider · Cline · Roo Code · OpenHands · Hermes · Openclaw.
 

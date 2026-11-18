@@ -53,7 +53,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 - **合盖也保持唤醒。** Mac 保持唤醒模式可让 Mac 合上盖子后也不睡眠, 无需终端命令,也不必每次切换都输入密码。
 - **感知工作,而非进程。** 自动检测模式仅当编程代理*正在实际产出*时才保持唤醒;代理一停下,Mac 就能重新睡眠。
-- **开箱即用支持 5 个代理**: Claude Code、Codex、Cursor、opencode、Antigravity, 还可以自行添加其他代理。
+- **开箱即用支持 6 个代理**: Claude Code、Codex、Cursor、opencode、Antigravity、omp, 还可以自行添加其他代理。
 - **会随情况调整的安全防护。** 当电量或温度越过危险线时自动睡眠。
 - **感知远程活动。** 自动检测模式识别 SSH、屏幕共享和 Tailscale 活动，在安全防护允许的范围内保持远程工作。
 - **绝不读取你的对话或代码。** 代理检测只查看 transcript 的时间戳,从不读取其内容。
@@ -72,7 +72,7 @@ brew upgrade --cask --greedy jadhvank/tap/eclam
 
 自动检测模式跟踪的是代理*此刻是否在工作*,而不是进程是否存在。工作期间 Mac 保持唤醒;一旦停下,保持就会释放(**Strict** 模式)。也提供只要进程存活就保持唤醒的 **Lax** 模式。
 
-**默认检测(5 个):** Claude Code · Codex · Cursor · opencode · Antigravity。
+**默认检测(6 个):** Claude Code · Codex · Cursor · opencode · Antigravity · omp。
 
 **在 Customize 中启用(默认关闭):** Aider · Cline · Roo Code · OpenHands · Hermes · Openclaw。
 

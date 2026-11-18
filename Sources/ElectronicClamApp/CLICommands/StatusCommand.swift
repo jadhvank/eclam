@@ -179,7 +179,7 @@ enum StatusCommand: CLISubcommand {
         if let stored = UserDefaults.standard.array(forKey: "WatchedAgents") as? [String] {
             return stored
         }
-        // Mirror StateStore default (v0.5 ADR-0006 §B — the documented 5).
+        // Mirror StateStore default (v0.5 ADR-0006 §B — the documented default set).
         return AgentTrace.M1Defaults.map(\.id)
     }
 
