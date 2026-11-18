@@ -23,11 +23,8 @@ private let WATCH_NOTIFY_STATUS_OK: UInt32 = 0
 /// actively working. One-shot foreground process; releases on every exit path.
 /// ADR-0007 §A/§C/§D.
 ///
-/// Resolution order for `<agent>`:
-///   1. `AgentTrace.M1Defaults` id
-///   2. `AgentTrace.CustomizeOnly` id
-///   3. `UserDefaults.standard["CustomAgentTraces"]` (user-registered)
-///   4. Path-shaped literal (`~`, `/`, `.`, or contains `*`/`?`) → ad-hoc trace
+/// Resolve the same default/external/custom catalog as the GUI, then optional
+/// Customize-only ids, then an explicit path/glob literal.
 ///
 /// Activity = freshest glob match's mtime within `--grace` seconds, OR a
 /// Darwin notify ping arrives on the trace's hook channel.
@@ -45,22 +42,22 @@ enum WatchCommand: CLISubcommand {
             let a = args[i]
             switch a {
             case "--grace":
-                guard i + 1 < args.count, let v = Double(args[i + 1]), v > 0 else {
-                    CLIStderr.print("eclam watch: --grace requires a positive number of seconds.")
+                guard i + 1 < args.count, let v = Double(args[i + 1]), v.isFinite, v > 0, v <= 30 * 24 * 3600 else {
+                    CLIStderr.print("eclam watch: --grace requires a positive number of seconds, at most 30 days.")
                     return 1
                 }
                 grace = v
                 i += 2
             case "--check-interval":
-                guard i + 1 < args.count, let v = Double(args[i + 1]), v > 0 else {
-                    CLIStderr.print("eclam watch: --check-interval requires a positive number of seconds.")
+                guard i + 1 < args.count, let v = Double(args[i + 1]), v.isFinite, v > 0, v <= 30 * 24 * 3600 else {
+                    CLIStderr.print("eclam watch: --check-interval requires a positive number of seconds, at most 30 days.")
                     return 1
                 }
                 checkInterval = v
                 i += 2
             case "--max":
-                guard i + 1 < args.count, let v = Double(args[i + 1]), v >= 0 else {
-                    CLIStderr.print("eclam watch: --max requires a non-negative number of minutes.")
+                guard i + 1 < args.count, let v = Double(args[i + 1]), v.isFinite, v >= 0, v <= 30 * 24 * 60 else {
+                    CLIStderr.print("eclam watch: --max requires 0 (unlimited) or up to 43200 minutes (30 days).")
                     return 1
                 }
                 maxMinutes = v
@@ -135,16 +132,8 @@ enum WatchCommand: CLISubcommand {
     // MARK: - Resolution
 
     private static func resolveTrace(_ arg: String) -> AgentTrace? {
-        // 1) M1 defaults
-        if let t = AgentTrace.M1Defaults.first(where: { $0.id == arg }) { return t }
-        // 2) Customize-only
+        if let t = knownTraces().first(where: { $0.id == arg }) { return t }
         if let t = AgentTrace.CustomizeOnly.first(where: { $0.id == arg }) { return t }
-        // 3) UserDefaults custom traces
-        if let data = UserDefaults.standard.data(forKey: "CustomAgentTraces"),
-           let decoded = try? JSONDecoder().decode([AgentTrace].self, from: data),
-           let t = decoded.first(where: { $0.id == arg }) {
-            return t
-        }
         // 4) Ad-hoc path/glob literal
         if looksLikePath(arg) {
             return AgentTrace(
@@ -164,13 +153,14 @@ enum WatchCommand: CLISubcommand {
         return false
     }
 
+    private static func knownTraces() -> [AgentTrace] {
+        let custom = UserDefaults.standard.data(forKey: "CustomAgentTraces")
+            .flatMap { try? JSONDecoder().decode([AgentTrace].self, from: $0) } ?? []
+        return AgentTrace.resolved(external: ExternalTraces.load(), custom: custom)
+    }
+
     private static func knownAgentIds() -> [String] {
-        var ids = AgentTrace.M1Defaults.map(\.id) + AgentTrace.CustomizeOnly.map(\.id)
-        if let data = UserDefaults.standard.data(forKey: "CustomAgentTraces"),
-           let decoded = try? JSONDecoder().decode([AgentTrace].self, from: data) {
-            ids.append(contentsOf: decoded.map(\.id))
-        }
-        return Array(Set(ids)).sorted()
+        Array(Set((knownTraces() + AgentTrace.CustomizeOnly).map(\.id))).sorted()
     }
 
     private static let helpText = """
@@ -181,7 +171,7 @@ enum WatchCommand: CLISubcommand {
     <agent> may be a default id (claude, codex, cursor, opencode,
     opencode-sessions, antigravity, omp, omp-subagents, omp-subagents-nested),
     a Customize-only id (aider, cline, roo, openhands, hermes, openclaw,
-    openclaw-legacy, cursor-legacy), a user-registered CustomAgentTraces id,
+    openclaw-legacy, cursor-legacy), an external traces.d or user-registered CustomAgentTraces id,
     or a literal path/glob beginning with ~, /, ., or containing * / ?.
 
     Options:
@@ -205,9 +195,8 @@ enum WatchCommand: CLISubcommand {
 /// `SIG_IGN` (nothing at all runs in signal context) and delivery happens via
 /// `DispatchSource.makeSignalSource` on a private serial queue, so the cancel
 /// flag is flipped from a normal execution context and lock-guarded against the
-/// tick queue. The tick timer (≤ `checkInterval`) observes the flag and drives
-/// the release — Ctrl-C latency is unchanged and bounded by the helper's 20s
-/// watchdog anyway.
+/// tick queue. The control timer observes the flag within one second when polling is not
+/// blocked; the helper lease bounds recovery if the process stops responding.
 private final class WatchSignalState {
     var signalSources: [DispatchSourceSignal] = []   // kept alive for process lifetime
     var userCancelled: Bool = false
@@ -251,37 +240,52 @@ private enum WatchSignalTrap {
     }
 }
 
-private final class WatchSession {
+protocol WatchConnection {
+    func remoteObjectProxyWithErrorHandler(_ handler: @escaping (Error) -> Void) -> Any
+    func invalidate()
+}
+
+extension NSXPCConnection: WatchConnection {}
+
+final class WatchSession {
     let trace: AgentTrace
-    let connection: NSXPCConnection
+    let connection: WatchConnection
     let grace: TimeInterval
     let checkInterval: TimeInterval
     let maxMinutes: Double
     let json: Bool
+    private let probe: (String, Date) -> AgentActivity.MtimeMatch?
 
+    private let leaseError = LockedBox<Error?>(nil)
+    private var cachedMtime: (path: String, modified: Date)?
+    private var lastActiveUptime: TimeInterval = ProcessInfo.processInfo.systemUptime
     private var sleepEnabled: Bool = false
     private var hookToken: Int32 = -1
     private var hasHookToken: Bool = false
-    private var lastHookPing: Date?
+    private var lastHookPing: TimeInterval?
     private var lastActivity: Date?
     private var lastReportedActive: Bool?
-    private let started: Date = Date()
+    private let started = ProcessInfo.processInfo.systemUptime
 
     /// Concurrency guard for `lastHookPing` (mutated from dispatch queue).
     private let lock = NSLock()
 
     init(trace: AgentTrace,
-         connection: NSXPCConnection,
+         connection: WatchConnection,
          grace: TimeInterval,
          checkInterval: TimeInterval,
          maxMinutes: Double,
-         json: Bool) {
+         json: Bool,
+         probe: @escaping (String, Date) -> AgentActivity.MtimeMatch? = {
+             AgentMtimeProbe.freshest(paths: Glob.expand($0), now: $1)
+         }) {
         self.trace = trace
         self.connection = connection
         self.grace = grace
         self.checkInterval = checkInterval
         self.maxMinutes = maxMinutes
         self.json = json
+        self.probe = probe
     }
 
     func run() -> Int32 {
@@ -289,7 +293,7 @@ private final class WatchSession {
 
         // Try to engage sleep-disabled up front. We don't wait for activity to
         // arrive — the user invoked `watch` because they expect coverage now.
-        if let err = syncSetSleepDisabled(true) {
+        if let err = syncWatchRequest({ proxy, reply in WatchLeaseRPC.begin(on: proxy, reply: reply) }) {
             CLIStderr.print("eclam watch: failed to engage sleep block: \(err.localizedDescription)")
             cleanupSubscriptions()
             connection.invalidate()
@@ -297,6 +301,7 @@ private final class WatchSession {
         }
         sleepEnabled = true
         lastActivity = Date()
+        lastActiveUptime = ProcessInfo.processInfo.systemUptime
         emitInitial()
 
         // Subscribe to the hook channel if this trace has one.
@@ -304,13 +309,41 @@ private final class WatchSession {
             subscribeHook(key: key)
         }
 
+        // Renew this connection's lease independently of filesystem polling.
+        // Once off/safety cancels ownership, renew fails; never silently reacquire.
+        let leaseQueue = DispatchQueue(label: "com.jadhvank.eclam.watch.lease")
+        let leaseTimer = DispatchSource.makeTimerSource(queue: leaseQueue)
+        leaseTimer.schedule(deadline: .now() + 5, repeating: 5)
+        leaseTimer.setEventHandler { [weak self] in
+            guard let self = self, !WatchSignalTrap.shouldExit else { return }
+            if self.leaseError.get() == nil {
+                self.leaseError.set(self.syncWatchRequest { proxy, reply in proxy.renewWatch(reply: reply) })
+            }
+        }
+        leaseTimer.resume()
+
+        // A glob can block on a disconnected network filesystem. It must not
+        // block cancellation, maximum duration, hook processing, or lease release.
+        let probeQueue = DispatchQueue(label: "com.jadhvank.eclam.watch.probe")
+        let probeTimer = DispatchSource.makeTimerSource(queue: probeQueue)
+        probeTimer.schedule(deadline: .now(), repeating: checkInterval)
+        probeTimer.setEventHandler { [weak self] in
+            guard let self = self else { return }
+            let sampledAt = Date()
+            let match = self.probe(self.trace.globPattern, sampledAt)
+            self.lock.lock()
+            self.cachedMtime = match.map { ($0.path, sampledAt.addingTimeInterval(-$0.age)) }
+            self.lock.unlock()
+        }
+        probeTimer.resume()
+
         // ---------------- Main loop ----------------
         // Use a periodic DispatchSourceTimer on a background queue so SIGINT /
         // SIGTERM don't have to interrupt a Thread.sleep call.
         let queue = DispatchQueue(label: "com.jadhvank.eclam.watch.tick")
         let timer = DispatchSource.makeTimerSource(queue: queue)
-        timer.schedule(deadline: .now() + checkInterval,
-                       repeating: checkInterval,
+        timer.schedule(deadline: .now(),
+                       repeating: min(checkInterval, 1),
                        leeway: .milliseconds(250))
 
         let exitSem = DispatchSemaphore(value: 0)
@@ -322,6 +355,14 @@ private final class WatchSession {
             if WatchSignalTrap.shouldExit {
                 exitReason = .userCancel
                 exitCode = 4
+                timer.cancel()
+                exitSem.signal()
+                return
+            }
+            if let error = self.leaseError.get() {
+                CLIStderr.print("eclam watch: protection ended: \(error.localizedDescription)")
+                exitReason = .leaseLost
+                exitCode = 2
                 timer.cancel()
                 exitSem.signal()
                 return
@@ -345,15 +386,17 @@ private final class WatchSession {
         timer.resume()
 
         // Block this thread until the timer fires its exit condition. SIGINT
-        // can't unblock a semaphore directly, so the timer (default 5s) is the
-        // worst-case latency from Ctrl-C → release. That's acceptable; the
-        // helper's watchdog has 20s grace anyway.
+        // cannot unblock a semaphore directly. Control checks run at least once
+        // a second, independently of the requested filesystem poll interval.
         exitSem.wait()
 
         // ---------------- Teardown ----------------
-        // Always release sleep, even on signal paths.
+        // Drain renewal before ending only our own lease; other owners survive.
+        probeTimer.cancel()
+        leaseTimer.cancel()
+        leaseQueue.sync { leaseTimer.setEventHandler {} }
         if sleepEnabled {
-            _ = syncSetSleepDisabled(false)
+            _ = syncWatchRequest { proxy, reply in proxy.endWatch(reply: reply) }
             sleepEnabled = false
         }
         cleanupSubscriptions()
@@ -370,6 +413,7 @@ private final class WatchSession {
     }
 
     private enum ExitReason {
+        case leaseLost
         case normal
         case userCancel
         case maxElapsed
@@ -377,41 +421,37 @@ private final class WatchSession {
     }
 
     private func tick(now: Date) -> TickOutcome {
-        // 1) mtime probe.
-        let mtimeMatch = AgentMtimeProbe.freshest(paths: Glob.expand(trace.globPattern), now: now)
-            .map { ($0.path, $0.age) }
-        let mtimeFresh: Bool = {
-            guard let (_, age) = mtimeMatch else { return false }
-            return age <= grace
-        }()
+        let uptime = ProcessInfo.processInfo.systemUptime
+        if maxMinutes > 0, uptime - started >= maxMinutes * 60 {
+            return .maxElapsed
+        }
+        lock.lock()
+        let sampledMtime = cachedMtime
+        let hookPing = lastHookPing
+        lock.unlock()
+        let mtimeMatch: (String, TimeInterval)? = sampledMtime.flatMap { match in
+            let age = now.timeIntervalSince(match.modified)
+            return AgentActivity.isPlausibleAge(age) ? (match.path, age) : nil
+        }
+        let mtimeFresh = mtimeMatch.map { $0.1 <= grace } ?? false
 
         // 2) hook ping freshness.
-        lock.lock()
         let hookFresh: Bool = {
-            guard let last = lastHookPing else { return false }
-            let age = now.timeIntervalSince(last)
+            guard let last = hookPing else { return false }
+            let age = uptime - last
             return AgentActivity.isPlausibleAge(age) && age <= grace
         }()
-        lock.unlock()
 
         let active = mtimeFresh || hookFresh
         if active {
             lastActivity = now
+            lastActiveUptime = uptime
         }
 
         emitTick(now: now, active: active, mtimeMatch: mtimeMatch, hookFresh: hookFresh)
 
-        // 3) --max hard cap.
-        if maxMinutes > 0 {
-            let elapsed = now.timeIntervalSince(started)
-            if elapsed >= maxMinutes * 60.0 {
-                return .maxElapsed
-            }
-        }
-
-        // 4) Extended idle auto-release: grace * 3 since last activity.
-        let staleCutoff = grace * 3
-        if let last = lastActivity, now.timeIntervalSince(last) >= staleCutoff {
+        // Use monotonic duration: wall-clock changes must not extend ownership.
+        if uptime - lastActiveUptime >= grace * 3 {
             return .idleTimeout
         }
 
@@ -432,7 +472,7 @@ private final class WatchSession {
                 "maxMinutes": maxMinutes,
             ])
         } else {
-            print("eclam watch: engaging sleep block for \(trace.label) (id=\(trace.id), grace=\(Int(grace))s, poll=\(Int(checkInterval))s). Ctrl-C to release.")
+            print("eclam watch: engaging sleep block for \(trace.label) (id=\(trace.id), grace=\(grace)s, poll=\(checkInterval)s). Ctrl-C to release.")
         }
     }
 
@@ -480,6 +520,7 @@ private final class WatchSession {
     private func emitFinal(reason: ExitReason) {
         let reasonStr: String = {
             switch reason {
+            case .leaseLost:    return "lease-lost"
             case .normal:       return "normal"
             case .userCancel:   return "user-cancel"
             case .maxElapsed:   return "max-elapsed"
@@ -528,7 +569,7 @@ private final class WatchSession {
         let block: @convention(block) (Int32) -> Void = { [weak self] _ in
             guard let self = self else { return }
             self.lock.lock()
-            self.lastHookPing = Date()
+            self.lastHookPing = ProcessInfo.processInfo.systemUptime
             self.lock.unlock()
         }
         let status = name.withCString { cstr -> UInt32 in
@@ -550,7 +591,9 @@ private final class WatchSession {
 
     // MARK: - Synchronous XPC
 
-    private func syncSetSleepDisabled(_ enabled: Bool) -> Error? {
+    private func syncWatchRequest(
+        _ operation: (ElectronicClamHelperProtocol, @escaping (Error?) -> Void) -> Void
+    ) -> Error? {
         let sem = DispatchSemaphore(value: 0)
         // Lock-guarded (shared LockedBox): reply/error handler land on XPC
         // queues; after the 1s timeout this thread reads while a late callback
@@ -564,7 +607,7 @@ private final class WatchSession {
             return NSError(domain: "com.jadhvank.eclam", code: -1,
                            userInfo: [NSLocalizedDescriptionKey: "no XPC proxy"])
         }
-        proxy.setSleepDisabled(enabled) { err in
+        operation(proxy) { err in
             rpcError.set(err)
             sem.signal()
         }

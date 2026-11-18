@@ -46,8 +46,13 @@ final class PowerSessionRuntime {
         queue.sync { let ok = controller.cancelHoldAndRestore(); reportPendingRestore(); return ok }
     }
     func heartbeat() { queue.sync { controller.heartbeat() } }
+    func beginWatch(owner: String) -> Bool { queue.sync { controller.beginWatch(owner: owner) } }
+    func renewWatch(owner: String) -> Bool { queue.sync { controller.renewWatch(owner: owner) } }
+    func endWatch(owner: String) -> Bool {
+        queue.sync { let ok = controller.endWatch(owner: owner); reportPendingRestore(); return ok }
+    }
     var state: (disabled: Bool, remaining: Double) {
-        queue.sync { (controller.sleepDisabled, controller.remainingSeconds) }
+        queue.sync { (controller.sleepDisabled, controller.externalRemainingSeconds) }
     }
     var lastTripReason: String? { queue.sync { controller.lastTripReason } }
 

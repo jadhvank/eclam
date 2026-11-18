@@ -407,11 +407,7 @@ final class StateStore {
     /// keyed by id. 충돌 시 우선순위: custom > traces.d(외부 선언이 기본 glob 을
     /// 덮어쓸 수 있게) > defaults. proposal §1 / `traces/README.md`.
     func allKnownTraces() -> [AgentTrace] {
-        var byId: [String: AgentTrace] = [:]
-        for t in AgentTrace.M1Defaults { byId[t.id] = t }
-        for t in ExternalTraces.load()  { byId[t.id] = t }
-        for t in customTraces           { byId[t.id] = t }
-        return Array(byId.values)
+        AgentTrace.resolved(external: ExternalTraces.load(), custom: customTraces)
     }
 
     /// Subset of `allKnownTraces()` filtered by `watchedAgents` — exactly what

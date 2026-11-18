@@ -9,13 +9,15 @@ import tempfile
 import textwrap
 
 cask = (Path(__file__).resolve().parents[1] / 'tap/Casks/eclam.rb').read_text()
-payload = re.search(r'args:\s*\["-c", <<~PYTHON, "~"\]\n(.*?)^\s*PYTHON$', cask, re.S | re.M)
+payload = re.search(r'args:\s*\["-c", <<~\'PYTHON\', "~"\]\n(.*?)^\s*PYTHON$', cask, re.S | re.M)
 assert payload, "literal cleanup command missing"
 code = textwrap.dedent(payload.group(1))
 with tempfile.TemporaryDirectory(prefix='eclam-cask-test-') as td:
     home = Path(td).resolve()
-    for name in ('.codex', '.hermes', '.claude'):
-        (home / name).mkdir()
+    for name in ('.codex', '.hermes', '.claude', '.omp/agent/extensions'):
+        (home / name).mkdir(parents=True)
+    omp = home / '.omp/agent/extensions/electric-clam.ts'
+    omp.write_text('// Electric Clam managed omp hook v1\nexport default function () {}\n')
     codex = home / '.codex/config.toml'
     hermes = home / '.hermes/config.yaml'
     claude = home / '.claude/settings.json'
@@ -29,10 +31,14 @@ with tempfile.TemporaryDirectory(prefix='eclam-cask-test-') as td:
     # atomic temporary-file + rename path with all other file writes denied.
     profile = '(version 1)(allow default)(deny file-write*)' + ''.join(
         '(allow file-write* (subpath ' + json.dumps(str(home / name)) + '))'
-        for name in ('.codex', '.hermes', '.claude'))
+        for name in ('.codex', '.hermes', '.claude', '.omp/agent/extensions'))
     def run():
         subprocess.run(['/usr/bin/sandbox-exec', '-p', profile, '/usr/bin/python3', '-c', code, str(home)], check=True)
     run()
+    assert not omp.exists()
+    omp.write_text('// unrelated extension\n')
+    run()
+    assert omp.read_text() == '// unrelated extension\n'
     assert codex.read_text() == 'keep = true\nafter = true\n'
     assert stat.S_IMODE(codex.stat().st_mode) == 0o600
     assert hermes.read_text() == 'keep: true\n# >>> eclam-hook\nincomplete: true\n'

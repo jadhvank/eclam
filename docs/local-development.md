@@ -19,3 +19,7 @@ python3 Tests/CaskCleanupTests.py
 The cask uses Homebrew's [structured uninstall steps](https://docs.brew.sh/Cask-Cookbook#stanza-flight_steps), validated with Homebrew 7.0.9. Update Homebrew before using this cask. Only eclam-marked hooks are removed; malformed configurations are preserved. The cask in this repository and `jadhvank/homebrew-tap` are published separately. Changing this checkout does not update the live tap.
 
 If a signed release helper is already installed, an ad-hoc CLI may correctly report that it cannot connect: it has no release Team ID. In that environment, validate `status` with a locally Developer ID-signed build. Do not disable the installed helper's caller verification or install a different helper just to make the test pass. `ECLAM_SIGN_ID=-` remains useful for build/unit-test work without a signing identity; report the live-helper check separately.
+
+## Tests
+
+Run `./scripts/test.sh` and `./scripts/check-i18n.sh` on macOS with Xcode command-line tools, Python 3, and Node.js 18 or newer. Node executes the rendered optional omp extension against a deterministic host; no omp installation or account is required. Watch integration tests use the production timer/helper logic with injected power writes and do not mutate system power settings.

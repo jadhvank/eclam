@@ -78,7 +78,9 @@ El modo automático sigue si el agente *está trabajando ahora mismo*, no si exi
 
 También puedes añadir agentes que no estén aquí, da un patrón glob o deja un único archivo de declaración en `~/.config/eclam/traces.d/*.json`.
 
-Por defecto, los agentes se detectan sondeando sus registros de sesión (~5 s, ~30 s con la pantalla bloqueada), así que un agente recién iniciado puede tardar unos segundos en aparecer. Claude, Codex y Hermes se detectan al instante si instalas sus hooks (opcionales).
+Por defecto se sondean los registros de sesión (cada ~5 s, ~30 s con la pantalla bloqueada). La detección empieza después de una escritura: puede omitir la primera respuesta o una tarea larga sin escrituras. Los hooks opcionales de Claude, Codex, Hermes y omp notifican la actividad sin esperar al registro.
+
+Para **omp**, instala el hook en **Ajustes → Agentes → Hooks opcionales** y reinicia omp. Solo añade `~/.omp/agent/extensions/electric-clam.ts` al perfil predeterminado. Notifica al inicio y cada 10 segundos hasta el final del turno, incluidas las sesiones secundarias. Sin hook se detectan las escrituras del directorio de sesiones predeterminado (sesión principal, subagentes y un nivel anidado; vigencia de 90 segundos). Los perfiles o rutas personalizados necesitan un trace o una instalación de la extensión propios. Los daemons inactivos y los procesos Bun no identifican el trabajo activo con fiabilidad, por lo que omp utiliza registros/hooks también en modo Lax.
 
 ### Protecciones de seguridad
 
@@ -108,7 +110,7 @@ Ambos servicios están en **Ajustes → Notificaciones** y son independientes: p
 ### Otros
 
 - **CLI + sesiones con nombre**: manéjalo directamente desde la terminal (ver [Usage](#usage)).
-- **Hooks de agente opcionales**: al instalarlos se inyecta un hook de señal de actividad en la configuración de Claude / Codex / Hermes; al desinstalarlos se restauran.
+- **Hooks de agente opcionales**: instala señales para Claude / Codex / Hermes / omp desde Ajustes → Agentes. La desinstalación elimina solo las entradas o la extensión de Electric Clam y conserva el resto.
 - **Restauración del reposo al salir**: la salida normal y SIGTERM liberan las solicitudes de energía, con un watchdog de 20 segundos en el helper para recuperar tras un fallo.
 - **Protección de la VPN frente al bloqueo en clamshell (opcional).** Sin pantalla externa y con batería, cerrar la tapa normalmente *bloquea* la pantalla, lo que tira una VPN SSL de FortiClient (necesita volver a iniciar sesión por SAML para reconectar). Una pantalla virtual invisible ancla la sesión, así que la pantalla no se bloquea y el túnel sobrevive. La acción **Apagar pantalla** también se divide en **Dim** (oscura pero segura para la VPN, por defecto) y **Sleep**, con una notificación opcional de desconexión de la VPN.
 - **Registro del helper resiliente**: no registra el helper en segundo plano desde una descarga en cuarentena ni desde una ubicación temporal (translocated), donde macOS lo bloquea; en su lugar te guía para mover la app a Applications. Ajustes → General señala copias duplicadas y discrepancias de versión, y `eclam repair` / **Reinstall Helper** recuperan un registro atascado.
@@ -183,7 +185,7 @@ Consulta [Seguridad y privacidad](docs/security.md) para más detalles.
 
 ## Advertencias / Limitaciones conocidas
 
-- **La detección puede tardar unos segundos sin un hook.** Los agentes sin un hook instalado se detectan sondeando sus registros de sesión (~5 s, ~30 s con la pantalla bloqueada). Claude / Codex / Hermes son instantáneos en cuanto instalas sus hooks.
+- **La detección basada solo en registros puede omitir actividad.** Hace falta una escritura inicial y las tareas largas pueden superar la ventana de vigencia. Los hooks opcionales reducen este vacío; el de omp cubre la primera respuesta y los turnos largos. Reinicia omp después de instalarlo.
 - **Sin protecciones de seguridad usando solo la CLI.**
 - **Ejecútalo desde Applications.** Si lo abres desde Downloads o una copia aún en cuarentena, macOS no dejará que arranque el helper en segundo plano, mueve Electric Clam a la carpeta Applications y vuelve a abrirlo.
 - **Agentes integrados en VS Code** (Cline / Roo Code) no tienen un proceso independiente, así que la detección en modo Lax es limitada.

@@ -95,9 +95,9 @@
 "agents.section.watched" = "Watched agents";
 "agents.section.hooks" = "Install hooks";
 "agents.section.hooksAdvanced" = "Agent hooks (optional)";
-"agents.hooks.caption" = "Electric Clam detects agents automatically by watching their session logs — no hook needed. Hooks only make detection instant and add a fallback when file access is restricted.";
+"agents.hooks.caption" = "Session logs provide automatic detection after the agent writes them. Optional hooks signal work immediately and can cover gaps during long turns.";
 "agents.watched.caption" = "Detected automatically by watching each agent's session log.";
-"agents.pollNote" = "Detection refreshes about every 5 seconds (30 s while the screen is locked), so a just-started agent can take a few seconds to show. Agents with a hook installed register instantly.";
+"agents.pollNote" = "Detection refreshes about every 5 seconds (30 s while locked). Log-only detection starts after a matching write; a new session or long turn may have no file signal.";
 "agents.col.agent" = "Agent";
 "agents.col.status" = "Status";
 "agents.col.pattern" = "Pattern";
@@ -113,7 +113,7 @@
 "agents.uninstall" = "Uninstall";
 "agents.add" = "Add";
 "agents.uninstallAll.title" = "Uninstall all Electric Clam hooks?";
-"agents.uninstallAll.body" = "Removes Electric Clam hook entries from ~/.claude/settings.json, ~/.codex/config.toml, and ~/.hermes/config.yaml. Your other settings are preserved.";
+"agents.uninstallAll.body" = "Removes Electric Clam hooks from Claude, Codex, Hermes, and omp. Your other settings and extensions are preserved.";
 "agents.uninstallFail" = "Some hooks could not be uninstalled";
 "agents.couldNotInstall" = "Could not install %@ hook";
 "agents.couldNotUninstall" = "Could not uninstall %@ hook";
@@ -519,3 +519,5 @@
 "mode.cooldown" = "Guard active — cooling down";
 "menu.nextMode" = "Click: %@";
 "menu.wakeMode" = "Mode";
+
+"agents.ompHint" = "Restart omp after installing. The hook covers the first response and long turns before session logs are written.";

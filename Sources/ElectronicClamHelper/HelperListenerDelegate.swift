@@ -57,9 +57,11 @@ final class HelperListenerDelegate: NSObject, NSXPCListenerDelegate {
         }
         #endif
         new.exportedInterface = NSXPCInterface(with: ElectronicClamHelperProtocol.self)
-        new.exportedObject = HelperService(isHook: isHook)
+        let service = HelperService(isHook: isHook)
+        new.exportedObject = service
         let id = ObjectIdentifier(new)
         new.invalidationHandler = { [weak self] in
+            service.connectionInvalidated()
             self?.lock.lock()
             self?.active.remove(id)
             let n = self?.active.count ?? 0

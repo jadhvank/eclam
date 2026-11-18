@@ -29,9 +29,9 @@ cask "eclam" do
   # parent directory, not just the existing file. No other home paths are writable.
   uninstall_preflight_steps do
     run "/usr/bin/python3",
-        writable_paths: ["~/.codex", "~/.hermes", "~/.claude"],
+        writable_paths: ["~/.codex", "~/.hermes", "~/.claude", "~/.omp/agent/extensions"],
         must_succeed:   false,
-        args:           ["-c", <<~PYTHON, "~"]
+        args:           ["-c", <<~'PYTHON', "~"]
           from pathlib import Path
           import json
           import os
@@ -106,6 +106,12 @@ cask "eclam" do
           replace(home / '.codex/config.toml', strip_marked)
           replace(home / '.hermes/config.yaml', strip_marked)
           replace(home / '.claude/settings.json', strip_claude)
+          omp = home / '.omp/agent/extensions/electric-clam.ts'
+          try:
+              if not omp.is_symlink() and omp.is_file() and omp.read_text().startswith('// Electric Clam managed omp hook v1\n'):
+                  omp.unlink()
+          except (OSError, UnicodeError):
+              pass
         PYTHON
   end
 

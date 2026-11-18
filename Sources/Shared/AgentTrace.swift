@@ -26,8 +26,8 @@ public struct AgentTrace: Codable, Equatable, Hashable {
 
     /// Expected `comm` basename of the agent's standalone foreground process,
     /// consulted by Lax mode's process-alive probe (`LaxProcessAlive`). nil ⇒
-    /// no standalone process exists (e.g. VS Code extensions), so the entry
-    /// can never contribute to Lax mode. Single source of truth — the old
+    /// no reliable standalone foreground match exists, so the entry
+    /// cannot contribute a process-only Lax signal. Single source of truth — the old
     /// hand-maintained `LaxProcessAlive.mapping` drifted (cursor-cli /
     /// opencode-sessions were missing). Optional + defaulted so persisted
     /// `CustomAgentTraces` JSON from older versions still decodes.
@@ -46,9 +46,31 @@ public struct AgentTrace: Codable, Equatable, Hashable {
         self.hookKey = hookKey
         self.comm = comm
     }
+
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        id = try values.decode(String.self, forKey: .id)
+        label = try values.decode(String.self, forKey: .label)
+        globPattern = try values.decode(String.self, forKey: .globPattern)
+        freshness = try values.decodeIfPresent(TimeInterval.self, forKey: .freshness) ?? 60
+        hookKey = try values.decodeIfPresent(String.self, forKey: .hookKey)
+        comm = try values.decodeIfPresent(String.self, forKey: .comm)
+    }
 }
 
 public extension AgentTrace {
+    /// One resolved pool for detection, settings and menus. Custom declarations
+    /// override external declarations, which override built-ins. Keep the familiar
+    /// default order, followed by additional agents sorted by label and stable id.
+    static func resolved(external: [AgentTrace], custom: [AgentTrace]) -> [AgentTrace] {
+        var byId: [String: AgentTrace] = [:]
+        for trace in M1Defaults + external + custom { byId[trace.id] = trace }
+        let defaults = M1Defaults.compactMap { byId.removeValue(forKey: $0.id) }
+        return defaults + byId.values.sorted {
+            $0.label == $1.label ? $0.id < $1.id : $0.label < $1.label
+        }
+    }
+
     /// Agents auto-detected by default (watched-by-default via
     /// `StateStore.defaultWatchedAgents`, which derives from this list). v0.5 —
     /// high-confidence set: claude/codex (hook) + cursor + opencode. v0.5.x —
@@ -121,16 +143,17 @@ public extension AgentTrace {
         // `~/.omp/agent/sessions/<encoded-cwd>/<timestamp>_<sessionId>.jsonl`
         // (can1357/oh-my-pi `docs/session.md`). freshness 90: a single >60s tool
         // call or model turn can leave a no-signal gap, as with Cursor.
-        // Lax mode: `comm` matches the standalone `omp` binary; a bun-installed
-        // omp shows up as `bun`, and omp's detached worker daemons also run as
-        // `omp`, so Lax can hold after the last session ends.
+        // First-response and long-turn coverage requires the optional omp hook:
+        // ordinary sessions can remain memory-only until the first assistant
+        // message completes. Process matching is intentionally unavailable:
+        // standalone worker daemons also use `omp`, while package installs use `bun`.
         AgentTrace(
             id: "omp",
             label: "omp",
             globPattern: "~/.omp/agent/sessions/*/*.jsonl",
             freshness: 90,
-            hookKey: nil,
-            comm: "omp"
+            hookKey: "omp",
+            comm: nil
         ),
         // Subagent transcripts live next to the parent as `<session>/<AgentId>.jsonl`,
         // "recursively for nested spawns"
@@ -145,7 +168,7 @@ public extension AgentTrace {
             globPattern: "~/.omp/agent/sessions/*/*/*.jsonl",
             freshness: 90,
             hookKey: nil,
-            comm: "omp"  // subagents run inside the parent omp process
+            comm: nil  // no reliable foreground-only process identity
         ),
         AgentTrace(
             id: "omp-subagents-nested",
@@ -153,7 +176,7 @@ public extension AgentTrace {
             globPattern: "~/.omp/agent/sessions/*/*/*/*.jsonl",
             freshness: 90,
             hookKey: nil,
-            comm: "omp"
+            comm: nil
         ),
     ]
 

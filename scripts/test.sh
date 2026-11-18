@@ -439,6 +439,34 @@ swiftc -target "$TARGET" -framework Foundation \
     "$ROOT/Sources/ElectronicClamApp/AgentMtimeProbe.swift" \
     "$ROOT/Tests/AgentMtimeProbeTests.swift" -o "$TMP/agent-mtime"
 "$TMP/agent-mtime"
+
+# Trace definitions and the opt-in omp extension. Node executes the installed
+# extension against a deterministic host; no omp account or live helper needed.
+swiftc -target "$TARGET" -framework Foundation \
+    "$ROOT/Sources/Shared/AgentTrace.swift" "$ROOT/Sources/ElectronicClamApp/Glob.swift" "$ROOT/Tests/AgentTraceTests.swift" -o "$TMP/agent-traces"
+"$TMP/agent-traces"
+swiftc -target "$TARGET" -framework Foundation \
+    "$ROOT/Sources/ElectronicClamApp/OmpHook.swift" "$ROOT/Tests/OmpHookTests.swift" -o "$TMP/omp-hook"
+"$TMP/omp-hook" "$ROOT" "$TMP/omp-installed.mjs"
+node "$ROOT/Tests/OmpHookTests.mjs" "$TMP/omp-installed.mjs"
+
+# Real foreground timer/renewal path with in-process XPC transport and fake power.
+swiftc -target "$TARGET" -framework Foundation -framework IOKit \
+    "$ROOT/Sources/Shared/AgentTrace.swift" "$ROOT/Sources/Shared/HelperProtocol.swift" \
+    "$ROOT/Sources/Shared/HoldState.swift" \
+    "$ROOT/Sources/ElectronicClamApp/AgentActivity.swift" \
+    "$ROOT/Sources/ElectronicClamApp/AgentMtimeProbe.swift" \
+    "$ROOT/Sources/ElectronicClamApp/ClaudeWorkspacePathing.swift" \
+    "$ROOT/Sources/ElectronicClamApp/Glob.swift" \
+    "$ROOT/Sources/ElectronicClamApp/ExternalTraces.swift" \
+    "$ROOT/Sources/ElectronicClamApp/CLICommands/WatchCommand.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/PowerSessionController.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/PowerSessionRuntime.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/PowerController.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/HelperService.swift" \
+    "$ROOT/Sources/ElectronicClamHelper/ActivityRelay.swift" \
+    "$ROOT/Tests/WatchCommandTests.swift" -o "$TMP/watch-command"
+"$TMP/watch-command"
 # Menu-bar selection, legacy opt-out and display request gating.
 echo "==> Compiling menu-bar mode tests"
 swiftc -target "$TARGET" -o "$TMP/eclam_menubarmodetests" \

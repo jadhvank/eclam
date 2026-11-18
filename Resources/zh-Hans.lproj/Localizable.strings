@@ -94,9 +94,9 @@
 "agents.section.watched" = "监视的代理";
 "agents.section.hooks" = "安装挂钩";
 "agents.section.hooksAdvanced" = "代理挂钩（可选）";
-"agents.hooks.caption" = "Electric Clam 通过监视每个代理的会话日志自动检测 — 无需挂钩。挂钩只会让检测即时生效，并在文件访问受限时提供后备方案。";
+"agents.hooks.caption" = "代理写入会话日志后即可自动检测。可选挂钩会立即通知工作开始，并可补充长时间响应中没有日志写入的间隔。";
 "agents.watched.caption" = "通过监视每个代理的会话日志自动检测。";
-"agents.pollNote" = "检测约每 5 秒刷新一次(锁屏时为 30 秒),因此刚启动的代理可能需要几秒才会显示。已安装挂钩的代理会即时注册。";
+"agents.pollNote" = "约每5秒刷新一次（锁屏时为30秒）。日志检测在文件写入后才开始，因此新会话或长时间响应期间可能没有文件信号。";
 "agents.col.agent" = "代理";
 "agents.col.status" = "状态";
 "agents.col.pattern" = "模式";
@@ -112,7 +112,7 @@
 "agents.uninstall" = "卸载";
 "agents.add" = "添加";
 "agents.uninstallAll.title" = "卸载所有 Electric Clam 挂钩？";
-"agents.uninstallAll.body" = "将从 ~/.claude/settings.json、~/.codex/config.toml 和 ~/.hermes/config.yaml 中移除 Electric Clam 挂钩条目。您的其他设置将保留。";
+"agents.uninstallAll.body" = "移除Claude、Codex、Hermes和omp中的Electric Clam挂钩。其他设置和扩展将保留。";
 "agents.uninstallFail" = "部分挂钩无法卸载";
 "agents.couldNotInstall" = "无法安装 %@ 挂钩";
 "agents.couldNotUninstall" = "无法卸载 %@ 挂钩";
@@ -517,3 +517,5 @@
 "mode.cooldown" = "安全防护 — 等待恢复";
 "menu.nextMode" = "点击：%@";
 "menu.wakeMode" = "模式";
+
+"agents.ompHint" = "安装后请重启omp。挂钩也能检测写入会话日志前的首次响应和长时间任务。";
